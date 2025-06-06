@@ -94,25 +94,33 @@ public class MainActivity extends SDLActivity{
     }
 
     private static final int STORAGE_PERMISSION_REQUEST_CODE = 2296;
+    private static final int FILE_PICKER_REQUEST_CODE = 0;
 
     private void requestStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11+ → MANAGE_EXTERNAL_STORAGE
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
             } else {
-                // Permission already granted
+                // Already granted
                 setupFiles();
             }
-        } else {
-            // For Android versions < R, fall back to legacy permissions
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6–10 → request READ/WRITE at runtime
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    new String[]{
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },
                     STORAGE_PERMISSION_REQUEST_CODE);
+        } else {
+            // Below Android 6 → permissions granted at install time
+            setupFiles();
         }
     }
+
 
 
     private void setupFiles(){
@@ -159,11 +167,11 @@ public class MainActivity extends SDLActivity{
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 0 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             // Handle file selection
             Uri selectedFileUri = data.getData();
             String fileName = "MM.z64";
-            File destinationDirectory = getExternalFilesDir(null); // The second argument can specify a subdirectory, or you can pass null to use the root directory.
+            File destinationDirectory = getExternalFilesDir(null);
             File destinationFile = new File(destinationDirectory, fileName);
 
             if (destinationDirectory != null && selectedFileUri != null) {
@@ -184,20 +192,19 @@ public class MainActivity extends SDLActivity{
                 }
             }
             nativeHandleSelectedFile(destinationFile.getPath());
+
         } else if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
-            // Handle MANAGE_EXTERNAL_STORAGE permission result
+            // Handle MANAGE_EXTERNAL_STORAGE result
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (Environment.isExternalStorageManager()) {
-                    // Permission granted
                     setupFiles();
                 } else {
-                    // Permission denied
-                    // Show message or guide user again
                     Toast.makeText(this, "Storage permission is required to access files.", Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
+
 
     public void openFilePicker() {
         // Create an Intent to open the file picker dialog
