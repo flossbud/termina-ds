@@ -18,6 +18,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.os.Build;
+import android.widget.Toast;
+
 import android.util.Log;
 
 import android.view.ViewGroup;
@@ -30,8 +33,6 @@ import android.widget.ImageView;
 
 //This class is the main SDLActivity and just sets up a bunch of default files and the input overlay
 public class MainActivity extends SDLActivity{
-
-    private static final int STORAGE_PERMISSION_REQUEST_CODE = 1;
 
     SharedPreferences preferences;
 
@@ -92,26 +93,27 @@ public class MainActivity extends SDLActivity{
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    // Request storage permission
-    private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                STORAGE_PERMISSION_REQUEST_CODE);
-    }
+    private static final int STORAGE_PERMISSION_REQUEST_CODE = 2296;
 
-    // Handle permission request result
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupFiles();
+    private void requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
             } else {
-                // Permission denied, handle accordingly (e.g., show a message)
+                // Permission already granted
+                setupFiles();
             }
+        } else {
+            // For Android versions < R, fall back to legacy permissions
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    STORAGE_PERMISSION_REQUEST_CODE);
         }
     }
+
 
     private void setupFiles(){
         //Copy assets folder for rom extraction
@@ -156,13 +158,15 @@ public class MainActivity extends SDLActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0 && resultCode == RESULT_OK) {
+
+        if (requestCode == 0 && resultCode == RESULT_OK && data != null) {
+            // Handle file selection
             Uri selectedFileUri = data.getData();
             String fileName = "MM.z64";
             File destinationDirectory = getExternalFilesDir(null); // The second argument can specify a subdirectory, or you can pass null to use the root directory.
             File destinationFile = new File(destinationDirectory, fileName);
 
-            if (destinationDirectory != null) {
+            if (destinationDirectory != null && selectedFileUri != null) {
                 try {
                     InputStream in = getContentResolver().openInputStream(selectedFileUri);
                     OutputStream out = new FileOutputStream(destinationFile);
@@ -180,6 +184,18 @@ public class MainActivity extends SDLActivity{
                 }
             }
             nativeHandleSelectedFile(destinationFile.getPath());
+        } else if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+            // Handle MANAGE_EXTERNAL_STORAGE permission result
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // Permission granted
+                    setupFiles();
+                } else {
+                    // Permission denied
+                    // Show message or guide user again
+                    Toast.makeText(this, "Storage permission is required to access files.", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
