@@ -12,7 +12,6 @@ android {
         buildConfig true
     }
     ndkVersion "26.0.10792818"
-    ndkPath "/home/waterdish/Android/Sdk/ndk/26.0.10792818"  // Point to your own NDK
     compileSdkVersion 31
     defaultConfig {
         if (buildAsApplication) {
@@ -20,7 +19,7 @@ android {
             namespace("com.dishii.mm")
         }
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 4
         versionName "1.1.1"
         externalNativeBuild {
