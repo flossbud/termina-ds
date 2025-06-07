@@ -18,7 +18,7 @@ Use Back/Select/- controller button, or the Android back button (swipe left if u
 
 <h3>FAQ:</h3>
 Q: Where do I add mods? <br>
-  A: Android/data/com.dishii.mm/files <br> <br>
+  A: 2S2H folder at root of device. <br> <br>
 
 Q: Why is it immediately crashing? <br>
   A: Try deleting and re-extracting the O2R file (mm.o2r). <br> <br>
