@@ -274,7 +274,9 @@ endif()
 ################################################################################
 # Compile definitions
 ################################################################################
-find_package(SDL2)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+    find_package(SDL2)
+endif()
 set(SDL2-INCLUDE ${SDL2_INCLUDE_DIRS})
 
 if (BUILD_CROWD_CONTROL)
