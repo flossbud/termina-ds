@@ -46,8 +46,8 @@ public class MainActivity extends SDLActivity{
 
         // Check if storage permissions are granted
         if (hasStoragePermission()) {
-            doVersionCheck();
             setupFiles();
+            doVersionCheck();
         } else {
             requestStoragePermission();
         }
@@ -55,7 +55,7 @@ public class MainActivity extends SDLActivity{
     }
 
     private void doVersionCheck(){
-        int currentVersion = BuildConfig.VERSION_CODE; // Use your app's version code
+        int currentVersion = BuildConfig.VERSION_CODE;
         int storedVersion = preferences.getInt("appVersion", 1);
 
         if (currentVersion > storedVersion) {
@@ -64,14 +64,16 @@ public class MainActivity extends SDLActivity{
         }
     }
 
-    private void deleteOutdatedAssets(){
-        File externalSohFile = new File(getExternalFilesDir(null), "2ship.o2r");
-        externalSohFile.delete();
-        File externalOotFile = new File(getExternalFilesDir(null), "mm.o2r");
-        externalOotFile.delete();
-        File externalAssetsFolder = new File(getExternalFilesDir(null), "assets");
-        deleteRecursive(externalAssetsFolder);
+    private void deleteOutdatedAssets() {
+        File rootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        File sohFile = new File(rootFolder, "2ship.o2r");
+        sohFile.delete();
 
+        File ootFile = new File(rootFolder, "mm.o2r");
+        ootFile.delete();
+
+        File assetsFolder = new File(rootFolder, "assets");
+        deleteRecursive(assetsFolder);
     }
 
     private void deleteRecursive(File fileOrDirectory) {
@@ -123,43 +125,44 @@ public class MainActivity extends SDLActivity{
 
 
 
-    private void setupFiles(){
-        //Copy assets folder for rom extraction
-        File externalAssetsDir = new File(getExternalFilesDir(null), "assets");
-        if (!externalAssetsDir.exists()) {
-            try {
-                externalAssetsDir.mkdirs();
-                AssetCopyUtil.copyAssetsToExternal(this, "assets", externalAssetsDir.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void setupFiles() {
+        // Target folder in root of storage
+        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+
+        if (!targetRootFolder.exists()) {
+            boolean created = targetRootFolder.mkdirs();
+            if (!created) {
+                Log.e("setupFiles", "Failed to create external storage folder 2S2H");
+                return;
             }
-        }
 
-        //Create empty mods folder
-        File externalModsDir = new File(getExternalFilesDir(null), "mods");
-        externalModsDir.mkdirs();
+            // Show popup
+            Toast.makeText(this, "Copying files to /storage/emulated/0/2S2H...", Toast.LENGTH_SHORT).show();
 
-        //Copy 2ship.o2r
-        File externalSohOtrFile = new File(getExternalFilesDir(null), "2ship.o2r");
-        if (!externalSohOtrFile.exists()) {
-            try {
-                InputStream in = getAssets().open("2ship.o2r");
-                OutputStream out = new FileOutputStream(externalSohOtrFile);
+            Log.i("setupFiles", "Created 2S2H, copying files...");
 
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, read);
+            // Source is the entire Android/data/com.package.name/files directory
+            File sourceRootFolder = getExternalFilesDir(null);
+
+            if (sourceRootFolder != null && sourceRootFolder.exists()) {
+                try {
+                    AssetCopyUtil.copyDirectory(sourceRootFolder, targetRootFolder);
+                    Log.i("setupFiles", "Copy complete.");
+                    Toast.makeText(this, "File copy complete.", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Error copying files.", Toast.LENGTH_LONG).show();
                 }
-
-                in.close();
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                Log.e("setupFiles", "Source folder does not exist.");
             }
-        }
 
+        } else {
+            Log.i("setupFiles", "Target folder already exists. No action needed.");
+        }
     }
+
+
 
     private native void nativeHandleSelectedFile(String filePath);
 
@@ -171,7 +174,8 @@ public class MainActivity extends SDLActivity{
             // Handle file selection
             Uri selectedFileUri = data.getData();
             String fileName = "MM.z64";
-            File destinationDirectory = getExternalFilesDir(null);
+
+            File destinationDirectory = new File(Environment.getExternalStorageDirectory(), "2S2H");
             File destinationFile = new File(destinationDirectory, fileName);
 
             if (destinationDirectory != null && selectedFileUri != null) {
@@ -191,6 +195,8 @@ public class MainActivity extends SDLActivity{
                     e.printStackTrace();
                 }
             }
+
+            // Now pass the path of the file in the new folder
             nativeHandleSelectedFile(destinationFile.getPath());
 
         } else if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
@@ -204,6 +210,7 @@ public class MainActivity extends SDLActivity{
             }
         }
     }
+
 
 
     public void openFilePicker() {

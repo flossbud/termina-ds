@@ -3,6 +3,7 @@ package com.dishii.mm;
 import android.content.Context;
 import android.content.res.AssetManager;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +56,38 @@ public class AssetCopyUtil {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    public static void copyFile(File sourceFile, File targetFile) throws IOException {
+        InputStream in = new FileInputStream(sourceFile);
+        OutputStream out = new FileOutputStream(targetFile);
+
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = in.read(buffer)) != -1) {
+            out.write(buffer, 0, bytesRead);
+        }
+
+        in.close();
+        out.close();
+    }
+
+    public static void copyDirectory(File sourceDir, File targetDir) throws IOException {
+        if (!targetDir.exists()) {
+            targetDir.mkdirs();
+        }
+
+        File[] files = sourceDir.listFiles();
+        if (files == null) return;
+
+        for (File file : files) {
+            File targetFile = new File(targetDir, file.getName());
+            if (file.isDirectory()) {
+                copyDirectory(file, targetFile);
+            } else {
+                copyFile(file, targetFile);
             }
         }
     }
