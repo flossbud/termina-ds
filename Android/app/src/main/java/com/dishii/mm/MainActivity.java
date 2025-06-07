@@ -128,6 +128,8 @@ public class MainActivity extends SDLActivity{
     private void setupFiles() {
         // Target folder in root of storage
         File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        
+        File sourceRootFolder = getExternalFilesDir(null);
 
         if (!targetRootFolder.exists()) {
             boolean created = targetRootFolder.mkdirs();
@@ -137,30 +139,75 @@ public class MainActivity extends SDLActivity{
             }
 
             // Show popup
-            Toast.makeText(this, "Copying files to /storage/emulated/0/2S2H...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Setting up files in /storage/emulated/0/2S2H...", Toast.LENGTH_SHORT).show();
 
-            Log.i("setupFiles", "Created 2S2H, copying files...");
+            Log.i("setupFiles", "Created 2S2H, checking for existing files...");
 
-            // Source is the entire Android/data/com.package.name/files directory
-            File sourceRootFolder = getExternalFilesDir(null);
-
+            // Check if anything is present in the Android/data folder
+            boolean sourceHasFiles = false;
             if (sourceRootFolder != null && sourceRootFolder.exists()) {
+                File[] sourceFiles = sourceRootFolder.listFiles();
+                if (sourceFiles != null && sourceFiles.length > 0) {
+                    sourceHasFiles = true;
+                }
+            }
+
+            if (sourceHasFiles) {
+                Log.i("setupFiles", "Copying files from Android/data/.../files to 2S2H");
                 try {
                     AssetCopyUtil.copyDirectory(sourceRootFolder, targetRootFolder);
-                    Log.i("setupFiles", "Copy complete.");
-                    Toast.makeText(this, "File copy complete.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Files copied from Android/data to 2S2H", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                     Toast.makeText(this, "Error copying files.", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Log.e("setupFiles", "Source folder does not exist.");
+                Log.i("setupFiles", "Android/data/.../files is empty. Copying assets and OTR from APK to 2S2H");
+
+                // --- Copy assets folder from APK assets to target ---
+                File targetAssetsDir = new File(targetRootFolder, "assets");
+                if (!targetAssetsDir.exists()) {
+                    try {
+                        targetAssetsDir.mkdirs();
+                        AssetCopyUtil.copyAssetsToExternal(this, "assets", targetAssetsDir.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // --- Create empty mods folder ---
+                File targetModsDir = new File(targetRootFolder, "mods");
+                targetModsDir.mkdirs();
+
+                // --- Copy 2ship.o2r from APK assets ---
+                File targetOtrFile = new File(targetRootFolder, "2ship.o2r");
+
+                if (!targetOtrFile.exists()) {
+                    try {
+                        InputStream in = getAssets().open("2ship.o2r");
+                        OutputStream out = new FileOutputStream(targetOtrFile);
+
+                        byte[] buffer = new byte[1024];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, read);
+                        }
+
+                        in.close();
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Toast.makeText(this, "Assets copied to 2S2H", Toast.LENGTH_SHORT).show();
             }
 
         } else {
             Log.i("setupFiles", "Target folder already exists. No action needed.");
         }
     }
+
 
 
 
