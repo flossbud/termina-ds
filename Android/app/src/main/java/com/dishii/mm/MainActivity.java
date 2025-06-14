@@ -2,6 +2,7 @@
 package com.dishii.mm;
 import org.libsdl.app.SDLActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
@@ -35,23 +39,33 @@ import android.widget.ImageView;
 public class MainActivity extends SDLActivity{
 
     SharedPreferences preferences;
+    private static final CountDownLatch setupLatch = new CountDownLatch(1);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         preferences = getSharedPreferences("com.dishii.mm.prefs",Context.MODE_PRIVATE);
 
-        setupControllerOverlay();
-
         // Check if storage permissions are granted
         if (hasStoragePermission()) {
-            setupFiles();
             doVersionCheck();
+            checkAndSetupFiles();
         } else {
             requestStoragePermission();
         }
+
+        super.onCreate(savedInstanceState);
+
+        setupControllerOverlay();
         attachController();
+    }
+
+    public static void waitForSetupFromNative() {
+        try {
+            setupLatch.await();  // Block until setup is complete
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void doVersionCheck(){
@@ -65,21 +79,45 @@ public class MainActivity extends SDLActivity{
     }
 
     private void deleteOutdatedAssets() {
-        File rootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
-        File sohFile = new File(rootFolder, "2ship.o2r");
-        sohFile.delete();
+        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
 
-        File ootFile = new File(rootFolder, "mm.o2r");
-        ootFile.delete();
+        File sohFile = new File(targetRootFolder, "2ship.o2r");
+        File ootFile = new File(targetRootFolder, "mm.o2r");
+        File assetsFolder = new File(targetRootFolder, "assets");
 
-        File assetsFolder = new File(rootFolder, "assets");
-        deleteRecursive(assetsFolder);
+        deleteIfExists(sohFile);
+        deleteIfExists(ootFile);
+        deleteRecursiveIfExists(assetsFolder);
+    }
+
+    private void deleteIfExists(File file) {
+        if (file.exists()) {
+            if (file.delete()) {
+                Log.i("deleteAssets", "Deleted file: " + file.getAbsolutePath());
+            } else {
+                Log.w("deleteAssets", "Failed to delete file: " + file.getAbsolutePath());
+            }
+        } else {
+            Log.i("deleteAssets", "File not found (skipped): " + file.getAbsolutePath());
+        }
+    }
+
+    private void deleteRecursiveIfExists(File dir) {
+        if (dir.exists()) {
+            deleteRecursive(dir);
+            Log.i("deleteAssets", "Deleted directory: " + dir.getAbsolutePath());
+        } else {
+            Log.i("deleteAssets", "Directory not found (skipped): " + dir.getAbsolutePath());
+        }
     }
 
     private void deleteRecursive(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
-                deleteRecursive(child);
+            File[] children = fileOrDirectory.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursive(child);
+                }
             }
         }
         fileOrDirectory.delete();
@@ -107,7 +145,7 @@ public class MainActivity extends SDLActivity{
                 startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
             } else {
                 // Already granted
-                setupFiles();
+                checkAndSetupFiles();
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android 6–10 → request READ/WRITE at runtime
@@ -119,93 +157,119 @@ public class MainActivity extends SDLActivity{
                     STORAGE_PERMISSION_REQUEST_CODE);
         } else {
             // Below Android 6 → permissions granted at install time
-            setupFiles();
+            checkAndSetupFiles();
+        }
+    }
+
+    public void checkAndSetupFiles() {
+        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        File assetsFolder = new File(targetRootFolder, "assets");
+        File sohOtrFile = new File(targetRootFolder, "2ship.o2r");
+
+        boolean isMissingAssets = !assetsFolder.exists() || assetsFolder.listFiles() == null || assetsFolder.listFiles().length == 0;
+        boolean isMissingSohOtr = !sohOtrFile.exists();
+
+        if (!targetRootFolder.exists() || isMissingAssets || isMissingSohOtr) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Setup Required")
+                    .setMessage("Some required files are missing. The app will create them (~30s). Press OK to begin.")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            runOnUiThread(() -> Toast.makeText(this, "Setting up files...", Toast.LENGTH_SHORT).show());
+                            setupFilesInBackground(targetRootFolder);
+                        });
+                    })
+                    .show();
+        } else {
+            // No setup needed, still need to count down
+            setupLatch.countDown();
         }
     }
 
 
+    private void setupFilesInBackground(File targetRootFolder) {
 
-    private void setupFiles() {
-        // Target folder in root of storage
-        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
-        
-        File sourceRootFolder = getExternalFilesDir(null);
+        File sourceOldRoot = getExternalFilesDir(null);
+        File sourceSavesDir = new File(sourceOldRoot, "saves"); // how to tell if there's anything to migrate
 
+        // === Migration from old Android/data/.../files/ directory ===
+        if (sourceOldRoot != null && sourceSavesDir.isDirectory()) {
+            Log.i("setupFiles", "Migrating old data from: " + sourceOldRoot.getAbsolutePath());
+
+            File[] sourceFiles = sourceOldRoot.listFiles();
+            if (sourceFiles != null) {
+                for (File file : sourceFiles) {
+                    String name = file.getName();
+                    if (name.equals("assets") || name.equals("2ship.o2r") || name.equals("mm.o2r")) {
+                        continue; // Skip these
+                    }
+
+                    File dest = new File(targetRootFolder, name);
+                    try {
+                        if (file.isDirectory()) {
+                            AssetCopyUtil.copyDirectory(file, dest);
+                        } else {
+                            AssetCopyUtil.copyFile(file, dest);
+                        }
+                        Log.i("setupFiles", "Migrated: " + name);
+                    } catch (IOException e) {
+                        Log.e("setupFiles", "Failed to migrate: " + name, e);
+                    }
+                }
+            }
+
+            runOnUiThread(() -> Toast.makeText(this, "Save data migrated", Toast.LENGTH_SHORT).show());
+        }
+
+        // Ensure root folder exists
         if (!targetRootFolder.exists()) {
-            boolean created = targetRootFolder.mkdirs();
-            if (!created) {
-                Log.e("setupFiles", "Failed to create external storage folder 2S2H");
+            if (!targetRootFolder.mkdirs()) {
+                Log.e("setupFiles", "Failed to create root folder");
+                runOnUiThread(() -> Toast.makeText(this, "Failed to create folder", Toast.LENGTH_LONG).show());
+                setupLatch.countDown();
                 return;
             }
-
-            // Show popup
-            Toast.makeText(this, "Setting up files in /storage/emulated/0/2S2H...", Toast.LENGTH_SHORT).show();
-
-            Log.i("setupFiles", "Created 2S2H, checking for existing files...");
-
-            // Check if anything is present in the Android/data folder
-            boolean sourceHasFiles = false;
-            if (sourceRootFolder != null && sourceRootFolder.exists()) {
-                File[] sourceFiles = sourceRootFolder.listFiles();
-                if (sourceFiles != null && sourceFiles.length > 0) {
-                    sourceHasFiles = true;
-                }
-            }
-
-            if (sourceHasFiles) {
-                Log.i("setupFiles", "Copying files from Android/data/.../files to 2S2H");
-                try {
-                    AssetCopyUtil.copyDirectory(sourceRootFolder, targetRootFolder);
-                    Toast.makeText(this, "Files copied from Android/data to 2S2H", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error copying files.", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Log.i("setupFiles", "Android/data/.../files is empty. Copying assets and OTR from APK to 2S2H");
-
-                // --- Copy assets folder from APK assets to target ---
-                File targetAssetsDir = new File(targetRootFolder, "assets");
-                if (!targetAssetsDir.exists()) {
-                    try {
-                        targetAssetsDir.mkdirs();
-                        AssetCopyUtil.copyAssetsToExternal(this, "assets", targetAssetsDir.getAbsolutePath());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                // --- Create empty mods folder ---
-                File targetModsDir = new File(targetRootFolder, "mods");
-                targetModsDir.mkdirs();
-
-                // --- Copy 2ship.o2r from APK assets ---
-                File targetOtrFile = new File(targetRootFolder, "2ship.o2r");
-
-                if (!targetOtrFile.exists()) {
-                    try {
-                        InputStream in = getAssets().open("2ship.o2r");
-                        OutputStream out = new FileOutputStream(targetOtrFile);
-
-                        byte[] buffer = new byte[1024];
-                        int read;
-                        while ((read = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, read);
-                        }
-
-                        in.close();
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                Toast.makeText(this, "Assets copied to 2S2H", Toast.LENGTH_SHORT).show();
-            }
-
-        } else {
-            Log.i("setupFiles", "Target folder already exists. No action needed.");
         }
+
+        // Always ensure mods folder exists
+        File targetModsDir = new File(targetRootFolder, "mods");
+        if (!targetModsDir.exists()) {
+            targetModsDir.mkdirs();
+        }
+
+        // Copy assets/ from internal
+        File targetAssetsDir = new File(targetRootFolder, "assets");
+        try {
+            if (!targetAssetsDir.exists()) {
+                targetAssetsDir.mkdirs();
+            }
+            AssetCopyUtil.copyAssetsToExternal(this, "assets", targetAssetsDir.getAbsolutePath());
+            runOnUiThread(() -> Toast.makeText(this, "Assets copied", Toast.LENGTH_SHORT).show());
+        } catch (IOException e) {
+            e.printStackTrace();
+            runOnUiThread(() -> Toast.makeText(this, "Error copying assets", Toast.LENGTH_LONG).show());
+        }
+
+        // Copy 2ship.o2r from internal assets
+        File targetOtrFile = new File(targetRootFolder, "2ship.o2r");
+        try (InputStream in = getAssets().open("2ship.o2r");
+             OutputStream out = new FileOutputStream(targetOtrFile)) {
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+            runOnUiThread(() -> Toast.makeText(this, "2ship.o2r copied", Toast.LENGTH_SHORT).show());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            runOnUiThread(() -> Toast.makeText(this, "Error copying 2ship.o2r", Toast.LENGTH_LONG).show());
+        }
+
+        setupLatch.countDown();
     }
 
 
@@ -250,14 +314,13 @@ public class MainActivity extends SDLActivity{
             // Handle MANAGE_EXTERNAL_STORAGE result
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (Environment.isExternalStorageManager()) {
-                    setupFiles();
+                    checkAndSetupFiles();
                 } else {
                     Toast.makeText(this, "Storage permission is required to access files.", Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
-
 
 
     public void openFilePicker() {

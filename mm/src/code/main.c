@@ -46,14 +46,30 @@ s32 gScreenWidth = SCREEN_WIDTH;
 s32 gScreenHeight = SCREEN_HEIGHT;
 size_t gSystemHeapSize = 0;
 
+#ifdef __ANDROID__
+#include <jni.h>
+#include <SDL.h>
+void wait_for_java_setup() {
+    JNIEnv* env = SDL_AndroidGetJNIEnv();
+    jobject activity = SDL_AndroidGetActivity();
+
+    jclass activityClass = (*env)->GetObjectClass(env, activity);
+    jclass mainActivityClass = (*env)->FindClass(env, "com/dishii/mm/MainActivity");
+
+    jmethodID waitMethod = (*env)->GetStaticMethodID(env, mainActivityClass, "waitForSetupFromNative", "()V");
+
+    (*env)->CallStaticVoidMethod(env, mainActivityClass, waitMethod);
+}
+#endif
+
 void InitOTR();
 
 #ifdef __GNUC__
 #define SDL_main main
 #endif
 #ifdef __ANDROID__
-#include <SDL2/SDL.h>
 int SDL_main(int argc, char** argv /* void* arg*/) {
+    wait_for_java_setup();  // Pause here until Java is ready
 #else
 void SDL_main(int argc, char** argv /* void* arg*/) {
 #endif
