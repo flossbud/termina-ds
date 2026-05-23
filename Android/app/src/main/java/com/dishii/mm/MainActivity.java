@@ -189,6 +189,7 @@ public class MainActivity extends SDLActivity{
 
 
     private void setupFilesInBackground(File targetRootFolder) {
+        boolean setupFailed = false;
 
         File sourceOldRoot = getExternalFilesDir(null);
         File sourceSavesDir = new File(sourceOldRoot, "saves"); // how to tell if there's anything to migrate
@@ -226,8 +227,7 @@ public class MainActivity extends SDLActivity{
         if (!targetRootFolder.exists()) {
             if (!targetRootFolder.mkdirs()) {
                 Log.e("setupFiles", "Failed to create root folder");
-                runOnUiThread(() -> Toast.makeText(this, "Failed to create folder", Toast.LENGTH_LONG).show());
-                setupLatch.countDown();
+                showSetupFailure("Failed to create the 2S2H folder.");
                 return;
             }
         }
@@ -248,6 +248,7 @@ public class MainActivity extends SDLActivity{
             runOnUiThread(() -> Toast.makeText(this, "Assets copied", Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             e.printStackTrace();
+            setupFailed = true;
             runOnUiThread(() -> Toast.makeText(this, "Error copying assets", Toast.LENGTH_LONG).show());
         }
 
@@ -266,10 +267,25 @@ public class MainActivity extends SDLActivity{
 
         } catch (IOException e) {
             e.printStackTrace();
+            setupFailed = true;
             runOnUiThread(() -> Toast.makeText(this, "Error copying 2ship.o2r", Toast.LENGTH_LONG).show());
         }
 
+        if (setupFailed) {
+            showSetupFailure("Required support files could not be copied. Please install a complete APK build.");
+            return;
+        }
+
         setupLatch.countDown();
+    }
+
+    private void showSetupFailure(String message) {
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle("Setup Failed")
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("Close", (dialog, which) -> finish())
+                .show());
     }
 
 

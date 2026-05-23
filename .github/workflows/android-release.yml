@@ -1,0 +1,72 @@
+name: Android Release APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - android
+    paths:
+      - "Android/**"
+      - "CMake/**"
+      - "CMakeLists.txt"
+      - "OTRExporter/**"
+      - "ZAPDTR/**"
+      - "libultraship/**"
+      - "mm/**"
+      - ".github/workflows/android-release.yml"
+
+jobs:
+  generate-2ship-otr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build ccache libboost-dev libglew-dev libpng-dev libzip-dev libtinyxml2-dev libsdl2-dev libsdl2-net-dev libspdlog-dev python3
+
+      - name: Generate no-ROM support archive
+        run: |
+          cmake -S . -B build-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-cmake --target Generate2ShipOtr --parallel 3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 2ship.o2r
+          path: 2ship.o2r
+          retention-days: 7
+
+  build-android:
+    needs: generate-2ship-otr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android build tools
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;26.0.10792818" "cmake;3.30.3"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: 2ship.o2r
+          path: Android/app/src/main/assets
+
+      - name: Build release APK
+        working-directory: Android
+        run: ./gradlew :app:assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: Android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14

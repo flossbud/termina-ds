@@ -74,6 +74,6 @@ git -C libultraship apply ../patches/libultraship-android-fork.patch
 
 This is an unofficial community fork. It is not affiliated with or endorsed by HarbourMasters or Waterdish.
 
-No ROM, O2R/OTR file, extracted game assets, or copyrighted content is included in this repository. No piracy is condoned or encouraged.
+No ROM, ROM-derived O2R/OTR file, extracted game assets, or copyrighted content is included in this repository. Release APKs may include the no-ROM `2ship.o2r` support archive generated from the port's custom assets. No piracy is condoned or encouraged.
 
 See [NOTICE.md](NOTICE.md) and the included license files for attribution.

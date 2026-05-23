@@ -148,6 +148,9 @@ file(COPY "${CMAKE_SOURCE_DIR}/OTRExporter/CFG/filelists/" DESTINATION "${CMAKE_
 file(COPY "${CMAKE_SOURCE_DIR}/OTRExporter/CFG/ActorList_MM.txt" DESTINATION "${CMAKE_SOURCE_DIR}/Android/app/src/main/assets/assets/extractor/symbols")
 file(COPY "${CMAKE_SOURCE_DIR}/OTRExporter/CFG/ObjectList_MM.txt" DESTINATION "${CMAKE_SOURCE_DIR}/Android/app/src/main/assets/assets/extractor/symbols")
 file(COPY "${CMAKE_SOURCE_DIR}/OTRExporter/CFG/SymbolMap_MM.txt" DESTINATION "${CMAKE_SOURCE_DIR}/Android/app/src/main/assets/assets/extractor/symbols")
+if(EXISTS "${CMAKE_SOURCE_DIR}/2ship.o2r")
+    file(COPY "${CMAKE_SOURCE_DIR}/2ship.o2r" DESTINATION "${CMAKE_SOURCE_DIR}/Android/app/src/main/assets")
+endif()
 endif()
 
 

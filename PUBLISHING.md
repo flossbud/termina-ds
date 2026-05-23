@@ -49,6 +49,19 @@ git remote add fork https://github.com/YOUR_GITHUB_USERNAME/2ship2harkinian-Andr
 git push -u fork android
 ```
 
-Before creating a GitHub Release, confirm no ROM, O2R/OTR file, extracted game asset, or local SDK file is committed.
+Before creating a GitHub Release, confirm no ROM, ROM-derived O2R/OTR file, extracted game asset, or local SDK file is committed.
+
+## 4. Build The Android Release APK
+
+Generate the no-ROM support archive before building Android:
+
+```sh
+cmake --build build-cmake --target Generate2ShipOtr
+cp 2ship.o2r Android/app/src/main/assets/2ship.o2r
+```
+
+Do not copy `mm.o2r` into `Android/app/src/main/assets`. That file is generated on-device from the user's own game file.
+
+The Android Gradle build checks for this exact split: `2ship.o2r` must be bundled, and `mm.o2r` must not be bundled.
 
 The release APK can be attached to GitHub Releases, but should not be committed to the repository.
