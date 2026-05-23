@@ -62,11 +62,29 @@ static const char* sHumanEyesTextures[PLAYER_EYES_MAX] = {
     "__OTR__objects/object_link_child/gLinkHumanEyesWincingTex",
 };
 
+static const char* sHumanEyesTexturesLegacy[PLAYER_EYES_MAX] = {
+    "__OTR__objects/object_link_child/gLinkHumanEyesOpenTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesHalfTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesClosedTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesRollRightTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesRollLeftTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesRollUpTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesRollDownTex",
+    "__OTR__objects/object_link_child/object_link_child_Tex_003800",
+};
+
 static const char* sHumanMouthTextures[PLAYER_MOUTH_MAX] = {
     "__OTR__objects/object_link_child/gLinkHumanMouthClosedTex",
     "__OTR__objects/object_link_child/gLinkHumanMouthHalfTex",
     "__OTR__objects/object_link_child/gLinkHumanMouthOpenTex",
     "__OTR__objects/object_link_child/gLinkHumanMouthSmileTex",
+};
+
+static const char* sHumanMouthTexturesLegacy[PLAYER_MOUTH_MAX] = {
+    "__OTR__objects/object_link_child/gLinkHumanMouthClosedTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthTeethTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthAngryTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthHappyTex",
 };
 
 static std::array<std::string, PLAYER_EYES_MAX> sResolvedFDEyesTextures;
@@ -125,16 +143,14 @@ static void ApplyMouthTextureSet(s32 form, const std::array<std::string, PLAYER_
 }
 
 static void ApplyPartialHumanTextureSet(void) {
-    for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
-        if (ResolveTexturePath(sHumanEyesTextures[i], sResolvedHumanEyesTextures[i])) {
-            sPlayerEyesTextures[PLAYER_FORM_HUMAN][i] = (TexturePtr)sResolvedHumanEyesTextures[i].c_str();
-        }
+    if (ResolveTextureSet(sHumanEyesTextures, sResolvedHumanEyesTextures) ||
+        ResolveTextureSet(sHumanEyesTexturesLegacy, sResolvedHumanEyesTextures)) {
+        ApplyEyesTextureSet(PLAYER_FORM_HUMAN, sResolvedHumanEyesTextures);
     }
 
-    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
-        if (ResolveTexturePath(sHumanMouthTextures[i], sResolvedHumanMouthTextures[i])) {
-            sPlayerMouthTextures[PLAYER_FORM_HUMAN][i] = (TexturePtr)sResolvedHumanMouthTextures[i].c_str();
-        }
+    if (ResolveTextureSet(sHumanMouthTextures, sResolvedHumanMouthTextures) ||
+        ResolveTextureSet(sHumanMouthTexturesLegacy, sResolvedHumanMouthTextures)) {
+        ApplyMouthTextureSet(PLAYER_FORM_HUMAN, sResolvedHumanMouthTextures);
     }
 }
 
