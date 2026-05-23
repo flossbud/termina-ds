@@ -1705,7 +1705,7 @@ void FileSelect_DrawWindowContents(GameState* thisx) {
 
     // draw file info box (large box when a file is selected)
     for (fileIndex = 0; fileIndex < 3; fileIndex++, temp += 28) {
-        if (fileIndex < 2) {
+        if (fileIndex < FILE_NUM_MAX) {
             gDPPipeSync(POLY_OPA_DISP++);
             gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, this->windowColor[0], this->windowColor[1], this->windowColor[2],
                             this->fileInfoAlpha[fileIndex]);
@@ -1726,7 +1726,7 @@ void FileSelect_DrawWindowContents(GameState* thisx) {
     gDPPipeSync(POLY_OPA_DISP++);
 
     for (i = 0; i < 3; i++, temp += 16) {
-        if (i < 2) {
+        if (i < FILE_NUM_MAX) {
             // draw file button
             gSPVertex(POLY_OPA_DISP++, &this->windowContentVtx[temp], 16, 0);
 
@@ -1764,7 +1764,7 @@ void FileSelect_DrawWindowContents(GameState* thisx) {
     }
 
     // draw file info
-    for (fileIndex = 0; fileIndex < 2; fileIndex++) {
+    for (fileIndex = 0; fileIndex < FILE_NUM_MAX; fileIndex++) {
         FileSelect_DrawFileInfo(&this->state, fileIndex);
     }
 
