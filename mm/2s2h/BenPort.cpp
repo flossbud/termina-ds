@@ -107,6 +107,7 @@ GameInteractor* GameInteractor::Instance;
 extern "C" char** cameraStrings;
 bool prevAltAssets = false;
 static HOOK_ID sAltAssetsStartupRefreshHookID = 0;
+static int32_t sAltAssetsStartupRefreshFrames = 0;
 std::vector<std::shared_ptr<std::string>> cameraStdStrings;
 
 Color_RGB8 kokiriColor = { 0x1E, 0x69, 0x1B };
@@ -130,6 +131,7 @@ static void CancelAltAssetsStartupRefresh() {
 
     GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPlayDrawWorldEnd>(sAltAssetsStartupRefreshHookID);
     sAltAssetsStartupRefreshHookID = 0;
+    sAltAssetsStartupRefreshFrames = 0;
 }
 
 static void RegisterAltAssetsStartupRefresh() {
@@ -141,15 +143,22 @@ static void RegisterAltAssetsStartupRefresh() {
 
     sAltAssetsStartupRefreshHookID =
         GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayDrawWorldEnd>([]() {
-            CancelAltAssetsStartupRefresh();
-
             if (!CVarGetInteger("gEnhancements.Mods.AlternateAssets", 0)) {
+                CancelAltAssetsStartupRefresh();
                 return;
             }
 
-            RefreshAltAssets();
-            prevAltAssets = true;
+            if ((sAltAssetsStartupRefreshFrames % 15) == 0) {
+                RefreshAltAssets();
+                prevAltAssets = true;
+            }
+
+            sAltAssetsStartupRefreshFrames--;
+            if (sAltAssetsStartupRefreshFrames <= 0) {
+                CancelAltAssetsStartupRefresh();
+            }
         });
+    sAltAssetsStartupRefreshFrames = 180;
 }
 
 OTRGlobals::OTRGlobals() {
