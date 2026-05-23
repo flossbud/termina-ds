@@ -18,8 +18,8 @@ App label: `2 Ship 2 Harkinian`
 
 - Restores save compatibility with newer upstream 2 Ship 2 Harkinian saves.
 - Adds upstream cheat and enhancement features that were missing from the Android port.
-- Adds modifier button support for speed modifier controls.
-- Fixes the Android Zora Link movement crash caused by TLUT handling in the renderer.
+- Adds modifier button support
+- Adds support for speed modifier controls.
 - Reduces the Android menu scale so the settings menus are easier to navigate.
 - Builds arm64 release APKs with Android-focused settings.
 
@@ -27,7 +27,7 @@ App label: `2 Ship 2 Harkinian`
 
 1. Install the APK from this fork's GitHub Releases.
 2. Open the app once. It will create the folder it needs for your ROM. Allow file permissions, then close and reopen the app.
-3. When prompted, choose to generate an O2R file and select your legally obtained `MM.z64`.
+3. When prompted, choose to generate an O2R file and select your legally obtained rom.
 4. After extraction, future launches should go straight into the game.
 
 Use the Back/Select/- controller button, or the Android back gesture/button, to open the Enhancements menu. Use touch controls to navigate menus.
