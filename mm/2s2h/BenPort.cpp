@@ -665,6 +665,13 @@ extern "C" void InitOTR() {
     OTRMessage_Init();
     OTRAudio_Init();
     OTRExtScanner();
+    if (prevAltAssets) {
+        Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(false);
+        gfx_texture_cache_clear();
+        PlayerCustomFlipbooks_Patch();
+        Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(true);
+        gfx_texture_cache_clear();
+    }
     PlayerCustomFlipbooks_Patch();
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnFileDropped>(Ben_ProcessDroppedFiles);
