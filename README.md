@@ -72,7 +72,7 @@ git -C libultraship apply ../patches/libultraship-android-fork.patch
 
 ## Legal And Credits
 
-This is an unofficial community fork. It is not affiliated with or endorsed by Nintendo, HarbourMasters, or Waterdish.
+This is an unofficial community fork. It is not affiliated with or endorsed by HarbourMasters or Waterdish.
 
 No ROM, O2R/OTR file, extracted game assets, or Nintendo-owned content is included in this repository. Users must provide their own legally obtained copy of Majora's Mask.
 
