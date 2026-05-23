@@ -13,7 +13,7 @@ Then push the local Android fork branch:
 ```sh
 cd libultraship
 git remote add fork https://github.com/YOUR_GITHUB_USERNAME/libultraship.git
-git push -u fork android-fork/1.2.2
+git push -u fork android-fork/1.2.3
 ```
 
 The Android fork commit is:
