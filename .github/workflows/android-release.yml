@@ -21,7 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+
+      - name: Fetch pinned submodule sources
+        run: |
+          rm -rf libultraship OTRExporter ZAPDTR
+          mkdir -p libultraship OTRExporter ZAPDTR
+          curl -L --retry 3 -o /tmp/libultraship.tar.gz https://github.com/linkzenic/libultraship/archive/86e93fd4cdc5ab96b024264a12abfec711a4b7c1.tar.gz
+          curl -L --retry 3 -o /tmp/OTRExporter.tar.gz https://github.com/Waterdish/OTRExporter/archive/1cbb1b65dd4646a964f8ded921af7c7249e4433c.tar.gz
+          curl -L --retry 3 -o /tmp/ZAPDTR.tar.gz https://github.com/Waterdish/ZAPDTR/archive/24ca939d543bccc4869064d84dcae85495ecd583.tar.gz
+          tar -xzf /tmp/libultraship.tar.gz --strip-components=1 -C libultraship
+          tar -xzf /tmp/OTRExporter.tar.gz --strip-components=1 -C OTRExporter
+          tar -xzf /tmp/ZAPDTR.tar.gz --strip-components=1 -C ZAPDTR
 
       - name: Install dependencies
         run: |
