@@ -327,17 +327,11 @@ void FileSelect_UpdateMainMenu(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY > 30) {
                 this->buttonIndex--;
-                if (this->buttonIndex == FS_BTN_MAIN_FILE_3) {
-                    this->buttonIndex = FS_BTN_MAIN_FILE_2;
-                }
                 if (this->buttonIndex < FS_BTN_MAIN_FILE_1) {
                     this->buttonIndex = FS_BTN_MAIN_OPTIONS;
                 }
             } else {
                 this->buttonIndex++;
-                if (this->buttonIndex == FS_BTN_MAIN_FILE_3) {
-                    this->buttonIndex = FS_BTN_MAIN_COPY;
-                }
                 if (this->buttonIndex > FS_BTN_MAIN_OPTIONS) {
                     this->buttonIndex = FS_BTN_MAIN_FILE_1;
                 }
