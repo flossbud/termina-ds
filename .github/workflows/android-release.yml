@@ -26,12 +26,41 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build ccache libboost-dev libglew-dev libpng-dev libzip-dev zipcmp libtinyxml2-dev libsdl2-dev libsdl2-net-dev libspdlog-dev python3
+          sudo apt-get install -y $(cat .github/workflows/apt-deps.txt) libzip-dev zipcmp zipmerge ziptool file
+
+      - name: Install latest SDL
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          if [ ! -d "SDL2-2.28.5" ]; then
+            wget https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5.tar.gz
+            tar -xzf SDL2-2.28.5.tar.gz
+          fi
+          cd SDL2-2.28.5
+          ./configure --enable-hidapi-libusb
+          make -j 10
+          sudo make install
+          sudo cp -av /usr/local/lib/libSDL* /lib/x86_64-linux-gnu/
+
+      - name: Install latest tinyxml2
+        run: |
+          sudo apt-get remove -y libtinyxml2-dev
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          if [ ! -d "tinyxml2-10.0.0" ]; then
+            wget https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz
+            tar -xzf 10.0.0.tar.gz
+          fi
+          cd tinyxml2-10.0.0
+          mkdir -p build
+          cd build
+          cmake ..
+          make
+          sudo make install
 
       - name: Generate no-ROM support archive
         run: |
-          cmake -S . -B build-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-cmake --target Generate2ShipOtr --parallel 3
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release
+          cmake --build build-cmake --config Release --target Generate2ShipOtr -j3
 
       - uses: actions/upload-artifact@v4
         with:
