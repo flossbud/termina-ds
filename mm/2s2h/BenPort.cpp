@@ -106,11 +106,51 @@ GameInteractor* GameInteractor::Instance;
 
 extern "C" char** cameraStrings;
 bool prevAltAssets = false;
+static HOOK_ID sAltAssetsStartupRefreshHookID = 0;
 std::vector<std::shared_ptr<std::string>> cameraStdStrings;
 
 Color_RGB8 kokiriColor = { 0x1E, 0x69, 0x1B };
 Color_RGB8 goronColor = { 0x64, 0x14, 0x00 };
 Color_RGB8 zoraColor = { 0x00, 0xEC, 0x64 };
+
+static void RefreshAltAssets() {
+    auto resourceManager = Ship::Context::GetInstance()->GetResourceManager();
+    resourceManager->SetAltAssetsEnabled(false);
+    gfx_texture_cache_clear();
+    PlayerCustomFlipbooks_Patch();
+    resourceManager->SetAltAssetsEnabled(true);
+    gfx_texture_cache_clear();
+    PlayerCustomFlipbooks_Patch();
+}
+
+static void CancelAltAssetsStartupRefresh() {
+    if (sAltAssetsStartupRefreshHookID == 0) {
+        return;
+    }
+
+    GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPlayDrawWorldEnd>(sAltAssetsStartupRefreshHookID);
+    sAltAssetsStartupRefreshHookID = 0;
+}
+
+static void RegisterAltAssetsStartupRefresh() {
+    CancelAltAssetsStartupRefresh();
+
+    if (!prevAltAssets) {
+        return;
+    }
+
+    sAltAssetsStartupRefreshHookID =
+        GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayDrawWorldEnd>([]() {
+            CancelAltAssetsStartupRefresh();
+
+            if (!CVarGetInteger("gEnhancements.Mods.AlternateAssets", 0)) {
+                return;
+            }
+
+            RefreshAltAssets();
+            prevAltAssets = true;
+        });
+}
 
 OTRGlobals::OTRGlobals() {
     std::vector<std::string> archiveFiles;
@@ -665,14 +705,8 @@ extern "C" void InitOTR() {
     OTRMessage_Init();
     OTRAudio_Init();
     OTRExtScanner();
-    if (prevAltAssets) {
-        Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(false);
-        gfx_texture_cache_clear();
-        PlayerCustomFlipbooks_Patch();
-        Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(true);
-        gfx_texture_cache_clear();
-    }
     PlayerCustomFlipbooks_Patch();
+    RegisterAltAssetsStartupRefresh();
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnFileDropped>(Ben_ProcessDroppedFiles);
 
@@ -932,6 +966,7 @@ extern "C" void Graph_ProcessGfxCommands(Gfx* commands) {
 
     bool curAltAssets = CVarGetInteger("gEnhancements.Mods.AlternateAssets", 0);
     if (prevAltAssets != curAltAssets) {
+        CancelAltAssetsStartupRefresh();
         prevAltAssets = curAltAssets;
         Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(curAltAssets);
         gfx_texture_cache_clear();
