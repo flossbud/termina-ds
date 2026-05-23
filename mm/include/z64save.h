@@ -34,6 +34,40 @@ typedef enum RespawnMode {
 
 #define SAVE_BUFFER_SIZE 0x4000
 
+typedef enum FileNum {
+    /* 0 */ FILE_NUM_1,
+    /* 1 */ FILE_NUM_2,
+    /* 2 */ FILE_NUM_3,
+    /* 3 */ FILE_NUM_MAX,
+    /* 3 */ FILE_NUM_1_OWL_SAVE = FILE_NUM_MAX,
+    /* 4 */ FILE_NUM_2_OWL_SAVE,
+    /* 5 */ FILE_NUM_3_OWL_SAVE,
+    /* 6 */ FILE_NUM_MAX_WITH_OWL_SAVE,
+} FileNum;
+
+#define FILE_NUM_OWL_SAVE_OFFSET FILE_NUM_1_OWL_SAVE
+
+typedef enum FlashSave {
+    /*  0 */ FLASH_SAVE_FILE_1_NEW_CYCLE_SAVE,
+    /*  1 */ FLASH_SAVE_FILE_1_NEW_CYCLE_SAVE_BACKUP,
+    /*  2 */ FLASH_SAVE_FILE_2_NEW_CYCLE_SAVE,
+    /*  3 */ FLASH_SAVE_FILE_2_NEW_CYCLE_SAVE_BACKUP,
+    /*  4 */ FLASH_SAVE_FILE_3_NEW_CYCLE_SAVE,
+    /*  5 */ FLASH_SAVE_FILE_3_NEW_CYCLE_SAVE_BACKUP,
+    /*  6 */ FLASH_SAVE_FILE_1_OWL_SAVE,
+    /*  7 */ FLASH_SAVE_FILE_1_OWL_SAVE_BACKUP,
+    /*  8 */ FLASH_SAVE_FILE_2_OWL_SAVE,
+    /*  9 */ FLASH_SAVE_FILE_2_OWL_SAVE_BACKUP,
+    /* 10 */ FLASH_SAVE_FILE_3_OWL_SAVE,
+    /* 11 */ FLASH_SAVE_FILE_3_OWL_SAVE_BACKUP,
+    /* 12 */ FLASH_SAVE_SRAM_HEADER,
+    /* 13 */ FLASH_SAVE_SRAM_HEADER_BACKUP,
+    /* 14 */ FLASH_SAVE_MAX,
+} FlashSave;
+
+#define FLASH_SAVE_MAIN_MULTIPLIER 2
+#define FLASH_SAVE_BACKUP_OFFSET 1
+
 typedef enum {
     /* 0  */ MAGIC_STATE_IDLE, // Regular gameplay
     /* 1  */ MAGIC_STATE_CONSUME_SETUP, // Sets the speed at which the magic border flashes
@@ -1773,7 +1807,7 @@ void func_80147314(SramContext* sramCtx, s32 fileNum); // Removes Owl Saves
 
 extern u32 gSramSlotOffsets[];
 extern u8 gAmmoItems[];
-extern s32 gFlashSaveStartPages[10];
+extern s32 gFlashSaveStartPages[];
 extern s32 gFlashSaveNumPages[];
 extern s32 gFlashSpecialSaveNumPages[];
 extern s32 gFlashOwlSaveStartPages[];

@@ -859,8 +859,8 @@ void FileSelect_SetWindowContentVtx(GameState* thisx) {
         // Account for owl-save offset
 
         spAC = j;
-        if (this->isOwlSave[j + 2]) {
-            spAC = j + 2;
+        if (this->isOwlSave[j + FILE_NUM_OWL_SAVE_OFFSET]) {
+            spAC = j + FILE_NUM_OWL_SAVE_OFFSET;
         }
 
         /* File name */
@@ -1419,8 +1419,8 @@ void FileSelect_DrawFileInfo(GameState* thisx, s16 fileIndex) {
     }
 
     if ((fileIndex == this->selectedFileIndex) || (fileIndex == this->copyDestFileIndex)) {
-        if (this->isOwlSave[fileIndex + 2]) {
-            sp20C = fileIndex + 2;
+        if (this->isOwlSave[fileIndex + FILE_NUM_OWL_SAVE_OFFSET]) {
+            sp20C = fileIndex + FILE_NUM_OWL_SAVE_OFFSET;
         }
 
         gDPPipeSync(POLY_OPA_DISP++);
@@ -1562,7 +1562,7 @@ void FileSelect_DrawFileInfo(GameState* thisx, s16 fileIndex) {
         }
     }
 
-    if (this->isOwlSave[fileIndex + 2]) {
+    if (this->isOwlSave[fileIndex + FILE_NUM_OWL_SAVE_OFFSET]) {
         gDPPipeSync(POLY_OPA_DISP++);
         gDPSetCombineMode(POLY_OPA_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
@@ -1712,7 +1712,7 @@ void FileSelect_DrawWindowContents(GameState* thisx) {
             gSPVertex(POLY_OPA_DISP++, &this->windowContentVtx[temp], 28, 0);
 
             for (quadVtxIndex = 0, i = 0; i < 7; i++, quadVtxIndex += 4) {
-                if ((i < 5) || (this->isOwlSave[fileIndex + 2] && (i >= 5))) {
+                if ((i < 5) || (this->isOwlSave[fileIndex + FILE_NUM_OWL_SAVE_OFFSET] && (i >= 5))) {
                     gDPLoadTextureBlock(POLY_OPA_DISP++, sFileInfoBoxTextures[i], G_IM_FMT_IA, G_IM_SIZ_16b,
                                         sFileInfoBoxPartWidths[i], 56, 0, G_TX_NOMIRROR | G_TX_WRAP,
                                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1752,7 +1752,7 @@ void FileSelect_DrawWindowContents(GameState* thisx) {
                                 G_TX_NOLOD, G_TX_NOLOD);
             gSP1Quadrangle(POLY_OPA_DISP++, 8, 10, 11, 9, 0);
 
-            if (this->isOwlSave[i + 2]) {
+            if (this->isOwlSave[i + FILE_NUM_OWL_SAVE_OFFSET]) {
                 gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, sWindowContentColors[0], sWindowContentColors[1],
                                 sWindowContentColors[2], this->nameBoxAlpha[i]);
                 gDPLoadTextureBlock(POLY_OPA_DISP++, gFileSelBlankButtonTex, G_IM_FMT_IA, G_IM_SIZ_16b, 52, 16, 0,
