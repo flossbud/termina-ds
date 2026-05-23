@@ -18,4 +18,4 @@ This repository and its release APKs should not include ROMs, O2R/OTR files, ext
 
 ## Trademark Notice
 
-Nintendo, The Legend of Zelda, and Majora's Mask are trademarks or registered trademarks of Nintendo. This fork is a community project and is not affiliated with or endorsed by Nintendo.
+This fork is a community project and is not affiliated with or endorsed by any corporation.
