@@ -51,11 +51,31 @@ static const char* sGoronMouthTextures[PLAYER_MOUTH_MAX] = {
     "__OTR__objects/object_link_goron/gLinkGoronMouthSmileTex",
 };
 
+static const char* sHumanEyesTextures[PLAYER_EYES_MAX] = {
+    "__OTR__objects/object_link_child/gLinkHumanEyesOpenTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesHalfTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesClosedTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesRightTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesLeftTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesUpTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesDownTex",
+    "__OTR__objects/object_link_child/gLinkHumanEyesWincingTex",
+};
+
+static const char* sHumanMouthTextures[PLAYER_MOUTH_MAX] = {
+    "__OTR__objects/object_link_child/gLinkHumanMouthClosedTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthHalfTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthOpenTex",
+    "__OTR__objects/object_link_child/gLinkHumanMouthSmileTex",
+};
+
 static std::array<std::string, PLAYER_EYES_MAX> sResolvedFDEyesTextures;
 static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedFDMouthTextures;
 static std::array<std::string, PLAYER_EYES_MAX> sResolvedDekuEyesTextures;
 static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedDekuMouthTextures;
 static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedGoronMouthTextures;
+static std::array<std::string, PLAYER_EYES_MAX> sResolvedHumanEyesTextures;
+static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedHumanMouthTextures;
 
 static s32 sFacePatchAltState = -1;
 
@@ -104,6 +124,20 @@ static void ApplyMouthTextureSet(s32 form, const std::array<std::string, PLAYER_
     }
 }
 
+static void ApplyPartialHumanTextureSet(void) {
+    for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
+        if (ResolveTexturePath(sHumanEyesTextures[i], sResolvedHumanEyesTextures[i])) {
+            sPlayerEyesTextures[PLAYER_FORM_HUMAN][i] = (TexturePtr)sResolvedHumanEyesTextures[i].c_str();
+        }
+    }
+
+    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+        if (ResolveTexturePath(sHumanMouthTextures[i], sResolvedHumanMouthTextures[i])) {
+            sPlayerMouthTextures[PLAYER_FORM_HUMAN][i] = (TexturePtr)sResolvedHumanMouthTextures[i].c_str();
+        }
+    }
+}
+
 void PlayerCustomFlipbooks_Patch(void) {
     const s32 altState = ResourceMgr_IsAltAssetsEnabled() ? 1 : 0;
     if (sFacePatchAltState == altState) {
@@ -131,4 +165,6 @@ void PlayerCustomFlipbooks_Patch(void) {
     if (ResolveTextureSet(sGoronMouthTextures, sResolvedGoronMouthTextures)) {
         ApplyMouthTextureSet(PLAYER_FORM_GORON, sResolvedGoronMouthTextures);
     }
+
+    ApplyPartialHumanTextureSet();
 }
