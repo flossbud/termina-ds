@@ -1,4 +1,4 @@
-# 2 Ship 2 Harkinian Android - Termina Tango
+# 2 Ship 2 Harkinian Android
 
 An unofficial Android fork of 2 Ship 2 Harkinian, based on Waterdish's Android port and the HarbourMasters upstream project.
 
@@ -9,7 +9,7 @@ Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
 
 ## Current Release
 
-Termina Tango 1.2.0
+2 Ship Android 1.2.2
 
 Android package id: `com.twoshipfork.mm`  
 App label: `2 Ship 2 Harkinian`
