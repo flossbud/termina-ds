@@ -14,7 +14,7 @@ The root project license is CC0 1.0 Universal. Several included components use M
 
 ## Game Assets
 
-This repository and its release APKs should not include ROMs, O2R/OTR files, extracted game assets, or other copyrighted game content. Users are expected to provide their own legally obtained copy of Majora's Mask.
+This repository and its release APKs should not include ROMs, O2R/OTR files, extracted game assets, or other copyrighted game content. Users are expected to provide their own legally obtained files.
 
 ## Trademark Notice
 
