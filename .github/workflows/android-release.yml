@@ -70,12 +70,12 @@ jobs:
 
       - name: Prepare checked-out source artifact
         run: |
-          tar --exclude-vcs --exclude=build-cmake --exclude=SDL2-2.28.5 --exclude=tinyxml2-10.0.0 -czf source-checkout.tar.gz .
+          tar --exclude-vcs --exclude=build-cmake --exclude=SDL2-2.28.5 --exclude=tinyxml2-10.0.0 -czf /tmp/source-checkout.tar.gz .
 
       - uses: actions/upload-artifact@v4
         with:
           name: source-checkout
-          path: source-checkout.tar.gz
+          path: /tmp/source-checkout.tar.gz
           retention-days: 7
 
   build-android:
