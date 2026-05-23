@@ -2,7 +2,7 @@
 
 An unofficial Android fork of 2 Ship 2 Harkinian, based on Waterdish's Android port and the HarbourMasters upstream project.
 
-This fork keeps the Android build moving while preserving the original project's expectations: no copyrighted game assets are included, and users must provide their own legally obtained copy of Majora's Mask.
+This fork keeps the Android build moving while preserving the original project's expectations: no copyrighted game assets are included, and users must provide their own legally obtained copy of game.
 
 Original Android port: https://github.com/Waterdish/2ship2harkinian-Android  
 Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
