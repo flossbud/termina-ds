@@ -86,7 +86,6 @@ tasks.register("verifyBundledAssets") {
     def bundled2ShipOtr = file("src/main/assets/2ship.o2r")
     def bundledRomOtr = file("src/main/assets/mm.o2r")
     inputs.file(bundled2ShipOtr).optional()
-    inputs.file(bundledRomOtr).optional()
 
     doLast {
         if (!bundled2ShipOtr.exists()) {
