@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
-project(2s2h VERSION 1.2.0 LANGUAGES C CXX)
+project(2s2h VERSION 1.2.2 LANGUAGES C CXX)
 include(CMake/2ship-cvars.cmake)
 include(CMake/lus-cvars.cmake)
 set(PROJECT_BUILD_NAME "Termina Tango" CACHE STRING "" FORCE)
