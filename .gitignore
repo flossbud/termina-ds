@@ -67,3 +67,14 @@ _packages/
 /mm/src/boot/build.c
 /mm/windows/properties.h
 /clang-format.exe
+
+# Android/Gradle build output
+Android/.gradle/
+Android/build/
+Android/app/build/
+Android/app/.cxx/
+Android/local.properties
+
+# Packaged binaries should be attached to GitHub Releases, not committed.
+*.apk
+*.aab

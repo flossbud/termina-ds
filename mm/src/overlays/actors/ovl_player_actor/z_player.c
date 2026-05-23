@@ -13174,18 +13174,21 @@ void func_8084748C(Player* this, f32* speed, f32 speedTarget, s16 yawTarget) {
     f32 incrStep = this->skelAnime.curFrame - 10.0f;
     f32 maxSpeed = (R_RUN_SPEED_LIMIT / 100.0f) * 0.8f;
 
-    if (*speed > maxSpeed) {
-        *speed = maxSpeed;
+    if (GameInteractor_Should(VB_SPEED_MODIFIER_SWIM, true, &incrStep, &maxSpeed, speed, &speedTarget)) {
+        if (*speed > maxSpeed) {
+            *speed = maxSpeed;
+        }
+
+        if ((0.0f < incrStep) && (incrStep < 16.0f)) {
+            incrStep = fabsf(incrStep) * 0.5f;
+        } else {
+            speedTarget = 0.0f;
+            incrStep = 0.0f;
+        }
+
+        Math_AsymStepToF(speed, speedTarget * 0.8f, incrStep, (fabsf(*speed) * 0.02f) + 0.05f);
     }
 
-    if ((0.0f < incrStep) && (incrStep < 16.0f)) {
-        incrStep = fabsf(incrStep) * 0.5f;
-    } else {
-        speedTarget = 0.0f;
-        incrStep = 0.0f;
-    }
-
-    Math_AsymStepToF(speed, speedTarget * 0.8f, incrStep, (fabsf(*speed) * 0.02f) + 0.05f);
     Math_ScaledStepToS(&this->currentYaw, yawTarget, 1600); // 1 ESS turn, also one frame of first-person rotation
 }
 
@@ -14601,6 +14604,8 @@ void Player_Action_13(Player* this, PlayState* play) {
     }
 
     if (!func_8083A4A4(this, &speedTarget, &yawTarget, REG(43) / 100.0f)) {
+        GameInteractor_Should(VB_SPEED_MODIFIER_WALK, true, &speedTarget);
+
         func_8083CB58(this, speedTarget, yawTarget);
         func_8083C8E8(this, play);
         if ((this->linearVelocity == 0.0f) && (speedTarget == 0.0f)) {

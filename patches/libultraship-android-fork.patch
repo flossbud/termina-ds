@@ -1,0 +1,61 @@
+diff --git a/include/libultraship/libultra/controller.h b/include/libultraship/libultra/controller.h
+index 3a985f33..fe6196a3 100644
+--- a/include/libultraship/libultra/controller.h
++++ b/include/libultraship/libultra/controller.h
+@@ -92,6 +92,8 @@
+ #define BTN_CUP 0x00008
+ #define BTN_R 0x00010
+ #define BTN_L 0x00020
++#define BTN_CUSTOM_MODIFIER1 0x00040
++#define BTN_CUSTOM_MODIFIER2 0x00080
+ #define BTN_DRIGHT 0x00100
+ #define BTN_DLEFT 0x00200
+ #define BTN_DDOWN 0x00400
+diff --git a/src/controller/controldevice/controller/ControllerButton.h b/src/controller/controldevice/controller/ControllerButton.h
+index dc9e967c..396adf0e 100644
+--- a/src/controller/controldevice/controller/ControllerButton.h
++++ b/src/controller/controldevice/controller/ControllerButton.h
+@@ -11,7 +11,7 @@ namespace Ship {
+ 
+ #define BUTTON_BITMASKS                                                                                             \
+     BTN_A, BTN_B, BTN_L, BTN_R, BTN_Z, BTN_START, BTN_CLEFT, BTN_CRIGHT, BTN_CUP, BTN_CDOWN, BTN_DLEFT, BTN_DRIGHT, \
+-        BTN_DUP, BTN_DDOWN
++        BTN_DUP, BTN_DDOWN, BTN_CUSTOM_MODIFIER1, BTN_CUSTOM_MODIFIER2
+ 
+ class ControllerButton {
+   public:
+diff --git a/src/graphic/Fast3D/gfx_pc.cpp b/src/graphic/Fast3D/gfx_pc.cpp
+index fccd6fc4..82c21daf 100644
+--- a/src/graphic/Fast3D/gfx_pc.cpp
++++ b/src/graphic/Fast3D/gfx_pc.cpp
+@@ -2015,7 +2015,6 @@ static void gfx_dp_set_tile_size(uint8_t tile, uint16_t uls, uint16_t ult, uint1
+ }
+ 
+ static void gfx_dp_load_tlut(uint8_t tile, uint32_t high_index) {
+-    SUPPORT_CHECK(tile == G_TX_LOADTILE);
+     SUPPORT_CHECK(g_rdp.texture_to_load.siz == G_IM_SIZ_16b);
+     // BENTODO
+     // SUPPORT_CHECK((g_rdp.texture_tile[tile].tmem == 256 && (high_index <= 127 || high_index == 255)) ||
+diff --git a/src/window/gui/Gui.cpp b/src/window/gui/Gui.cpp
+index c3eef180..17e6fe54 100644
+--- a/src/window/gui/Gui.cpp
++++ b/src/window/gui/Gui.cpp
+@@ -123,9 +123,15 @@ void Gui::Init(GuiWindowInitData windowImpl) {
+                                                           &iconsConfig, sIconsRanges);
+ 
+ #if defined(__ANDROID__)
+-    // Scale everything by 3 for Android and enable gamepad
+-    ImGui::GetStyle().ScaleAllSizes(3.0f);
+-    mImGuiIo->FontGlobalScale = 3.0f;
++    float androidMenuScale = CVarGetFloat("gSettings.Menu.AndroidScale", 2.0f);
++    if (androidMenuScale < 1.0f) {
++        androidMenuScale = 1.0f;
++    } else if (androidMenuScale > 3.0f) {
++        androidMenuScale = 3.0f;
++    }
++
++    ImGui::GetStyle().ScaleAllSizes(androidMenuScale);
++    mImGuiIo->FontGlobalScale = androidMenuScale;
+     CVarSetInteger(CVAR_IMGUI_CONTROLLER_NAV, 1);
+ #endif
+ 

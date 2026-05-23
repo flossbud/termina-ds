@@ -423,6 +423,18 @@ static const std::unordered_map<int32_t, const char*> timeStopOptions = {
     { TIME_STOP_TEMPLES_DUNGEONS, "Temples + Mini Dungeons" },
 };
 
+static const std::unordered_map<int32_t, const char*> speedModifierModeOptions = {
+    { 0, "Off" },
+    { 1, "On" },
+    { 2, "Hold Modifier" },
+    { 3, "Toggle Modifier" },
+};
+
+static const std::unordered_map<int32_t, const char*> speedModifierButtonOptions = {
+    { BTN_CUSTOM_MODIFIER1, "Modifier 1" },
+    { BTN_CUSTOM_MODIFIER2, "Modifier 2" },
+};
+
 static const std::unordered_map<int32_t, const char*> notificationPosition = {
     { 0, "Top Left" }, { 1, "Top Right" }, { 2, "Bottom Left" }, { 3, "Bottom Right" }, { 4, "Hidden" },
 };
@@ -1010,6 +1022,11 @@ void AddEnhancements() {
               { "Infinite Rupees", "gCheats.InfiniteRupees", "Always have a full Wallet.", WIDGET_CVAR_CHECKBOX, {} },
               { "Infinite Consumables", "gCheats.InfiniteConsumables",
                 "Always have max Consumables, you must have collected the consumables first.", WIDGET_CVAR_CHECKBOX },
+              { "Infinite Epona Carrots", "gCheats.InfiniteEponaCarrots",
+                "Allows Epona to boost without consuming carrots.", WIDGET_CVAR_CHECKBOX },
+              { "Easy Frame Advance", "gCheats.EasyFrameAdvance",
+                "Continue holding START button when unpausing to only advance a single frame and then re-pause.",
+                WIDGET_CVAR_CHECKBOX },
               { "Longer Deku Flower Glide",
                 "gCheats.LongerFlowerGlide",
                 "Allows Deku Link to glide longer, no longer dropping after a certain distance.",
@@ -1021,6 +1038,8 @@ void AddEnhancements() {
                 "Allows to Razor Sword to be used indefinitely without dulling its blade.", WIDGET_CVAR_CHECKBOX },
               { "Unrestricted Items", "gCheats.UnrestrictedItems", "Allows all Forms to use all Items.",
                 WIDGET_CVAR_CHECKBOX },
+              { "Hookshot Anywhere", "gCheats.HookshotAnywhere", "Allows most surfaces to be hookshot-able.",
+                WIDGET_CVAR_CHECKBOX },
               { "Moon Jump on L",
                 "gCheats.MoonJumpOnL",
                 "Holding L makes you float into the air.",
@@ -1028,6 +1047,8 @@ void AddEnhancements() {
                 {},
                 [](widgetInfo& info) { RegisterMoonJumpOnL(); } },
               { "Elegy of Emptiness Anywhere", "gCheats.ElegyAnywhere", "Allows Elegy of Emptiness outside of Ikana",
+                WIDGET_CVAR_CHECKBOX },
+              { "Climb Anywhere", "gCheats.ClimbAnywhere", "Allows climbing on most walls regardless of vines.",
                 WIDGET_CVAR_CHECKBOX },
               { "Stop Time in Dungeons",
                 "gCheats.TempleTimeStop",
@@ -1037,7 +1058,22 @@ void AddEnhancements() {
                 "- Temples + Mini Dungeons: In addition to the above temples, stops time in both Spider "
                 "Houses, Pirate's Fortress, Beneath the Well, Ancient Castle of Ikana, and Secret Shrine.",
                 WIDGET_CVAR_COMBOBOX,
-                { .comboBoxOptions = timeStopOptions } } } } });
+                { .comboBoxOptions = timeStopOptions } },
+              { "Speed Modifier",
+                "gCheats.SpeedModifier.Mode",
+                "Changes Link's walking and swimming speed.",
+                WIDGET_CVAR_COMBOBOX,
+                { .comboBoxOptions = speedModifierModeOptions } },
+              { "Speed Modifier Multiplier: %.1fx",
+                "gCheats.SpeedModifier.Value",
+                "How much the speed modifier changes walking and swimming speed.",
+                WIDGET_CVAR_SLIDER_FLOAT,
+                { .min = 0.1f, .max = 6.0f, .defaultVariant = 1.0f, .format = "%.1fx", .step = 0.1f } },
+              { "Speed Modifier Button",
+                "gCheats.SpeedModifier.Btn",
+                "Modifier button used by hold and toggle speed modifier modes.",
+                WIDGET_CVAR_COMBOBOX,
+                { .defaultVariant = BTN_CUSTOM_MODIFIER1, .comboBoxOptions = speedModifierButtonOptions } } } } });
     // Gameplay Enhancements
     enhancementsSidebar.push_back(
         { "Gameplay",

@@ -325,11 +325,22 @@ typedef struct DpadSaveInfo {
     u8 dpadSlots[4][4];
 } DpadSaveInfo;
 
+typedef enum {
+    SAVETYPE_VANILLA,
+    SAVETYPE_RANDO,
+} SaveType;
+
 // These are values added by 2S2H that we need to be persisted to the save file
 // See `ShipSaveContext` for values on the SaveContext that aren't persisted.
 typedef struct ShipSaveInfo {
     DpadSaveInfo dpadEquips;
     s32 pauseSaveEntrance;
+    SaveType saveType;
+    uint64_t fileCreatedAt;
+    uint64_t fileCompletedAt;
+    uint64_t filePlaytime;
+    RespawnData respawn[RESPAWN_MODE_MAX];
+    char commitHash[8];
 } ShipSaveInfo;
 // #endregion
 

@@ -18,20 +18,21 @@ void TransitionFade_SetColor(void* thisx, u32 color);
 void RegisterFastTransformation() {
     REGISTER_VB_SHOULD(VB_PREVENT_MASK_TRANSFORMATION_CS, {
         if (CVarGetInteger("gEnhancements.Masks.FastTransformation", 0)) {
-            *should = true;
             Player* player = GET_PLAYER(gPlayState);
+            u8 targetForm = GET_PLAYER_FORM;
+
+            *should = true;
 
             // This was mostly copied directly from func_8012301C within z_player_lib.c
-            s16 objectId = gPlayerFormObjectIds[GET_PLAYER_FORM];
+            s16 objectId = gPlayerFormObjectIds[targetForm];
 
             gActorOverlayTable[ACTOR_PLAYER].initInfo->objectId = objectId;
             func_8012F73C(&gPlayState->objectCtx, player->actor.objectSlot, objectId);
             player->actor.objectSlot = Object_GetSlot(&gPlayState->objectCtx, GAMEPLAY_KEEP);
 
-            s32 objectSlot =
-                Object_GetSlot(&gPlayState->objectCtx, gActorOverlayTable[ACTOR_PLAYER].initInfo->objectId);
+            s32 objectSlot = Object_GetSlot(&gPlayState->objectCtx, gActorOverlayTable[ACTOR_PLAYER].initInfo->objectId);
             player->actor.objectSlot = objectSlot;
-            player->actor.shape.rot.z = GET_PLAYER_FORM + 1;
+            player->actor.shape.rot.z = targetForm + 1;
             player->actor.init = PlayerCall_Init;
             player->actor.update = PlayerCall_Update;
             player->actor.draw = PlayerCall_Draw;

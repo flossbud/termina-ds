@@ -68,6 +68,18 @@ static const std::unordered_map<int32_t, const char*> timeStopOptions = {
     { TIME_STOP_TEMPLES_DUNGEONS, "Temples + Mini Dungeons" },
 };
 
+static const std::unordered_map<int32_t, const char*> speedModifierModeOptions = {
+    { 0, "Off" },
+    { 1, "On" },
+    { 2, "Hold Modifier" },
+    { 3, "Toggle Modifier" },
+};
+
+static const std::unordered_map<int32_t, const char*> speedModifierButtonOptions = {
+    { BTN_CUSTOM_MODIFIER1, "Modifier 1" },
+    { BTN_CUSTOM_MODIFIER2, "Modifier 2" },
+};
+
 namespace BenGui {
 std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends;
 std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
@@ -164,6 +176,16 @@ extern std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 
 void DrawSettingsMenu() {
     if (UIWidgets::BeginMenu("Settings")) {
+#if defined(__ANDROID__)
+        if (UIWidgets::BeginMenu("Menu")) {
+            UIWidgets::CVarSliderFloat("Menu Scale (Needs reload): %.2fx", "gSettings.Menu.AndroidScale", 1.0f, 3.0f,
+                                       2.0f, { .showButtons = false, .format = "" });
+            UIWidgets::Tooltip("Adjusts the Android menu size. Restart the app after changing this setting.");
+
+            ImGui::EndMenu();
+        }
+#endif
+
         if (UIWidgets::BeginMenu("Audio")) {
             UIWidgets::CVarSliderFloat("Master Volume: %.0f %%", "gSettings.Audio.MasterVolume", 0.0f, 1.0f, 1.0f,
                                        { .showButtons = false, .format = "", .isPercentage = true });
@@ -818,6 +840,11 @@ void DrawCheatsMenu() {
         UIWidgets::CVarCheckbox("Infinite Magic", "gCheats.InfiniteMagic");
         UIWidgets::CVarCheckbox("Infinite Rupees", "gCheats.InfiniteRupees");
         UIWidgets::CVarCheckbox("Infinite Consumables", "gCheats.InfiniteConsumables");
+        UIWidgets::CVarCheckbox("Infinite Epona Carrots", "gCheats.InfiniteEponaCarrots",
+                                { .tooltip = "Allows Epona to boost without consuming carrots" });
+        UIWidgets::CVarCheckbox(
+            "Easy Frame Advance", "gCheats.EasyFrameAdvance",
+            { .tooltip = "Continue holding START when unpausing to advance a single frame and re-pause" });
         if (UIWidgets::CVarCheckbox(
                 "Longer Deku Flower Glide", "gCheats.LongerFlowerGlide",
                 { .tooltip = "Allows Deku Link to glide longer, no longer dropping after a certain distance" })) {
@@ -826,12 +853,16 @@ void DrawCheatsMenu() {
         UIWidgets::CVarCheckbox("No Clip", "gCheats.NoClip");
         UIWidgets::CVarCheckbox("Unbreakable Razor Sword", "gCheats.UnbreakableRazorSword");
         UIWidgets::CVarCheckbox("Unrestricted Items", "gCheats.UnrestrictedItems");
+        UIWidgets::CVarCheckbox("Hookshot Anywhere", "gCheats.HookshotAnywhere",
+                                { .tooltip = "Allows most surfaces to be hookshot-able" });
         if (UIWidgets::CVarCheckbox("Moon Jump on L", "gCheats.MoonJumpOnL",
                                     { .tooltip = "Holding L makes you float into the air" })) {
             RegisterMoonJumpOnL();
         }
         UIWidgets::CVarCheckbox("Elegy of Emptiness Anywhere", "gCheats.ElegyAnywhere",
                                 { .tooltip = "Allows Elegy of Emptiness outside of Ikana" });
+        UIWidgets::CVarCheckbox("Climb Anywhere", "gCheats.ClimbAnywhere",
+                                { .tooltip = "Allows climbing on most walls regardless of vines" });
         UIWidgets::CVarCombobox(
             "Stop Time in Dungeons", "gCheats.TempleTimeStop", timeStopOptions,
             { .tooltip = "Stops time from advancing in selected areas. Requires a room change to update.\n\n"
@@ -840,6 +871,17 @@ void DrawCheatsMenu() {
                          "- Temples + Mini Dungeons: In addition to the above temples, stops time in both Spider "
                          "Houses, Pirate's Fortress, Beneath the Well, Ancient Castle of Ikana, and Secret Shrine.",
               .defaultIndex = TIME_STOP_OFF });
+        UIWidgets::CVarCombobox("Speed Modifier", "gCheats.SpeedModifier.Mode", speedModifierModeOptions,
+                                { .tooltip = "Changes Link's walking and swimming speed." });
+        if (CVarGetInteger("gCheats.SpeedModifier.Mode", 0) != 0) {
+            UIWidgets::CVarSliderFloat("Speed Modifier Multiplier: %.1fx", "gCheats.SpeedModifier.Value", 0.1f,
+                                       6.0f, 1.0f, { .format = "%.1fx", .step = 0.1f });
+        }
+        if (CVarGetInteger("gCheats.SpeedModifier.Mode", 0) >= 2) {
+            UIWidgets::CVarCombobox("Speed Modifier Button", "gCheats.SpeedModifier.Btn",
+                                    speedModifierButtonOptions,
+                                    { .defaultIndex = BTN_CUSTOM_MODIFIER1 });
+        }
 
         ImGui::EndMenu();
     }

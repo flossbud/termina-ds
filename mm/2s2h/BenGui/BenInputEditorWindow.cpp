@@ -1525,6 +1525,11 @@ void BenInputEditorWindow::DrawPortTabContents(uint8_t portIndex) {
         DrawButtonDeviceIcons(portIndex, mDpadBitmasks);
     }
 
+    if (ImGui::CollapsingHeader("Modifier Buttons", NULL, ImGuiTreeNodeFlags_DefaultOpen)) {
+        DrawButtonLine("M1", portIndex, BTN_CUSTOM_MODIFIER1);
+        DrawButtonLine("M2", portIndex, BTN_CUSTOM_MODIFIER2);
+    }
+
     if (ImGui::CollapsingHeader("Analog Stick", NULL, ImGuiTreeNodeFlags_DefaultOpen)) {
         DrawAnalogStickDeviceIcons(portIndex, Ship::LEFT_STICK);
         DrawStickSection(portIndex, Ship::LEFT, 0);

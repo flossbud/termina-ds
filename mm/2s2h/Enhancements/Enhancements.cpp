@@ -57,6 +57,7 @@ void InitEnhancements() {
     RegisterFastFlowerLaunch();
     RegisterInstantPutaway();
     RegisterFierceDeityPutaway();
+    RegisterLinkSpeedModifier();
 
     // Songs
     RegisterEnableSunsSong();

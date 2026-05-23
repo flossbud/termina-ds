@@ -72,6 +72,11 @@ typedef enum {
     VB_CHECK_HELD_ITEM_BUTTON_PRESS,
     VB_MAGIC_SPIN_ATTACK_CHECK_FORM,
     VB_TRANSFORM_THUNDER_MATRIX,
+    VB_BE_HOOKSHOT_SURFACE,
+    VB_BE_CLIMBABLE_SURFACE,
+    VB_CONSUME_EPONA_CARROT,
+    VB_SPEED_MODIFIER_SWIM,
+    VB_SPEED_MODIFIER_WALK,
 } GIVanillaBehavior;
 
 typedef enum {
@@ -285,6 +290,7 @@ class GameInteractor {
 
     DEFINE_HOOK(OnFileDropped, (std::string path));
 
+    DEFINE_HOOK(OnGameStateMainStart, ());
     DEFINE_HOOK(OnGameStateMainFinish, ());
     DEFINE_HOOK(OnGameStateDrawFinish, ());
     DEFINE_HOOK(OnGameStateUpdate, ());
@@ -335,6 +341,7 @@ class GameInteractor {
 extern "C" {
 #endif // __cplusplus
 
+void GameInteractor_ExecuteOnGameStateMainStart();
 void GameInteractor_ExecuteOnGameStateMainFinish();
 void GameInteractor_ExecuteOnGameStateDrawFinish();
 void GameInteractor_ExecuteOnGameStateUpdate();

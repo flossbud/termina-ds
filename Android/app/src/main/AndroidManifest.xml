@@ -3,9 +3,8 @@
      com.gamemaker.game
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dishii.mm"
-    android:versionCode="5"
-    android:versionName="1.1.2"
+    android:versionCode="6"
+    android:versionName="1.2.0"
     android:installLocation="auto">
 
     <!-- OpenGL ES 3.0 -->
