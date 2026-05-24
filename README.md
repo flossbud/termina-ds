@@ -17,8 +17,11 @@ App label: `2 Ship 2 Harkinian`
 ## What's Different In This Fork
 
 - Restores save compatibility with newer upstream 2 Ship 2 Harkinian saves.
+- Adds ability to use up to 3 save files.
+- Improved Android performance and startup behavior.
+- Improved alternate asset texture handling on Android.
 - Adds upstream cheat and enhancement features that were missing from the Android port.
-- Adds modifier button support
+- Adds modifier button support.
 - Adds support for speed modifier controls.
 - Reduces the Android menu scale so the settings menus are easier to navigate.
 - Builds arm64 release APKs with Android-focused settings.
