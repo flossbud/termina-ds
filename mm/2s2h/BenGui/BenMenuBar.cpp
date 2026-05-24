@@ -762,8 +762,6 @@ void DrawEnhancementsMenu() {
                                     { .tooltip = "Allows Link to instantly puts away held item without waiting." });
             UIWidgets::CVarCheckbox("Fierce Deity Putaway", "gEnhancements.Player.FierceDeityPutaway",
                                     { .tooltip = "Allows Fierce Deity Link to put away his sword." });
-            UIWidgets::CVarCheckbox("Faster Push/Pull", "gEnhancements.Player.FasterPushAndPull");
-            UIWidgets::CVarCheckbox("Prevent Diving Over Water", "gEnhancements.Player.PreventDiveOverWater");
             ImGui::EndMenu();
         }
 
