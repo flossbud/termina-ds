@@ -158,7 +158,7 @@ static void RegisterAltAssetsStartupRefresh() {
                 CancelAltAssetsStartupRefresh();
             }
         });
-    sAltAssetsStartupRefreshFrames = 45;
+    sAltAssetsStartupRefreshFrames = 180;
 }
 
 OTRGlobals::OTRGlobals() {
