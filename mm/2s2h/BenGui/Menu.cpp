@@ -15,6 +15,8 @@
 
 #include "SearchableMenuItems.h"
 
+#include <algorithm>
+
 extern "C" {
 #include "z64.h"
 #include "functions.h"
@@ -38,6 +40,29 @@ extern std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends
 extern std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
 extern Ship::WindowBackend configWindowBackend;
 extern void UpdateWindowBackendObjects();
+
+#ifdef __ANDROID__
+static bool IsCompactAndroidMenu(float width, float height) {
+    if (width <= 0.0f || height <= 0.0f) {
+        return false;
+    }
+
+    const float shortEdge = std::min(width, height);
+    const float aspect = std::max(width, height) / shortEdge;
+
+    return aspect <= 1.45f || shortEdge <= 960.0f;
+}
+
+static float GetAndroidMenuSidebarBaseWidth(float width, float height) {
+    const bool compact = IsCompactAndroidMenu(width, height);
+    const float desired = width * (compact ? 0.28f : 0.32f);
+    const float minWidth = compact ? 220.0f : 320.0f;
+    const float maxWidth = compact ? 360.0f : 600.0f;
+    const float screenMaxWidth = width * (compact ? 0.34f : 0.42f);
+
+    return std::clamp(desired, minWidth, std::min(maxWidth, screenMaxWidth));
+}
+#endif
 
 // BENTODO: Not implemented yet
 // UIWidgets::CVarCheckbox("Widescreen Actor Culling",
@@ -209,7 +234,8 @@ void BenMenu::DrawElement() {
     float centerX = pos.x + windowWidth / 2 - (style.ItemSpacing.x * (sectionCount + 1));
     std::vector<ImVec2> headerSizes;
 #ifdef __ANDROID__
-    float headerWidth = 600.0f + style.ItemSpacing.x;
+    const float androidSidebarBaseWidth = GetAndroidMenuSidebarBaseWidth(windowWidth, windowHeight);
+    float headerWidth = androidSidebarBaseWidth + style.ItemSpacing.x;
 #else
     float headerWidth = 200.0f + style.ItemSpacing.x;
 #endif
@@ -305,7 +331,7 @@ void BenMenu::DrawElement() {
         menuSearchText.erase(std::remove(menuSearchText.begin(), menuSearchText.end(), ' '), menuSearchText.end());
         if (menuSearchText.length() < 1) {
 #ifdef __ANDROID__
-            ImGui::SameLine(headerWidth - 600.0f + style.ItemSpacing.x);
+            ImGui::SameLine(headerWidth - androidSidebarBaseWidth + style.ItemSpacing.x);
 #else
             ImGui::SameLine(headerWidth - 200.0f + style.ItemSpacing.x);
 #endif
@@ -350,7 +376,7 @@ void BenMenu::DrawElement() {
     float columnHeight = sectionHeight - style.ItemSpacing.y * 4;
     ImGui::SetNextWindowPos(pos + style.ItemSpacing * 2);
 #ifdef __ANDROID__
-    float sidebarWidth = 600 - style.ItemSpacing.x;
+    float sidebarWidth = androidSidebarBaseWidth - style.ItemSpacing.x;
 #else
     float sidebarWidth = 200 - style.ItemSpacing.x;
 #endif
