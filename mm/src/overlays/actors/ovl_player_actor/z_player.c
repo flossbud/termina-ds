@@ -7335,8 +7335,10 @@ void func_8083827C(Player* this, PlayState* play) {
                                 sp48 = func_80835CD8(play, this, &D_8085D154, &sp4C, &sp60, &sp5C);
                                 sp44 = this->actor.world.pos.y;
 
-                                if (WaterBox_GetSurface1(play, &play->colCtx, sp4C.x, sp4C.z, &sp44, &sp58) &&
-                                    ((sp44 - sp48) > 50.0f)) {
+                                if (GameInteractor_Should(VB_LINK_DIVE_OVER_WATER,
+                                                          WaterBox_GetSurface1(play, &play->colCtx, sp4C.x, sp4C.z,
+                                                                               &sp44, &sp58) &&
+                                                              ((sp44 - sp48) > 50.0f))) {
                                     func_80834DB8(this, &gPlayerAnim_link_normal_run_jump_water_fall, 6.0f, play);
                                     Player_SetAction(play, this, Player_Action_27, 0);
                                     return;
@@ -9244,8 +9246,9 @@ s32 Player_ActionChange_2(Player* this, PlayState* play) {
                             this->currentYaw = this->actor.shape.rot.y = interactRangeActor->shape.rot.y;
 
                             func_8082DAD4(this);
-                            if ((giEntry->itemId != ITEM_NONE) && (giEntry->gid >= 0) &&
-                                (Item_CheckObtainability(giEntry->itemId) == ITEM_NONE)) {
+                            if (GameInteractor_Should(VB_PLAY_SLOW_CHEST_CS,
+                                                      (giEntry->itemId != ITEM_NONE) && (giEntry->gid >= 0) &&
+                                                          (Item_CheckObtainability(giEntry->itemId) == ITEM_NONE))) {
                                 this->csId = chest->csId2;
                                 func_8082DB90(play, this, this->ageProperties->openChestAnim);
                                 func_8082E920(play, this,

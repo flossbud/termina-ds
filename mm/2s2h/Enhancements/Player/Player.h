@@ -6,5 +6,7 @@ void RegisterFastFlowerLaunch();
 void RegisterInstantPutaway();
 void RegisterFierceDeityPutaway();
 void RegisterLinkSpeedModifier();
+void RegisterFasterPushAndPull();
+void RegisterPreventDiveOverWater();
 
 #endif // PLAYER_H

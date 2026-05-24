@@ -28,6 +28,11 @@ void InitEnhancements() {
     // Dialogue
     RegisterFastBankSelection();
 
+    // Time Savers
+    RegisterFastChests();
+    RegisterFasterRupeeAccumulator();
+    RegisterFasterSceneTransitions();
+
     // Equipment
     RegisterSkipMagicArrowEquip();
     RegisterInstantRecall();
@@ -58,6 +63,8 @@ void InitEnhancements() {
     RegisterInstantPutaway();
     RegisterFierceDeityPutaway();
     RegisterLinkSpeedModifier();
+    RegisterFasterPushAndPull();
+    RegisterPreventDiveOverWater();
 
     // Songs
     RegisterEnableSunsSong();

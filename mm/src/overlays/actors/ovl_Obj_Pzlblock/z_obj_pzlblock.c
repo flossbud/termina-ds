@@ -5,6 +5,7 @@
  */
 
 #include "z_obj_pzlblock.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/object_secom_obj/object_secom_obj.h"
 
@@ -260,7 +261,8 @@ void func_809A3A74(ObjPzlblock* this, PlayState* play) {
     }
 
     if (sp20 != -1) {
-        if ((this->unk_16E[sp20] >= 11) && func_809A34E0(this, sp20) && func_809A35EC(this, sp20)) {
+        if (GameInteractor_Should(VB_BLOCK_BEGIN_MOVE, this->unk_16E[sp20] >= 11, this) &&
+            func_809A34E0(this, sp20) && func_809A35EC(this, sp20)) {
             if (!func_809A33E0(this, play, (this->dyna.pushForce > 0.0f) ? 90 : 120)) {
                 func_809A376C(this, sp20);
                 func_809A3BA4(this);

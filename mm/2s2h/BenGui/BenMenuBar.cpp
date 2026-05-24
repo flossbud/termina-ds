@@ -593,6 +593,13 @@ void DrawEnhancementsMenu() {
             ImGui::EndMenu();
         }
 
+        if (UIWidgets::BeginMenu("Time Savers")) {
+            UIWidgets::CVarCheckbox("Fast Chests", "gEnhancements.Timesavers.FastChests");
+            UIWidgets::CVarCheckbox("Faster Scene Transitions", "gEnhancements.Timesavers.FasterSceneTransitions");
+            UIWidgets::CVarCheckbox("Faster Rupee Accumulator", "gEnhancements.Timesavers.FasterRupeeAccumulator");
+            ImGui::EndMenu();
+        }
+
         if (UIWidgets::BeginMenu("Dpad")) {
             UIWidgets::CVarCheckbox("Dpad Equips", "gEnhancements.Dpad.DpadEquips",
                                     { .tooltip = "Allows you to equip items to your d-pad" });
@@ -755,6 +762,8 @@ void DrawEnhancementsMenu() {
                                     { .tooltip = "Allows Link to instantly puts away held item without waiting." });
             UIWidgets::CVarCheckbox("Fierce Deity Putaway", "gEnhancements.Player.FierceDeityPutaway",
                                     { .tooltip = "Allows Fierce Deity Link to put away his sword." });
+            UIWidgets::CVarCheckbox("Faster Push/Pull", "gEnhancements.Player.FasterPushAndPull");
+            UIWidgets::CVarCheckbox("Prevent Diving Over Water", "gEnhancements.Player.PreventDiveOverWater");
             ImGui::EndMenu();
         }
 

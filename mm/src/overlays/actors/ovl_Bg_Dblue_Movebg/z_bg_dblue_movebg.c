@@ -6,6 +6,7 @@
 
 #include "prevent_bss_reordering.h"
 #include "z_bg_dblue_movebg.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include "objects/object_dblue_object/object_dblue_object.h"
 #include "overlays/actors/ovl_Obj_Hunsui/z_obj_hunsui.h"
 
@@ -403,8 +404,10 @@ void func_80A2A444(BgDblueMovebg* this, PlayState* play) {
     Player* temp_a3;
     s16 temp_v0;
 
-    this->unk_188++;
-    this->unk_188 = CLAMP_MAX(this->unk_188, 5);
+    if (GameInteractor_Should(VB_GREAT_BAY_GEAR_CLAMP_PUSH_SPEED, true, this)) {
+        this->unk_188++;
+        this->unk_188 = CLAMP_MAX(this->unk_188, 5);
+    }
 
     sp20 = Math_StepToS(&this->unk_18A, 900, this->unk_188);
     temp_v0 = this->unk_18A * this->unk_17E;
@@ -491,8 +494,10 @@ void func_80A2A7F8(BgDblueMovebg* this, PlayState* play) {
     s16 sp26;
     s32 temp;
 
-    this->unk_188++;
-    this->unk_188 = CLAMP_MAX(this->unk_188, 5);
+    if (GameInteractor_Should(VB_GREAT_BAY_GEAR_CLAMP_PUSH_SPEED, true, this)) {
+        this->unk_188++;
+        this->unk_188 = CLAMP_MAX(this->unk_188, 5);
+    }
 
     sp28 = Math_StepToS(&this->unk_18A, 900, this->unk_188);
     sp26 = this->unk_18A * this->unk_17E;
