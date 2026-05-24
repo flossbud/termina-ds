@@ -52,6 +52,9 @@ void SetupGuiElements() {
     style.ItemSpacing = ImVec2(8.0f, 6.0f);
     style.Colors[ImGuiCol_MenuBarBg] = UIWidgets::Colors::DarkGray;
 
+#ifdef __ANDROID__
+    CVarClear(CVAR_MENU_BAR_OPEN);
+#endif
     mBenMenuBar = std::make_shared<BenMenuBar>(CVAR_MENU_BAR_OPEN, CVarGetInteger(CVAR_MENU_BAR_OPEN, 0));
     gui->SetMenuBar(std::reinterpret_pointer_cast<Ship::GuiMenuBar>(mBenMenuBar));
 
