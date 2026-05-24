@@ -1059,26 +1059,6 @@ extern "C" void ResourceMgr_DirtyDirectory(const char* resName) {
     Ship::Context::GetInstance()->GetResourceManager()->DirtyDirectory(resName);
 }
 
-extern "C" void ResourceMgr_UnloadResource(const char* resName) {
-    std::string path = resName;
-    if (path.rfind("__OTR__", 0) == 0) {
-        path = path.substr(7);
-    }
-
-    Ship::Context::GetInstance()->GetResourceManager()->UnloadResource(path);
-}
-
-static void ResourceMgr_UnloadOriginalWhenAltExists(const char* resName) {
-    std::string path = resName;
-    if (path.rfind("__OTR__", 0) == 0) {
-        path = path.substr(7);
-    }
-
-    if (ResourceMgr_IsAltAssetsEnabled() && ExtensionCache.contains(Ship::IResource::gAltAssetPrefix + path)) {
-        ResourceMgr_UnloadResource(path.c_str());
-    }
-}
-
 // OTRTODO: There is probably a more elegant way to go about this...
 // Kenix: This is definitely leaking memory when it's called.
 extern "C" char** ResourceMgr_ListFiles(const char* searchMask, int* resultSize) {
@@ -1209,8 +1189,6 @@ extern "C" void ResourceMgr_PushCurrentDirectory(char* path) {
 }
 
 extern "C" Gfx* ResourceMgr_LoadGfxByName(const char* path) {
-    ResourceMgr_UnloadOriginalWhenAltExists(path);
-
     auto res = std::static_pointer_cast<LUS::DisplayList>(GetResourceByName(path));
     return (Gfx*)&res->Instructions[0];
 }
