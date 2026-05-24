@@ -11,6 +11,7 @@ on:
       - "CMakeLists.txt"
       - "OTRExporter/**"
       - "ZAPDTR/**"
+      - "libultraship"
       - "libultraship/**"
       - "mm/**"
       - ".github/workflows/android-release.yml"
