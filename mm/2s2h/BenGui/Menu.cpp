@@ -55,10 +55,10 @@ static bool IsCompactAndroidMenu(float width, float height) {
 
 static float GetAndroidMenuSidebarBaseWidth(float width, float height) {
     const bool compact = IsCompactAndroidMenu(width, height);
-    const float desired = width * (compact ? 0.28f : 0.32f);
-    const float minWidth = compact ? 220.0f : 320.0f;
-    const float maxWidth = compact ? 360.0f : 600.0f;
-    const float screenMaxWidth = width * (compact ? 0.34f : 0.42f);
+    const float desired = width * (compact ? 0.22f : 0.32f);
+    const float minWidth = compact ? 200.0f : 320.0f;
+    const float maxWidth = compact ? 320.0f : 600.0f;
+    const float screenMaxWidth = width * (compact ? 0.28f : 0.42f);
 
     return std::clamp(desired, minWidth, std::min(maxWidth, screenMaxWidth));
 }
@@ -432,7 +432,7 @@ void BenMenu::DrawElement() {
         columns = 1;
     }
 #ifdef __ANDROID__
-    columns=1;
+    columns = 1;
 #endif
     float columnWidth = (sectionWidth - style.ItemSpacing.x * columns) / columns;
     bool useColumns = columns > 1;
