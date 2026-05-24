@@ -27,7 +27,7 @@ jobs:
         run: |
           rm -rf libultraship OTRExporter ZAPDTR
           mkdir -p libultraship OTRExporter ZAPDTR
-          curl -L --retry 3 -o /tmp/libultraship.tar.gz https://github.com/linkzenic/libultraship/archive/88260169230b9c6e44bd46a1c6b98c5a3c44b358.tar.gz
+          curl -L --retry 3 -o /tmp/libultraship.tar.gz https://github.com/linkzenic/libultraship/archive/260ba88e20308e5cb8e780cd88d955c5185c8081.tar.gz
           curl -L --retry 3 -o /tmp/OTRExporter.tar.gz https://github.com/Waterdish/OTRExporter/archive/1cbb1b65dd4646a964f8ded921af7c7249e4433c.tar.gz
           curl -L --retry 3 -o /tmp/ZAPDTR.tar.gz https://github.com/Waterdish/ZAPDTR/archive/24ca939d543bccc4869064d84dcae85495ecd583.tar.gz
           tar -xzf /tmp/libultraship.tar.gz --strip-components=1 -C libultraship
