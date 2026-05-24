@@ -1089,6 +1089,10 @@ void AddEnhancements() {
                 "Allows Link to instantly puts away held item without waiting.", WIDGET_CVAR_CHECKBOX },
               { "Fierce Deity Putaway", "gEnhancements.Player.FierceDeityPutaway",
                 "Allows Fierce Deity Link to put away his sword.", WIDGET_CVAR_CHECKBOX },
+              { "Faster Push/Pull", "gEnhancements.Player.FasterPushAndPull",
+                "Speeds up pushing and pulling movable blocks.", WIDGET_CVAR_CHECKBOX },
+              { "Prevent Diving Over Water", "gEnhancements.Player.PreventDiveOverWater",
+                "Prevents automatically diving when jumping toward deep water.", WIDGET_CVAR_CHECKBOX },
               { "Climb speed",
                 "gEnhancements.Player.ClimbSpeed",
                 "Increases the speed at which Link climbs vines and ladders.",
@@ -1354,7 +1358,15 @@ void AddEnhancements() {
     enhancementsSidebar.push_back(
         { "Time Savers",
           3,
-          { // Cutscene Skips
+          { // General Time Savers
+            { { .widgetName = "General", .widgetType = WIDGET_SEPARATOR_TEXT },
+              { "Fast Chests", "gEnhancements.Timesavers.FastChests",
+                "Skips the slower chest opening sequence when possible.", WIDGET_CVAR_CHECKBOX },
+              { "Faster Scene Transitions", "gEnhancements.Timesavers.FasterSceneTransitions",
+                "Uses faster fade and wipe transitions where safe.", WIDGET_CVAR_CHECKBOX },
+              { "Faster Rupee Accumulator", "gEnhancements.Timesavers.FasterRupeeAccumulator",
+                "Counts wallet changes faster.", WIDGET_CVAR_CHECKBOX } },
+            // Cutscene Skips
             { { .widgetName = "Cutscenes", .widgetType = WIDGET_SEPARATOR_TEXT },
               { "Hide Title Cards", "gEnhancements.Cutscenes.HideTitleCards", "Hides Title Cards when entering areas.",
                 WIDGET_CVAR_CHECKBOX },
