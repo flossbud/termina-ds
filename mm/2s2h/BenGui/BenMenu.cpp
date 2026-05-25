@@ -1874,6 +1874,7 @@ void BenMenu::AddEnhancements() {
                      .Tooltip("Enables the HUD Editor window, allowing you to modify your HUD.")
                      .Size(Sizes::Inline));
 
+#if !defined(__ANDROID__)
     // Cosmetics Editor
     path = { "Enhancements", "Cosmetic Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "Cosmetic Editor", 1);
@@ -1897,6 +1898,7 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Popout Audio Editor", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.AudioEditor")
         .WindowName("Audio Editor");
+#endif
 }
 
 void BenMenu::AddDevTools() {
@@ -2031,12 +2033,14 @@ void BenMenu::AddDevTools() {
             "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples."))
         .WindowName("GfxDebuggerWindow");
 
+#if !defined(__ANDROID__)
     path = { "Dev Tools", "Hook Debugger", SECTION_COLUMN_1 };
     AddSidebarEntry("Dev Tools", "Hook Debugger", 1);
     AddWidget(path, "Popout Hook Debugger", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.HookDebugger")
         .Options(ButtonOptions().Tooltip("Enables the Hook Debugger window, for viewing info about registered hooks."))
         .WindowName("Hook Debugger");
+#endif
 
     path = { "Dev Tools", "Save Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Dev Tools", "Save Editor", 1);
@@ -2059,6 +2063,7 @@ void BenMenu::AddDevTools() {
         .Options(ButtonOptions().Tooltip("Enables the Event Log window."))
         .WindowName("Event Log");
 
+#if !defined(__ANDROID__)
     path = { "Dev Tools", "DL Viewer", SECTION_COLUMN_1 };
     AddSidebarEntry("Dev Tools", "DL Viewer", 1);
     AddWidget(path, "Popout DL Viewer", WIDGET_WINDOW_BUTTON)
@@ -2071,6 +2076,7 @@ void BenMenu::AddDevTools() {
         .CVar("gWindows.MessageViewer")
         .Options(ButtonOptions().Tooltip("Enables the Message Viewer window for testing in-game messages."))
         .WindowName("Message Viewer");
+#endif
 }
 
 BenMenu::BenMenu(const std::string& consoleVariable, const std::string& name)

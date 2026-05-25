@@ -1,5 +1,7 @@
 #include "Enhancements.h"
 
+void RegisterPictoBoxOnCUp();
+
 void InitEnhancements() {
     // Camera
     RegisterCameraInterpolationFixes();
@@ -12,6 +14,10 @@ void InitEnhancements() {
     RegisterMoonJumpOnL();
     RegisterUnbreakableRazorSword();
     RegisterUnrestrictedItems();
+    RegisterHookshotAnywhere();
+    RegisterClimbAnywhere();
+    RegisterEasyFrameAdvance();
+    RegisterInfiniteEponaCarrots();
     RegisterTimeStopInTemples();
     RegisterElegyAnywhere();
 
@@ -36,6 +42,8 @@ void InitEnhancements() {
     // Equipment
     RegisterSkipMagicArrowEquip();
     RegisterInstantRecall();
+    RegisterRemoteBombchu();
+    RegisterPictoBoxOnCUp();
 
     // Fixes
     RegisterFierceDeityZTargetMovement();

@@ -285,6 +285,7 @@ void Play_TakePictoPhoto(PreRender* prerender) {
     Play_ConvertRgba16ToIntensityImage(gPictoPhotoI8, prerender->fbufSave, SCREEN_WIDTH, PICTO_PHOTO_TOPLEFT_X,
                                        PICTO_PHOTO_TOPLEFT_Y, (PICTO_PHOTO_TOPLEFT_X + PICTO_PHOTO_WIDTH) - 1,
                                        (PICTO_PHOTO_TOPLEFT_Y + PICTO_PHOTO_HEIGHT) - 1, 8);
+    GameInteractor_Should(VB_PICTO_TAKE, true, prerender);
 }
 
 s32 Play_ChooseDynamicTransition(PlayState* this, s32 transitionType) {

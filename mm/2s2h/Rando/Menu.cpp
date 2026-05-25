@@ -81,7 +81,7 @@ static const ImVec4 CLOCK_NIGHT_TINT = ImVec4(0.3f, 0.5f, 1.0f, 1.0f);
 static const float DISABLED_ITEM_ALPHA = 0.3f;
 static const char* CLOCK_PROGRESSIVE_TOOLTIP =
     "\n\nTime items are not compatible with Progressive Time modes.\nSwitch to Random mode to use starting time.";
-static constexpr const char* RANDO_MENU_LABEL = "Rando Beta";
+static constexpr const char* RANDO_MENU_LABEL = "Randomizer Beta";
 
 // Apply clock-specific rendering (tint colors and tooltips) based on progressive mode
 static void ApplyClockItemRendering(RandoItemId item, ImVec4& tintColor, std::string& tooltipText,

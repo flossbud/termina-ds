@@ -2,6 +2,7 @@
 #define EQUIPMENT_H
 
 void RegisterInstantRecall();
+void RegisterRemoteBombchu();
 void RegisterSkipMagicArrowEquip();
 void RegisterTwoHandedSwordSpinAttack();
 
