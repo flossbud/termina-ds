@@ -236,6 +236,11 @@ struct CheckboxOptions : WidgetOptions {
         return *this;
     }
 
+    CheckboxOptions& Disabled(bool disabled_) {
+        WidgetOptions::disabled = disabled_;
+        return *this;
+    }
+
     CheckboxOptions& DisabledTooltip(const char* disabledTooltip_) {
         WidgetOptions::disabledTooltip = disabledTooltip_;
         return *this;
@@ -1182,6 +1187,7 @@ bool StateButton(const char* str_id, const char* label, ImVec2 size, UIWidgets::
                  ImGuiButtonFlags flags = ImGuiButtonFlags_None);
 void DrawFlagArray32(const std::string& name, uint32_t& flags, Colors color = Colors::LightBlue);
 void DrawFlagArray16(const std::string& name, uint16_t& flags, Colors color = Colors::LightBlue);
+void DrawFlagArray8(const std::string& name, uint8_t& flags, Colors color = Colors::LightBlue);
 void DrawFlagTableArray16(const FlagTable& flagTable, uint16_t& flags);
 void DrawFlagTableArray8(const FlagTable& flagTable, uint16_t row, uint8_t& flags);
 void DrawFlagTableArray8Mask(const FlagTable& flagTable, uint16_t row, uint8_t& flags);

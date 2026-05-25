@@ -10,10 +10,6 @@ s32 func_80832558(PlayState* play, Player* player, AfterPutAwayFunc afterPutAway
 void func_80C095C8(EnKitan* enKitan, PlayState* play);
 }
 
-void UpdateGameTime(u16 gameTime) {
-    gSaveContext.save.time = gameTime;
-}
-
 extern "C" void Player_StartTalking(PlayState* play, Actor* actor) {
     Player_TalkWithPlayer(play, actor);
 }

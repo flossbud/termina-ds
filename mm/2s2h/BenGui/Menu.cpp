@@ -10,6 +10,7 @@
 #include "variables.h"
 #include <tuple>
 #include <config/Config.h>
+#include <algorithm>
 
 extern "C" {
 #include "z64.h"
@@ -776,6 +777,18 @@ void Menu::DrawElement() {
         menuEntries[headerIndex].sidebarOrder.size()) {
         sectionIndex = menuEntries[headerIndex].sidebarOrder.at(0);
     }
+
+    float widestSidebarLabel = 0.0f;
+    for (auto& sidebarLabel : menuEntries.at(headerIndex).sidebarOrder) {
+        widestSidebarLabel = std::max(widestSidebarLabel, ImGui::CalcTextSize(sidebarLabel.c_str()).x);
+    }
+    sidebarWidth = std::max(sidebarWidth, widestSidebarLabel + style.FramePadding.x * 2 + style.ItemSpacing.x * 2);
+#if defined(__ANDROID__)
+    sidebarWidth = std::min(sidebarWidth, menuSize.x * 0.32f);
+#else
+    sidebarWidth = std::min(sidebarWidth, menuSize.x * 0.25f);
+#endif
+
     float sectionCenterX = pos.x + (sidebarWidth / 2);
     float topY = pos.y;
     ImGui::SetNextWindowSizeConstraints({ sidebarWidth, 0 }, { sidebarWidth, columnHeight });
@@ -815,7 +828,16 @@ void Menu::DrawElement() {
     std::string sectionMenuId = sectionIndex + " Settings";
     int columns = sidebar->at(sectionIndex).columnCount;
     size_t columnFuncs = sidebar->at(sectionIndex).columnWidgets.size();
+    if (columnFuncs > 0) {
+        columns = std::min<int>(columns, static_cast<int>(columnFuncs));
+    }
     if (windowWidth < 800) {
+        columns = 1;
+    }
+#if defined(__ANDROID__)
+    columns = 1;
+#endif
+    if (columns < 1) {
         columns = 1;
     }
     float columnWidth = (sectionWidth - style.ItemSpacing.x * columns) / columns;
@@ -860,7 +882,7 @@ void Menu::DrawElement() {
             }
             // for (auto& entryName : sidebar->at(sectionIndex).sidebarOrder) {
             for (auto& entry : sidebar->at(sectionIndex).columnWidgets.at(i)) {
-                MenuDrawItem(entry, 90 / sidebar->at(sectionIndex).columnCount, menuThemeIndex);
+                MenuDrawItem(entry, useColumns ? 90 / columns : 90, menuThemeIndex);
             }
             //}
             if (useColumns) {

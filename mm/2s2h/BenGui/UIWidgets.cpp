@@ -1161,6 +1161,36 @@ void DrawFlagArray16(const std::string& name, uint16_t& flags, Colors color) {
     ImGui::PopID();
 }
 
+void DrawFlagArray8(const std::string& name, uint8_t& flags, Colors color) {
+    ImGui::PushID(name.c_str());
+    for (int8_t flagIndex = 0; flagIndex < 8; flagIndex++) {
+        if ((flagIndex % 8) != 0) {
+            ImGui::SameLine();
+        }
+        ImGui::PushID(flagIndex);
+        uint8_t bitMask = 1 << flagIndex;
+        bool flag = (flags & bitMask) != 0;
+        PushStyleCheckbox(color);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 6.0f));
+        std::string id = fmt::format("##{}{}", name, flagIndex);
+        if (ImGui::Checkbox(id.c_str(), &flag)) {
+            if (flag) {
+                flags |= bitMask;
+            } else {
+                flags &= ~bitMask;
+            }
+        }
+        if (ImGui::IsItemHovered()) {
+            std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
+            ImGui::SetTooltip("%s", label.c_str());
+        }
+        ImGui::PopStyleVar();
+        PopStyleCheckbox();
+        ImGui::PopID();
+    }
+    ImGui::PopID();
+}
+
 void DrawFlagTableArray16(const FlagTable& flagTable, uint16_t& flags) {
     ImGui::PushID(flagTable.name);
     for (int16_t flagIndex = 0; flagIndex < 16; flagIndex++) {

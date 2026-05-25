@@ -323,7 +323,11 @@ void BenMenu::AddSettings() {
     // Add Settings menu
     AddMenuEntry("Settings", "gSettings.Menu.SettingsSidebarSection");
     // General Settings
+#if defined(__ANDROID__)
+    AddSidebarEntry("Settings", "General", 1);
+#else
     AddSidebarEntry("Settings", "General", 2);
+#endif
     WidgetPath path = { "Settings", "General", SECTION_COLUMN_1 };
     AddWidget(path, "Menu Theme", WIDGET_CVAR_COMBOBOX)
         .CVar("gSettings.Menu.Theme")
@@ -331,10 +335,25 @@ void BenMenu::AddSettings() {
                      .Tooltip("Changes the Theme of the Menu Widgets.")
                      .ComboMap(&menuThemeOptions)
                      .DefaultIndex(Colors::LightBlue));
+    AddWidget(path, fmt::format("2 Ship Android ({})", (char*)gBuildVersion), WIDGET_TEXT);
     AddWidget(path, "Menu Background Opacity", WIDGET_CVAR_SLIDER_FLOAT)
         .CVar("gSettings.Menu.BackgroundOpacity")
         .Options(FloatSliderOptions().DefaultValue(0.85f).IsPercentage().Tooltip(
             "Sets the opacity of the background of the port menu."));
+#if defined(__ANDROID__)
+    AddWidget(path, "Menu Scale: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
+        .CVar("gSettings.Menu.AndroidScale")
+        .Callback([](WidgetInfo& info) {
+            ImGui::GetIO().FontGlobalScale = CVarGetFloat("gSettings.Menu.AndroidScale", 1.45f);
+        })
+        .Options(FloatSliderOptions()
+                     .DefaultValue(1.45f)
+                     .Min(1.0f)
+                     .Max(3.0f)
+                     .Step(0.05f)
+                     .Format("%.2f")
+                     .Tooltip("Adjusts the Android menu size. Restart the app to fully apply widget spacing."));
+#endif
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     AddWidget(path, "Menu Controller Navigation", WIDGET_CVAR_CHECKBOX)
         .CVar(CVAR_IMGUI_CONTROLLER_NAV)
@@ -372,62 +391,14 @@ void BenMenu::AddSettings() {
     AddWidget(path, "Reset Button Combination:", WIDGET_CVAR_BTN_SELECTOR)
         .CVar("gSettings.ResetBtn")
         .Options(BtnSelectorOptions().DefaultValue(BTN_CUSTOM_MODIFIER2));
+#if !defined(__ANDROID__)
     AddWidget(path, "Open App Files Folder", WIDGET_BUTTON)
         .Callback([](WidgetInfo& info) {
             std::string filesPath = Ship::Context::GetInstance()->GetAppDirectoryPath();
             SDL_OpenURL(std::string("file:///" + std::filesystem::absolute(filesPath).string()).c_str());
         })
         .Options(ButtonOptions().Tooltip("Opens the folder that contains the save and mods folders, etc."));
-
-    path.column = SECTION_COLUMN_2;
-    AddWidget(path, "about", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
-        ImGui::BeginChild("about");
-        ImGui::PushStyleColor(ImGuiCol_Text, ColorValues.at(Colors::Gray));
-        ImGui::Text("%s", (char*)gBuildVersion);
-        ImGui::PopStyleColor();
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.5f, 0.5f, 1.0f));
-        ImGui::SeparatorText("Thank You");
-        ImGui::PopStyleColor();
-        ImGui::SameLine();
-        ImTextureID heartTextureId = Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(
-            (const char*)gQuestIconHeartContainer2Tex);
-        ImGui::Image(heartTextureId, ImVec2(25.0f, 25.0f));
-        ImGui::TextWrapped("Special thanks to our contributors, playtesters, artists, moderators, helpers, and "
-                           "everyone in the larger decomp & N64 communities who make this project possible.\n\n");
-
-        // Draw auto scrolling list of contributors in columns
-        ImGui::SetNextWindowSize(ImVec2(0.0f, ImGui::GetMainViewport()->WorkSize.y / 3));
-        ImGui::BeginChild("contributors", ImVec2(0, 0), 0,
-                          ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-        static double scrollSpeed = 1.5f * (ImGui::GetFontSize() / 1000.0f); // Lines to scroll per second
-        static int numColumns = 2; // Two columns seem to work best. Some names are too long for more on lower res
-
-        // Calculate the height of one full list iteration
-        float lineHeight = ImGui::GetTextLineHeightWithSpacing();
-        float singleListHeight =
-            (contributors.size() / numColumns + (contributors.size() % numColumns != 0 ? 1 : 0)) * lineHeight;
-
-        // Calculate scroll position that wraps seamlessly
-        double scrollPosition = fmod((GetUnixTimestamp() % 18446744000000000000) * scrollSpeed, singleListHeight);
-        ImGui::SetScrollY(scrollPosition);
-
-        // Render the contributors list twice for infinite scroll effect
-        for (int iteration = 0; iteration < 2; iteration++) {
-            for (int column = 0; column < numColumns; column++) {
-                if (column > 0)
-                    ImGui::SameLine();
-
-                ImGui::BeginGroup();
-                for (int i = column; i < contributors.size(); i += numColumns) {
-                    ImGui::Text("%s", contributors.at(i).c_str());
-                }
-                ImGui::EndGroup();
-            }
-        }
-        ImGui::EndChild();
-
-        ImGui::EndChild();
-    });
+#endif
 
     // Audio Settings
     path.sidebarName = "Audio";
@@ -495,11 +466,17 @@ void BenMenu::AddSettings() {
     // Graphics Settings
     path.sidebarName = "Graphics";
     path.column = SECTION_COLUMN_1;
+#if defined(__ANDROID__)
+    AddSidebarEntry("Settings", "Graphics", 1);
+#else
     AddSidebarEntry("Settings", "Graphics", 3);
+#endif
     AddWidget(path, "Graphics Options", WIDGET_SEPARATOR_TEXT);
+#if !defined(__ANDROID__)
     AddWidget(path, "Toggle Fullscreen", WIDGET_BUTTON)
         .Callback([](WidgetInfo& info) { Ship::Context::GetInstance()->GetWindow()->ToggleFullscreen(); })
         .Options(ButtonOptions().Tooltip("Toggles Fullscreen On/Off."));
+#endif
     AddWidget(path, "Internal Resolution: %.0f%%", WIDGET_CVAR_SLIDER_FLOAT)
         .CVar(CVAR_INTERNAL_RESOLUTION)
         .Callback([](WidgetInfo& info) {
@@ -586,8 +563,10 @@ void BenMenu::AddSettings() {
         .CVar(CVAR_TEXTURE_FILTER)
         .Options(ComboboxOptions().Tooltip("Sets the applied Texture Filtering.").ComboVec(&textureFilteringOptions));
 
+#if !defined(__ANDROID__)
     path.column = SECTION_COLUMN_2;
     AddWidget(path, "Advanced Graphics Options", WIDGET_SEPARATOR_TEXT);
+#endif
 
     path.sidebarName = "Controls";
     AddSidebarEntry("Settings", "Controls", 1);
@@ -670,6 +649,7 @@ void BenMenu::AddSettings() {
                      .Format("%.1f")
                      .Step(0.1f));
 
+#if !defined(__ANDROID__)
     path.column = SECTION_COLUMN_1;
     path.sidebarName = "Presets";
     AddSidebarEntry("Settings", "Presets", 1);
@@ -690,6 +670,7 @@ void BenMenu::AddSettings() {
         .CVar("gWindows.InputViewerSettings")
         .WindowName("Input Viewer Settings")
         .Options(ButtonOptions().Tooltip("Enables the separate Input Viewer Settings Window."));
+#endif
 }
 int32_t motionBlurStrength;
 

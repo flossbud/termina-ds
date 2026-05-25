@@ -22,18 +22,6 @@ static const ALIGN_ASSET(2) char gShipLogoDL[] = dgShipLogoDL;
 #define dgLUSLogoTextTex "__OTR__misc/nintendo_rogo_static/gLUSLogoTextTex"
 static const ALIGN_ASSET(2) char gLUSLogoTextTex[] = dgLUSLogoTextTex;
 
-const char* GetGameVersionString() {
-    uint32_t gameVersion = ResourceMgr_GetGameVersion(0);
-    switch (gameVersion) {
-        case MM_NTSC_US_10:
-            return "MM-US 1.0";
-        case MM_NTSC_US_GC:
-            return "MM-US GC";
-        default:
-            return "UNKNOWN";
-    }
-}
-
 void ConsoleLogo_PrintBuildInfo(ConsoleLogoState* this) {
     GraphicsContext* gfxCtx = this->state.gfxCtx;
     GfxPrint printer;
@@ -44,15 +32,9 @@ void ConsoleLogo_PrintBuildInfo(ConsoleLogoState* this) {
 
     GfxPrint_Init(&printer);
     GfxPrint_Open(&printer, POLY_OPA_DISP);
-    GfxPrint_SetColor(&printer, 131, 154, 255, 255);
-
-    GfxPrint_SetPos(&printer, 1, 25);
-    GfxPrint_Printf(&printer, "%s", gBuildVersion);
-    GfxPrint_SetPos(&printer, 1, 26);
-    GfxPrint_Printf(&printer, "%s", gBuildDate);
-
-    GfxPrint_SetPos(&printer, 29, 26);
-    GfxPrint_Printf(&printer, "%s", GetGameVersionString());
+    GfxPrint_SetColor(&printer, 190, 205, 255, 220);
+    GfxPrint_SetPos(&printer, 33, 27);
+    GfxPrint_Printf(&printer, "v%d.%d.%d", gBuildVersionMajor, gBuildVersionMinor, gBuildVersionPatch);
 
     POLY_OPA_DISP = GfxPrint_Close(&printer);
     GfxPrint_Destroy(&printer);
