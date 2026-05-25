@@ -193,6 +193,12 @@ void FreeLookPitchMinMax() {
 
 using namespace UIWidgets;
 
+void HideUnsupportedAndroidOption(WidgetInfo& info) {
+#ifdef __ANDROID__
+    info.isHidden = true;
+#endif
+}
+
 void BenMenu::AddSidebarEntry(std::string sectionName, std::string sidebarName, uint32_t columnCount) {
     assert(!sectionName.empty());
     assert(!sidebarName.empty());
@@ -1681,6 +1687,7 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Minigames", WIDGET_SEPARATOR_TEXT);
     AddWidget(path, "Bombers Hide-and-Seek Count", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.BombersHideAndSeek")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the number of Bomber Kids you have to find to complete the hide-and-seek game.")
                      .Min(1)
@@ -1695,6 +1702,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(30));
     AddWidget(path, "Honey & Darling Day 1 (Bombchus)", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.HoneyAndDarlingDay1")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win the Honey & Darling minigame on Day 1.")
                      .Min(1)
@@ -1702,6 +1710,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(8));
     AddWidget(path, "Honey & Darling Day 2 (Bombs)", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.HoneyAndDarlingDay2")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win the Honey & Darling minigame on Day 2.")
                      .Min(1)
@@ -1709,6 +1718,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(8));
     AddWidget(path, "Honey & Darling Day 3 (Bow)", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.HoneyAndDarlingDay3")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win the Honey & Darling minigame on Day 3.")
                      .Min(1)
@@ -1716,6 +1726,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(16));
     AddWidget(path, "Town Archery Perfect Score", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.TownArcheryScore")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win the Town Archery minigame. Reaching this score will end "
                               "the minigame.")
@@ -1724,10 +1735,12 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(50));
     AddWidget(path, "Randomize Shooting Gallery Octoroks", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Minigames.RandomizeShootingGalleryOctoroks")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Randomizes the positions of Octoroks in the Town Shooting Gallery minigame "
                                            "each time they appear."));
     AddWidget(path, "Swamp Archery Perfect Score", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.SwampArcheryScore")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win the Swamp Archery minigame, if this is changed it also "
                               "speeds up the final score counting.")
@@ -1736,6 +1749,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(2180));
     AddWidget(path, "Romani Target Practice Winning Score", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.RomaniTargetPractice")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the score required to win Romani's Target Practice.")
                      .Min(1)
@@ -1747,6 +1761,7 @@ void BenMenu::AddEnhancements() {
 
     AddWidget(path, "Cucco Shack Cucco Count", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.CuccoShackCuccoCount")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Choose how many cuccos you need to raise to make Grog happy.")
                      .Min(1)
@@ -1754,9 +1769,11 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(10));
     AddWidget(path, "Skip Gorman Horse Race", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Minigames.SkipHorseRace")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Instantly win the Gorman Horse Race"));
     AddWidget(path, "Beaver Race Rings Collected", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.BeaverRaceRingsCollected")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the number of rings required for both Beavers. If the slider is set to 20, the "
                               "first Beaver will require 20 rings, and the second Beaver will require 25 rings, which "
@@ -1766,6 +1783,7 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(20));
     AddWidget(path, "Skip Little Beaver Brother Races", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Minigames.SkipLittleBeaver")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Only Race the Older Beaver."));
     AddWidget(path, "Goron Race", WIDGET_CVAR_COMBOBOX)
         .CVar("gEnhancements.DifficultyOptions.GoronRace")
@@ -1778,6 +1796,7 @@ void BenMenu::AddEnhancements() {
                      .ComboVec(&goronRaceDifficultyOptions));
     AddWidget(path, "Swamp Boat Archery Target Score", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.BoatArcheryScore")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(IntSliderOptions()
                      .Tooltip("Sets the initial target score of the Swamp Boat Archery minigame. The target score "
                               "gets set the first time you play the minigame in each cycle.")
@@ -1787,6 +1806,9 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Koume's Health", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.Minigames.BoatArcheryHealth")
         .PreFunc([](WidgetInfo& info) {
+#ifdef __ANDROID__
+            info.isHidden = true;
+#endif
             if (mBenMenu->disabledMap.at(DISABLE_FOR_KOUME_INVINCIBLE).active) {
                 info.activeDisables.push_back(DISABLE_FOR_KOUME_INVINCIBLE);
             }
@@ -1799,9 +1821,11 @@ void BenMenu::AddEnhancements() {
                      .DefaultValue(10));
     AddWidget(path, "Invincible", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Minigames.BoatArcheryInvincible")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Koume's health does not decrease when hit."));
     AddWidget(path, "Treasure Chest Shop Show Full Maze", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Minigames.TreasureChestShopShowFullMaze")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Shows the entire maze layout in the Treasure Chest Shop minigame "
                                            "instead of only revealing tiles near Link."));
 

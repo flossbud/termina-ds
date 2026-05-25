@@ -1454,7 +1454,7 @@ void AddEnhancements() {
         { "Difficulty Options",
           3,
           { { { "Disable Takkuri Steal",
-                "gEnhancements.Cheats.DisableTakkuriSteal",
+                "gEnhancements.DifficultyOptions.DisableTakkuriSteal",
                 "Prevents the Takkuri from stealing key items like bottles and swords. It may still steal other items.",
                 WIDGET_CVAR_CHECKBOX,
                 {},

@@ -6,7 +6,7 @@ void RegisterDisableTakkuriSteal() {
     GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::ShouldVanillaBehavior>(thiefBirdStealHookID);
     thiefBirdStealHookID = 0;
 
-    if (!CVarGetInteger("gEnhancements.Cheats.DisableTakkuriSteal", 0)) {
+    if (!CVarGetInteger("gEnhancements.DifficultyOptions.DisableTakkuriSteal", 0)) {
         return;
     }
 

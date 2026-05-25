@@ -46,6 +46,21 @@ constexpr int8_t S8_ZERO = 0;
 constexpr u8 U8_ZERO = 0;
 constexpr u8 REG_PAGES_MAX = REG_PAGES;
 constexpr u8 REG_GROUPS_MAX = REG_GROUPS - 1;
+
+#ifdef __ANDROID__
+constexpr bool SAVE_EDITOR_STACKED_PANELS = true;
+#else
+constexpr bool SAVE_EDITOR_STACKED_PANELS = false;
+#endif
+
+float SaveEditorPanelWidth(float preferredWidth) {
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+    if (availableWidth > 0.0f && availableWidth < preferredWidth) {
+        return availableWidth;
+    }
+    return preferredWidth;
+}
+
 const char* MAGIC_LEVEL_NAMES[3] = { "No Magic", "Single Magic", "Double Magic" };
 constexpr int8_t MAGIC_LEVEL_MAX = 2;
 const char* WALLET_LEVEL_NAMES[3] = { "Child Wallet", "Adult Wallet", "Giant Wallet" };
@@ -1071,8 +1086,8 @@ void DrawQuestStatusTab() {
     }
     ImGui::EndChild();
     ImGui::BeginChild("equipBox",
-                      ImVec2(INV_GRID_WIDTH * 2.2 + INV_GRID_PADDING * 2,
-                             INV_GRID_HEIGHT * 1 + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                      ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 4 + INV_GRID_PADDING * 2),
+                             INV_GRID_HEIGHT * 1.25f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                       ImGuiChildFlags_Border);
     ImGui::Text("Equipment");
     if (GET_PLAYER_FORM == PLAYER_FORM_FIERCE_DEITY) {
@@ -1110,12 +1125,14 @@ void DrawQuestStatusTab() {
         }
     }
     ImGui::EndChild();
-    ImGui::SameLine();
+    if (!SAVE_EDITOR_STACKED_PANELS) {
+        ImGui::SameLine();
+    }
     ImGui::BeginChild("notebookBox",
-                      ImVec2(INV_GRID_WIDTH * 1 + INV_GRID_PADDING * 2,
-                             INV_GRID_HEIGHT * 1 + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                      ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 4 + INV_GRID_PADDING * 2),
+                             INV_GRID_HEIGHT * 1.25f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                       ImGuiChildFlags_Border);
-    ImGui::Text("Bombers");
+    ImGui::Text("Notebook");
     ImTextureID textureId = Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(
         (const char*)gItemIcons[ITEM_BOMBERS_NOTEBOOK]);
     if (ImGui::ImageButton(std::to_string(ITEM_BOMBERS_NOTEBOOK).c_str(), textureId,
@@ -1126,7 +1143,8 @@ void DrawQuestStatusTab() {
     }
     ImGui::EndChild();
     ImGui::BeginChild("heartshapedBox",
-                      ImVec2(INV_GRID_WIDTH * 2 + INV_GRID_PADDING * 2, INV_GRID_HEIGHT + INV_GRID_PADDING),
+                      ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 4 + INV_GRID_PADDING * 2),
+                             INV_GRID_HEIGHT * 1.25f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                       ImGuiChildFlags_Border);
     ImGui::Text("Heart Pieces");
     int32_t pohCount = (gSaveContext.save.saveInfo.inventory.questItems & 0xF0000000) >> 28;
@@ -1284,25 +1302,33 @@ void DrawPlayerTab() {
     if (gPlayState) {
         Player* player = GET_PLAYER(gPlayState);
         ImGui::BeginChild("playerLocation",
-                          ImVec2(INV_GRID_WIDTH * 8 + INV_GRID_PADDING * 2,
-                                 INV_GRID_HEIGHT * 1.75f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                          ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 12 + INV_GRID_PADDING * 2),
+                                 INV_GRID_HEIGHT * 2.75f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                           ImGuiChildFlags_Border);
 
         GetPlayerForm(GET_PLAYER_FORM);
         ImGui::Text("%s Link", curForm);
         ImGui::Text("Position:");
         UIWidgets::PushStyleCombobox(formColor);
-        ImGui::PushItemWidth(ImGui::GetFontSize() * 6);
+        ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
         ImGui::InputScalar("X Pos", ImGuiDataType_Float, &player->actor.world.pos.x);
-        ImGui::SameLine();
+        if (!SAVE_EDITOR_STACKED_PANELS) {
+            ImGui::SameLine();
+        }
         ImGui::InputScalar("Y Pos", ImGuiDataType_Float, &player->actor.world.pos.y);
-        ImGui::SameLine();
+        if (!SAVE_EDITOR_STACKED_PANELS) {
+            ImGui::SameLine();
+        }
         ImGui::InputScalar("Z Pos", ImGuiDataType_Float, &player->actor.world.pos.z);
         ImGui::Text("Rotation:");
         ImGui::InputScalar("X Rot", ImGuiDataType_S16, &player->actor.world.rot.x);
-        ImGui::SameLine();
+        if (!SAVE_EDITOR_STACKED_PANELS) {
+            ImGui::SameLine();
+        }
         ImGui::InputScalar("Y Rot", ImGuiDataType_S16, &player->actor.world.rot.y);
-        ImGui::SameLine();
+        if (!SAVE_EDITOR_STACKED_PANELS) {
+            ImGui::SameLine();
+        }
         ImGui::InputScalar("Z Rot", ImGuiDataType_S16, &player->actor.world.rot.z);
 
         ImGui::PopItemWidth();
@@ -1310,12 +1336,12 @@ void DrawPlayerTab() {
         ImGui::EndChild();
 
         ImGui::BeginChild("playerSpeed",
-                          ImVec2(INV_GRID_WIDTH * 5 + INV_GRID_PADDING * 2,
-                                 INV_GRID_HEIGHT * 2.75f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                          ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 8 + INV_GRID_PADDING * 2),
+                                 INV_GRID_HEIGHT * 3.25f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                           ImGuiChildFlags_Border);
         ImGui::Text("Link's Speed");
         UIWidgets::PushStyleCombobox(formColor);
-        ImGui::PushItemWidth(ImGui::GetFontSize() * 6);
+        ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
         ImGui::InputScalar("Linear Velocity", ImGuiDataType_Float, &player->linearVelocity);
         ImGui::InputScalar("Y Velocity", ImGuiDataType_Float, &player->actor.velocity.y);
         ImGui::InputScalar("Ledge Height", ImGuiDataType_Float, &player->yDistToLedge);
@@ -1327,8 +1353,8 @@ void DrawPlayerTab() {
         ImGui::EndChild();
 
         ImGui::BeginChild("playerForm",
-                          ImVec2(INV_GRID_WIDTH * 8 + INV_GRID_PADDING * 2,
-                                 INV_GRID_HEIGHT * 2.2f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                          ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 12 + INV_GRID_PADDING * 2),
+                                 INV_GRID_HEIGHT * 4.1f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                           ImGuiChildFlags_Border);
         ImGui::Text("Change Link's Current Form");
         for (int i = PLAYER_FORM_FIERCE_DEITY; i <= PLAYER_FORM_HUMAN; i++) {
@@ -1417,8 +1443,8 @@ void DrawPlayerTab() {
         ImGui::EndChild();
 
         ImGui::BeginChild("playerStates",
-                          ImVec2(INV_GRID_WIDTH * 8 + INV_GRID_PADDING * 2,
-                                 INV_GRID_HEIGHT * 0.75f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
+                          ImVec2(SaveEditorPanelWidth(INV_GRID_WIDTH * 12 + INV_GRID_PADDING * 2),
+                                 INV_GRID_HEIGHT * 1.25f + INV_GRID_PADDING * 2 + INV_GRID_TOP_MARGIN),
                           ImGuiChildFlags_Border);
         ImGui::Text("Player States");
         uint32_t states[4] = { player->stateFlags1, player->stateFlags2, player->stateFlags3,
