@@ -734,6 +734,7 @@ void Sram_ResetSave(void) {
     gSaveContext.save.isOwlSave = false;
 
     memset(&gSaveContext.save.saveInfo, 0, sizeof(SaveInfo));
+    memset(&gSaveContext.save.shipSaveInfo, 0, sizeof(ShipSaveInfo));
 }
 
 /**
@@ -1002,6 +1003,11 @@ void Sram_InitNewSave(void) {
     // #region 2S2H
     memcpy(&gSaveContext.save.shipSaveInfo.dpadEquips, &sSaveDefaultDpadItemEquips, sizeof(DpadSaveInfo));
     gSaveContext.save.shipSaveInfo.pauseSaveEntrance = -1;
+    gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_VANILLA;
+    gSaveContext.save.shipSaveInfo.fileCreatedAt = 0;
+    gSaveContext.save.shipSaveInfo.fileCompletedAt = 0;
+    gSaveContext.save.shipSaveInfo.filePlaytime = 0;
+    gSaveContext.shipSaveContext.lastTimeLog = 0;
     // #endregion
 
     Sram_GenerateRandomSaveFields();
@@ -1227,6 +1233,11 @@ void Sram_InitDebugSave(void) {
     // #region 2S2H
     memcpy(&gSaveContext.save.shipSaveInfo.dpadEquips, &sSaveDefaultDpadItemEquips, sizeof(DpadSaveInfo));
     gSaveContext.save.shipSaveInfo.pauseSaveEntrance = -1;
+    gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_VANILLA;
+    gSaveContext.save.shipSaveInfo.fileCreatedAt = 0;
+    gSaveContext.save.shipSaveInfo.fileCompletedAt = 0;
+    gSaveContext.save.shipSaveInfo.filePlaytime = 0;
+    gSaveContext.shipSaveContext.lastTimeLog = 0;
     // #endregion
 
     Sram_GenerateRandomSaveFields();

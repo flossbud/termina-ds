@@ -4088,7 +4088,7 @@ void func_80830B38(Player* this) {
 }
 
 s32 func_80830B88(PlayState* play, Player* this) {
-    if (CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_R)) {
+    if (GameInteractor_Should(VB_SHIELD_FROM_BUTTON_HOLD, CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_R))) {
         if (!(this->stateFlags1 & (PLAYER_STATE1_400000 | PLAYER_STATE1_800000 | PLAYER_STATE1_20000000))) {
             if (!(this->stateFlags1 & PLAYER_STATE1_8000000) || ((this->currentBoots >= PLAYER_BOOTS_ZORA_UNDERWATER) &&
                                                                  (this->actor.bgCheckFlags & BGCHECKFLAG_GROUND))) {
@@ -8133,8 +8133,8 @@ s32 Player_ActionChange_6(Player* this, PlayState* play) {
 }
 
 s32 Player_ActionChange_11(Player* this, PlayState* play) {
-    if (CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_R) && (this->unk_AA5 == PLAYER_UNKAA5_0) &&
-        (play->bButtonAmmoPlusOne == 0)) {
+    if (GameInteractor_Should(VB_SHIELD_FROM_BUTTON_HOLD, CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_R)) &&
+        (this->unk_AA5 == PLAYER_UNKAA5_0) && (play->bButtonAmmoPlusOne == 0)) {
         if (Player_IsGoronOrDeku(this) ||
             ((((this->transformation == PLAYER_FORM_ZORA) && !(this->stateFlags1 & PLAYER_STATE1_2000000)) ||
               ((this->transformation == PLAYER_FORM_HUMAN) && (this->currentShield != PLAYER_SHIELD_NONE))) &&
@@ -13655,8 +13655,11 @@ s32 Player_UpperAction_ChangeHeldItem(Player* this, PlayState* play) {
     if (PlayerAnimation_Update(play, &this->skelAnimeUpper) ||
         ((Player_ItemToItemAction(this, this->heldItemId) == this->heldItemAction) &&
          (sPlayerUseHeldItem = sPlayerUseHeldItem ||
-                               ((this->modelAnimType != PLAYER_ANIMTYPE_3) &&
-                                (this->heldItemAction != PLAYER_IA_DEKU_STICK) && (play->bButtonAmmoPlusOne == 0))))) {
+                               GameInteractor_Should(VB_USE_HELD_ITEM_AFTER_CHANGE,
+                                                     (this->modelAnimType != PLAYER_ANIMTYPE_3) &&
+                                                         (this->heldItemAction != PLAYER_IA_DEKU_STICK) &&
+                                                         (play->bButtonAmmoPlusOne == 0),
+                                                     this)))) {
         Player_SetUpperAction(play, this, sPlayerUpperActionUpdateFuncs[this->heldItemAction]);
         this->unk_ACC = 0;
         this->unk_AA4 = 0;
@@ -15840,11 +15843,14 @@ void Player_Action_43(Player* this, PlayState* play) {
             ((this->unk_AA5 == PLAYER_UNKAA5_3) &&
              (((Player_ItemToItemAction(this, Inventory_GetBtnBItem(play)) != this->heldItemAction) &&
                CHECK_BTN_ANY(sPlayerControlInput->press.button, BTN_B)) ||
-              CHECK_BTN_ANY(sPlayerControlInput->press.button, BTN_R | BTN_A) || func_80123434(this) ||
+              (CHECK_BTN_ANY(sPlayerControlInput->press.button, BTN_R | BTN_A) &&
+               GameInteractor_Should(VB_EXIT_FIRST_PERSON_MODE_FROM_BUTTON, true)) ||
+              func_80123434(this) ||
               (!func_800B7128(this) && !func_8082EF20(this))))) ||
            ((this->unk_AA5 == PLAYER_UNKAA5_1) &&
             CHECK_BTN_ANY(sPlayerControlInput->press.button,
-                          BTN_CRIGHT | BTN_CLEFT | BTN_CDOWN | BTN_CUP | BTN_R | BTN_B | BTN_A | BTN_DPAD_EQUIP))) ||
+                          BTN_CRIGHT | BTN_CLEFT | BTN_CDOWN | BTN_CUP | BTN_R | BTN_B | BTN_A | BTN_DPAD_EQUIP) &&
+            GameInteractor_Should(VB_EXIT_FIRST_PERSON_MODE_FROM_BUTTON, true))) ||
           Player_ActionChange_4(this, play)))) {
         func_80839ED0(this, play);
         Audio_PlaySfx(NA_SE_SY_CAMERA_ZOOM_UP);

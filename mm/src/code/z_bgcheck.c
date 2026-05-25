@@ -4282,7 +4282,8 @@ u32 SurfaceType_GetEcho(CollisionContext* colCtx, CollisionPoly* poly, s32 bgId)
 }
 
 u32 SurfaceType_IsHookshotSurface(CollisionContext* colCtx, CollisionPoly* poly, s32 bgId) {
-    return SurfaceType_GetData(colCtx, poly, bgId, 1) >> 17 & 1;
+    return GameInteractor_Should(VB_BE_HOOKSHOT_SURFACE, SurfaceType_GetData(colCtx, poly, bgId, 1) >> 17 & 1, poly,
+                                 bgId);
 }
 
 s32 SurfaceType_IsIgnoredByEntities(CollisionContext* colCtx, CollisionPoly* poly, s32 bgId) {

@@ -43,6 +43,8 @@ void InitEnhancements() {
     RegisterSkipMagicArrowEquip();
     RegisterInstantRecall();
     RegisterRemoteBombchu();
+    RegisterBombArrows();
+    RegisterArrowCycle();
     RegisterPictoBoxOnCUp();
 
     // Fixes
@@ -63,6 +65,7 @@ void InitEnhancements() {
     // Minigames
     RegisterAlwaysWinDoggyRace();
     RegisterCremiaHugs();
+    RegisterFrogChoirCount();
     RegisterSwordsmanSchool();
 
     // Player
@@ -73,6 +76,7 @@ void InitEnhancements() {
     RegisterLinkSpeedModifier();
     RegisterFasterPushAndPull();
     RegisterPreventDiveOverWater();
+    RegisterUnsheatheWithoutSlashing();
 
     // Songs
     RegisterEnableSunsSong();
@@ -96,5 +100,14 @@ void InitEnhancements() {
     RegisterTimeMovesWhenYouMove();
 
     // Difficulty Options
+    RegisterCustomBankRewardThresholds();
+    RegisterDamageMultiplier();
+    RegisterShowDekuGuardSearchBalls();
     RegisterDisableTakkuriSteal();
+    RegisterGibdoTradeSequenceOptions();
+    RegisterGoronRaceDifficulty();
+    RegisterHiddenGrottosVisibility();
+    RegisterHyperEnemies();
+    RegisterJinxedTimer();
+    RegisterPermanentHeartLoss();
 }

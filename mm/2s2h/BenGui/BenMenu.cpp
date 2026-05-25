@@ -1668,11 +1668,6 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip(
             "When you lose 4 quarters of a heart you will permanently lose that heart container.\n\nDisabling this "
             "after the fact will not restore any received heart containers."));
-    AddWidget(path, "Delete File on Death", WIDGET_CVAR_CHECKBOX)
-        .CVar("gEnhancements.DifficultyOptions.DeleteFileOnDeath")
-        .Options(CheckboxOptions().Tooltip("Dying will delete your file\n\n     " ICON_FA_EXCLAMATION_TRIANGLE
-                                           " WARNING " ICON_FA_EXCLAMATION_TRIANGLE
-                                           "\nTHIS IS NOT REVERSIBLE\nUSE AT YOUR OWN RISK!"));
     AddWidget(path, "Jinxed Timer: %d seconds", WIDGET_CVAR_SLIDER_INT)
         .CVar("gEnhancements.DifficultyOptions.JinxedTimer")
         .Options(

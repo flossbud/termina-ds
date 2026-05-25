@@ -3,6 +3,7 @@
 
 void RegisterAlwaysWinDoggyRace();
 void RegisterCremiaHugs();
+void RegisterFrogChoirCount();
 void RegisterSwordsmanSchool();
 
 #endif // MINIGAMES_H

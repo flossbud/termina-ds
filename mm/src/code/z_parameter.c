@@ -5511,6 +5511,11 @@ s16 sDpadItemAmmoY[] = {
 void Interface_Dpad_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
     u8 i;
     u16 ammo;
+
+    if (!GameInteractor_Should(VB_DRAW_HUD_AMMO_COUNT, true, button, alpha, true)) {
+        return;
+    }
+
     OPEN_DISPS(play->state.gfxCtx);
 
     i = ((void)0, DPAD_GET_CUR_FORM_BTN_ITEM(button));
@@ -5617,6 +5622,11 @@ s16 D_801BFB0C[] = { 0x23, 0x23, 0x33, 0x23 };
 void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
     u8 i;
     u16 ammo;
+
+    if (!GameInteractor_Should(VB_DRAW_HUD_AMMO_COUNT, true, button, alpha, false)) {
+        return;
+    }
+
     OPEN_DISPS(play->state.gfxCtx);
 
     i = ((void)0, GET_CUR_FORM_BTN_ITEM(button));
@@ -6033,11 +6043,13 @@ void Interface_DrawPauseMenuEquippingIcons(PlayState* play) {
         pauseCtx->cursorVtx[18].v.ob[1] = pauseCtx->cursorVtx[19].v.ob[1] =
             pauseCtx->cursorVtx[16].v.ob[1] - (pauseCtx->equipAnimScale / 10);
 
+        ItemId equipAnimDrawItem = pauseCtx->equipTargetItem;
+        if (GameInteractor_Should(VB_KALEIDO_DRAW_EQUIP_ANIM_ICON, true, &equipAnimDrawItem)) {
         if (pauseCtx->equipTargetItem < 0xB5) {
             // Normal Equip (icon goes from the inventory slot to the C button when equipping it)
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, pauseCtx->equipAnimAlpha);
             gSPVertex(OVERLAY_DISP++, &pauseCtx->cursorVtx[16], 4, 0);
-            gDPLoadTextureBlock(OVERLAY_DISP++, gItemIcons[pauseCtx->equipTargetItem], G_IM_FMT_RGBA, G_IM_SIZ_32b, 32,
+            gDPLoadTextureBlock(OVERLAY_DISP++, gItemIcons[equipAnimDrawItem], G_IM_FMT_RGBA, G_IM_SIZ_32b, 32,
                                 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                                 G_TX_NOLOD, G_TX_NOLOD);
         } else {
@@ -6062,6 +6074,7 @@ void Interface_DrawPauseMenuEquippingIcons(PlayState* play) {
             gDPLoadTextureBlock(OVERLAY_DISP++, gMagicArrowEquipEffectTex, G_IM_FMT_IA, G_IM_SIZ_8b, 32, 32, 0,
                                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                                 G_TX_NOLOD, G_TX_NOLOD);
+        }
         }
 
         gSP1Quadrangle(OVERLAY_DISP++, 0, 2, 3, 1, 0);

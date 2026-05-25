@@ -8,5 +8,6 @@ void RegisterFierceDeityPutaway();
 void RegisterLinkSpeedModifier();
 void RegisterFasterPushAndPull();
 void RegisterPreventDiveOverWater();
+void RegisterUnsheatheWithoutSlashing();
 
 #endif // PLAYER_H
