@@ -18,6 +18,14 @@ extern "C" {
 // Very primitive randomizer implementation, when a save is created, if rando is enabled
 // we set the save type to rando and shuffle all checks and persist the results to the save
 void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
+#ifdef __ANDROID__
+    if (CVarGetInteger("gRando.Enabled", 0)) {
+        SPDLOG_WARN("Randomizer file creation is disabled on Android while the flow is experimental.");
+        CVarSetInteger("gRando.Enabled", 0);
+    }
+    return;
+#endif
+
     if (CVarGetInteger("gRando.Enabled", 0)) {
         gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_RANDO;
         // Zero out the rando struct
