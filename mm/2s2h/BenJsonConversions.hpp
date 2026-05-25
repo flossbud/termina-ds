@@ -2,7 +2,9 @@
 #define BenJsonConversions_hpp
 
 #include "z64.h"
+#include "build.h"
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 using json = nlohmann::json;
 
@@ -18,6 +20,52 @@ void from_json(const json& j, DpadSaveInfo& dpadEquips) {
         j.at("dpadItems").at(i).get_to(dpadEquips.dpadItems[i]);
         j.at("dpadSlots").at(i).get_to(dpadEquips.dpadSlots[i]);
     }
+}
+
+void to_json(json& j, const RandoSaveCheck& randoSaveCheck) {
+    j = json{
+        { "randoItemId", randoSaveCheck.randoItemId },
+        { "eligible", randoSaveCheck.eligible },
+        { "cycleObtained", randoSaveCheck.cycleObtained },
+        { "obtained", randoSaveCheck.obtained },
+        { "shuffled", randoSaveCheck.shuffled },
+        { "skipped", randoSaveCheck.skipped },
+        { "price", randoSaveCheck.price },
+    };
+}
+
+void from_json(const json& j, RandoSaveCheck& randoSaveCheck) {
+    j.at("randoItemId").get_to(randoSaveCheck.randoItemId);
+    j.at("eligible").get_to(randoSaveCheck.eligible);
+    j.at("cycleObtained").get_to(randoSaveCheck.cycleObtained);
+    j.at("obtained").get_to(randoSaveCheck.obtained);
+    j.at("shuffled").get_to(randoSaveCheck.shuffled);
+    j.at("skipped").get_to(randoSaveCheck.skipped);
+    j.at("price").get_to(randoSaveCheck.price);
+}
+
+void to_json(json& j, const RandoSaveInfo& rando) {
+    j = json{
+        { "randoInf", rando.randoInf },
+        { "randoEvents", rando.randoEvents },
+        { "randoSaveChecks", rando.randoSaveChecks },
+        { "finalSeed", rando.finalSeed },
+        { "randoSaveOptions", rando.randoSaveOptions },
+        { "randoStartingItems", rando.randoStartingItems },
+        { "foundDungeonKeys", rando.foundDungeonKeys },
+        { "foundTriforcePieces", rando.foundTriforcePieces },
+    };
+}
+
+void from_json(const json& j, RandoSaveInfo& rando) {
+    j.at("randoInf").get_to(rando.randoInf);
+    j.at("randoEvents").get_to(rando.randoEvents);
+    j.at("randoSaveChecks").get_to(rando.randoSaveChecks);
+    j.at("finalSeed").get_to(rando.finalSeed);
+    j.at("randoSaveOptions").get_to(rando.randoSaveOptions);
+    j.at("randoStartingItems").get_to(rando.randoStartingItems);
+    j.at("foundDungeonKeys").get_to(rando.foundDungeonKeys);
+    j.at("foundTriforcePieces").get_to(rando.foundTriforcePieces);
 }
 
 void to_json(json& j, const Vec3f& vec) {
@@ -74,6 +122,10 @@ void to_json(json& j, const ShipSaveInfo& shipSaveInfo) {
         { "respawn", shipSaveInfo.respawn },
         { "commitHash", commitHash },
     };
+
+    if (shipSaveInfo.saveType == SAVETYPE_RANDO) {
+        j["rando"] = shipSaveInfo.rando;
+    }
 }
 
 void from_json(const json& j, ShipSaveInfo& shipSaveInfo) {
@@ -85,6 +137,10 @@ void from_json(const json& j, ShipSaveInfo& shipSaveInfo) {
     j.at("filePlaytime").get_to(shipSaveInfo.filePlaytime);
     j.at("respawn").get_to(shipSaveInfo.respawn);
     j.at("commitHash").get_to(shipSaveInfo.commitHash);
+
+    if (shipSaveInfo.saveType == SAVETYPE_RANDO) {
+        j.at("rando").get_to(shipSaveInfo.rando);
+    }
 }
 
 void to_json(json& j, const ItemEquips& itemEquips) {

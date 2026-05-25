@@ -55,8 +55,13 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/Enhancements/GfxPatcher/PlayerCustomFlipbooks.h"
 #include "2s2h/DeveloperTools/DebugConsole.h"
 #include "2s2h/DeveloperTools/DeveloperTools.h"
+#include "2s2h/Rando/Rando.h"
+#include "2s2h/Rando/Spoiler/Spoiler.h"
+#include "2s2h/CustomItem/CustomItem.h"
+#include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/SaveManager/SaveManager.h"
 #include "2s2h/ShipUtils.h"
+#include "2s2h/ShipInit.hpp"
 
 // Resource Types/Factories
 #include "resource/type/Blob.h"
@@ -487,9 +492,9 @@ void Ben_ProcessDroppedFiles(std::string filePath) {
         handled = BinarySaveConverter_HandleFileDropped(filePath);
     }
 
-    // if (!handled) {
-    //     handled = Randomizer_HandleFileDropped(filePath);
-    // }
+    if (!handled) {
+        handled = Rando::Spoiler::HandleFileDropped(filePath.data());
+    }
 
     // if (!handled) {
     //     handled = Presets_HandleFileDropped(filePath);
@@ -708,6 +713,12 @@ extern "C" void InitOTR() {
     BenGui::SetupGuiElements();
     InitEnhancements();
     InitDeveloperTools();
+    ShipInit::InitAll();
+    Rando::Init();
+    GameInteractor::Instance->RegisterOwnHooks();
+    CustomItem::RegisterHooks();
+    CustomMessage::RegisterHooks();
+    Rando::StaticData::PopulateCheckNames();
     GfxPatcher_ApplyNecessaryAuthenticPatches();
     DebugConsole_Init();
 

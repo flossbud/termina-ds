@@ -1087,6 +1087,7 @@ typedef enum PlayerUnkAA5 {
 typedef void (*PlayerActionFunc)(struct Player* this, struct PlayState* play);
 typedef s32 (*PlayerUpperActionFunc)(struct Player* this, struct PlayState* play);
 typedef void (*PlayerFuncD58)(struct PlayState* play, struct Player* this);
+typedef PlayerFuncD58 AfterPutAwayFunc;
 
 
 typedef struct Player {

@@ -1,5 +1,6 @@
 #include "prevent_bss_reordering.h"
 #include "global.h"
+#include <public/bridge/consolevariablebridge.h>
 #include "fault.h"
 #include "fixed_point.h"
 #include "vt.h"

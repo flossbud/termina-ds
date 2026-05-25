@@ -3,18 +3,22 @@
 
 #include <stdio.h>
 #include "BenMenuBar.h"
+#include "BenMenu.h"
 #include "DeveloperTools/SaveEditor.h"
 #include "DeveloperTools/ActorViewer.h"
 #include "DeveloperTools/CollisionViewer.h"
 #include "DeveloperTools/EventLog.h"
 #include "BenInputEditorWindow.h"
-#include "Menu.h"
 
 namespace BenGui {
     void SetupHooks();
     void SetupGuiElements();
     void Draw();
     void Destroy();
+    UIWidgets::Colors GetMenuThemeColor();
+    void SetDisplayOverlayVisibility(bool visible);
 }
+
+#define THEME_COLOR BenGui::GetMenuThemeColor()
 
 #endif /* BenGui_hpp */

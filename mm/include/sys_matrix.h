@@ -13,6 +13,8 @@ typedef enum {
     /* 1 */ MTXMODE_APPLY // applies transformation to the current matrix
 } MatrixMode;
 
+#define MATRIX_FINALIZE_AND_LOAD(pkt, gfxCtx) \
+    gSPMatrix(pkt, Matrix_NewMtx(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW)
 
 extern Mtx gIdentityMtx;
 extern MtxF gIdentityMtxF;

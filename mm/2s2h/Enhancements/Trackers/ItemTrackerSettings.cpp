@@ -20,7 +20,7 @@ static const char* displayModes[2] = { "Always", "Combo Button Hold" };
 
 void ItemTrackerSettingsWindow::DrawElement() {
     ImGui::SetNextWindowSize(ImVec2(733, 472), ImGuiCond_FirstUseEver);
-    const UIWidgets::FloatSliderOptions sliderOpts = { .format = "%.0f", .step = 1.0f };
+    const UIWidgets::FloatSliderOptions sliderOpts = UIWidgets::FloatSliderOptions().Format("%.0f").Step(1.0f);
 
     if (!ImGui::BeginChild("Item Tracker Settings")) {
         ImGui::EndChild();
@@ -28,7 +28,7 @@ void ItemTrackerSettingsWindow::DrawElement() {
     }
 
     UIWidgets::WindowButton("Show/Hide Item Tracker", "gWindows.ItemTracker", mItemTrackerWindow,
-                            { .size = UIWidgets::Sizes::Inline });
+                            UIWidgets::WindowButtonOptions().Size(UIWidgets::Sizes::Inline));
 
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 8.0f, 8.0f });
     ImGui::BeginTable("itemTrackerSettingsTable", 2, ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersV);
@@ -49,10 +49,14 @@ void ItemTrackerSettingsWindow::DrawElement() {
     UIWidgets::Checkbox("Enable Dragging", mItemTrackerWindow->GetIsDraggablePtr());
     UIWidgets::Checkbox("Only enable while paused", mItemTrackerWindow->GetOnlyShowPausedPtr());
 
-    UIWidgets::SliderFloat("Icon size : %.0fpx", mItemTrackerWindow->GetIconSizePtr(), 0.0f, 128.0f, sliderOpts);
-    UIWidgets::SliderFloat("Icon margins : %.0fpx", mItemTrackerWindow->GetIconSpacingPtr(), -5.0f, 50.0f, sliderOpts);
-    UIWidgets::SliderFloat("Text size : %.0fpx", mItemTrackerWindow->GetTextSizePtr(), 1.0f, 30.0f, sliderOpts);
-    UIWidgets::SliderFloat("Text Offset : %0.fpx", mItemTrackerWindow->GetTextOffsetPtr(), 0.0f, 40.0f, sliderOpts);
+    UIWidgets::SliderFloat("Icon size : %.0fpx", mItemTrackerWindow->GetIconSizePtr(),
+                           UIWidgets::FloatSliderOptions(sliderOpts).Min(0.0f).Max(128.0f));
+    UIWidgets::SliderFloat("Icon margins : %.0fpx", mItemTrackerWindow->GetIconSpacingPtr(),
+                           UIWidgets::FloatSliderOptions(sliderOpts).Min(-5.0f).Max(50.0f));
+    UIWidgets::SliderFloat("Text size : %.0fpx", mItemTrackerWindow->GetTextSizePtr(),
+                           UIWidgets::FloatSliderOptions(sliderOpts).Min(1.0f).Max(30.0f));
+    UIWidgets::SliderFloat("Text Offset : %0.fpx", mItemTrackerWindow->GetTextOffsetPtr(),
+                           UIWidgets::FloatSliderOptions(sliderOpts).Min(0.0f).Max(40.0f));
 
     ImGui::TableNextColumn();
 

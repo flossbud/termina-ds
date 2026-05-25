@@ -1,5 +1,6 @@
 #include "global.h"
 #include "audiomgr.h"
+#include <public/bridge/consolevariablebridge.h>
 #include <string.h>
 
 void AudioMgr_NotifyTaskDone(AudioMgr* audioMgr) {

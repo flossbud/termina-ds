@@ -5,11 +5,22 @@
 
 #ifdef __cplusplus
 #include <string>
+#include <variant>
 extern "C" {
 #endif
 #include "z64.h"
 #ifdef __cplusplus
 }
+#endif
+
+#include "GameInteractor_VanillaBehavior.h"
+
+#ifndef VB_TATL_INTERUPT_MSG3
+#define VB_TATL_INTERUPT_MSG3 VB_TATL_INTERRUPT_MSG3
+#endif
+
+#ifndef VB_TATL_INTERUPT_MSG6
+#define VB_TATL_INTERUPT_MSG6 VB_TATL_INTERRUPT_MSG6
 #endif
 
 typedef enum {
@@ -28,65 +39,8 @@ typedef enum {
     FLAG_CYCL_SCENE_SWITCH,
     FLAG_CYCL_SCENE_CLEARED_ROOM,
     FLAG_CYCL_SCENE_COLLECTIBLE,
+    FLAG_RANDO_INF,
 } FlagType;
-
-typedef enum {
-    // Vanilla condition: gSaveContext.showTitleCard
-    VB_SHOW_TITLE_CARD,
-    VB_PLAY_ENTRANCE_CS,
-    VB_DISABLE_FD_MASK,
-    VB_DOGGY_RACE_SET_MAX_SPEED,
-    VB_LOWER_RAZOR_SWORD_DURABILITY,
-    VB_SET_BLAST_MASK_COOLDOWN_TIMER,
-    VB_PATCH_POWER_CROUCH_STAB,
-    VB_PATCH_SIDEROLL,
-    VB_TATL_CONVERSATION_AVAILABLE,
-    VB_PREVENT_MASK_TRANSFORMATION_CS,
-    VB_RESET_PUTAWAY_TIMER,
-    VB_SET_CLIMB_SPEED,
-    VB_PREVENT_CLOCK_DISPLAY,
-    VB_SONG_AVAILABLE_TO_PLAY,
-    VB_USE_CUSTOM_CAMERA,
-    VB_DELETE_OWL_SAVE,
-    VB_MSG_SCRIPT_DEL_ITEM,
-    VB_CONSIDER_BUNNY_HOOD_EQUIPPED,
-    VB_USE_ITEM_EQUIP_MASK,
-    VB_KALEIDO_DISPLAY_ITEM_TEXT,
-    VB_USE_ITEM_CONSIDER_LINK_HUMAN,
-    VB_DRAW_ITEM_EQUIPPED_OUTLINE,
-    VB_PLAY_TRANSITION_CS,
-    VB_TATL_INTERUPT_MSG3,
-    VB_TATL_INTERUPT_MSG6,
-    VB_ITEM_BE_RESTRICTED,
-    VB_FLIP_HOP_VARIABLE,
-    VB_DISABLE_LETTERBOX,
-    VB_CLOCK_TOWER_OPENING_CONSIDER_THIS_FIRST_CYCLE,
-    VB_DRAW_SLIME_BODY_ITEM,
-    VB_ZTARGET_SPEED_CHECK,
-    VB_THIEF_BIRD_STEAL,
-    VB_PLAY_CREMIA_HUG_CUTSCENE,
-    VB_FD_ALWAYS_WIELD_SWORD,
-    VB_SHOULD_PUTAWAY,
-    VB_ELEGY_CHECK_SCENE,
-    VB_NEED_SCARECROW_SONG,
-    VB_CHECK_HELD_ITEM_BUTTON_PRESS,
-    VB_MAGIC_SPIN_ATTACK_CHECK_FORM,
-    VB_TRANSFORM_THUNDER_MATRIX,
-    VB_BE_HOOKSHOT_SURFACE,
-    VB_BE_CLIMBABLE_SURFACE,
-    VB_CONSUME_EPONA_CARROT,
-    VB_SPEED_MODIFIER_SWIM,
-    VB_SPEED_MODIFIER_WALK,
-    VB_LINK_DIVE_OVER_WATER,
-    VB_PLAY_SLOW_CHEST_CS,
-    VB_SETUP_TRANSITION,
-    VB_GREAT_BAY_GEAR_CLAMP_PUSH_SPEED,
-    VB_PUSH_BLOCK_SET_SPEED,
-    VB_PUSH_BLOCK_SET_TIMER,
-    VB_SKATE_BLOCK_BEGIN_MOVE,
-    VB_BLOCK_BEGIN_MOVE,
-    VB_BLOCK_BE_FINISHED_PULLING,
-} GIVanillaBehavior;
 
 typedef enum {
     GI_INVERT_CAMERA_RIGHT_STICK_X,
@@ -112,6 +66,13 @@ typedef enum {
     GI_DPAD_EQUIP,
 } GIDpadType;
 
+typedef enum {
+    GI_EVENT_NONE,
+    GI_EVENT_GIVE_ITEM,
+    GI_EVENT_SPAWN_ACTOR,
+    GI_EVENT_TRANSITION,
+} GIEventType;
+
 #ifdef __cplusplus
 
 #include <vector>
@@ -122,6 +83,40 @@ typedef enum {
 
 typedef uint32_t HOOK_ID;
 
+struct GIEventNone {};
+
+struct GIEventGiveItem {
+    bool showGetItemCutscene;
+    s16 param;
+    ActorFunc giveItem;
+    ActorFunc drawItem;
+};
+
+struct GIEventSpawnActor {
+    s16 actorId;
+    f32 posX;
+    f32 posY;
+    f32 posZ;
+    s16 rotX;
+    s16 rotY;
+    s16 rotZ;
+    s32 params;
+    bool relativeCoords;
+};
+
+struct GIEventTransition {
+    u16 entrance;
+    u16 cutsceneIndex;
+    s8 transitionTrigger;
+    u8 transitionType;
+};
+
+struct GIEventTrap {
+    std::function<void()> action;
+};
+
+typedef std::variant<GIEventNone, GIEventGiveItem, GIEventSpawnActor, GIEventTransition, GIEventTrap> GIEvent;
+
 #define DEFINE_HOOK(name, args)                  \
     struct name {                                \
         typedef std::function<void args> fn;     \
@@ -131,6 +126,10 @@ typedef uint32_t HOOK_ID;
 class GameInteractor {
   public:
     static GameInteractor* Instance;
+    void RegisterOwnHooks();
+
+    std::vector<GIEvent> events = {};
+    GIEvent currentEvent = GIEventNone();
 
     // Game State
     class State {};
@@ -308,9 +307,12 @@ class GameInteractor {
     DEFINE_HOOK(BeforeKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
     DEFINE_HOOK(AfterKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
     DEFINE_HOOK(OnSaveInit, (s16 fileNum));
+    DEFINE_HOOK(OnSaveLoad, (s16 fileNum));
+    DEFINE_HOOK(OnFileSelectSaveLoad, (s16 fileNum, bool isOwlSave, SaveContext* saveContext));
     DEFINE_HOOK(BeforeEndOfCycleSave, ());
     DEFINE_HOOK(AfterEndOfCycleSave, ());
     DEFINE_HOOK(BeforeMoonCrashSaveReset, ());
+    DEFINE_HOOK(OnGameCompletion, ());
 
     DEFINE_HOOK(OnSceneInit, (s8 sceneId, s8 spawnNum));
     DEFINE_HOOK(OnRoomInit, (s8 sceneId, s8 roomNum));
@@ -327,6 +329,7 @@ class GameInteractor {
     DEFINE_HOOK(OnActorKill, (Actor * actor));
     DEFINE_HOOK(OnActorDestroy, (Actor * actor));
     DEFINE_HOOK(OnPlayerPostLimbDraw, (Player * player, s32 limbIndex));
+    DEFINE_HOOK(OnPlayerReleaseHeldActor, (PlayState * play, Player* player, Actor* heldActor));
 
     DEFINE_HOOK(OnSceneFlagSet, (s16 sceneId, FlagType flagType, u32 flag));
     DEFINE_HOOK(OnSceneFlagUnset, (s16 sceneId, FlagType flagType, u32 flag));
@@ -339,10 +342,11 @@ class GameInteractor {
 
     DEFINE_HOOK(OnPassPlayerInputs, (Input * input));
 
-    DEFINE_HOOK(OnOpenText, (u16 textId));
+    DEFINE_HOOK(OnOpenText, (u16 * textId, bool* loadFromMessageTable));
 
     DEFINE_HOOK(ShouldItemGive, (u8 item, bool* should));
     DEFINE_HOOK(OnItemGive, (u8 item));
+    DEFINE_HOOK(OnRandoSeedGeneration, ());
 
     DEFINE_HOOK(ShouldVanillaBehavior, (GIVanillaBehavior flag, bool* should, va_list originalArgs));
 };
@@ -359,9 +363,12 @@ void GameInteractor_ExecuteOnKaleidoUpdate(PauseContext* pauseCtx);
 void GameInteractor_ExecuteBeforeKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);
 void GameInteractor_ExecuteAfterKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);
 void GameInteractor_ExecuteOnSaveInit(s16 fileNum);
+void GameInteractor_ExecuteOnSaveLoad(s16 fileNum);
+void GameInteractor_ExecuteOnFileSelectSaveLoad(s16 fileNum, bool isOwlSave, SaveContext* saveContext);
 void GameInteractor_ExecuteBeforeEndOfCycleSave();
 void GameInteractor_ExecuteAfterEndOfCycleSave();
 void GameInteractor_ExecuteBeforeMoonCrashSaveReset();
+void GameInteractor_ExecuteOnGameCompletion();
 
 void GameInteractor_ExecuteOnSceneInit(s16 sceneId, s8 spawnNum);
 void GameInteractor_ExecuteOnRoomInit(s16 sceneId, s8 roomNum);
@@ -378,6 +385,7 @@ void GameInteractor_ExecuteOnActorDraw(Actor* actor);
 void GameInteractor_ExecuteOnActorKill(Actor* actor);
 void GameInteractor_ExecuteOnActorDestroy(Actor* actor);
 void GameInteractor_ExecuteOnPlayerPostLimbDraw(Player* player, s32 limbIndex);
+void GameInteractor_ExecuteOnPlayerReleaseHeldActor(PlayState* play, Player* player, Actor* heldActor);
 
 void GameInteractor_ExecuteOnSceneFlagSet(s16 sceneId, FlagType flagType, u32 flag);
 void GameInteractor_ExecuteOnSceneFlagUnset(s16 sceneId, FlagType flagType, u32 flag);
@@ -390,7 +398,7 @@ void GameInteractor_ExecuteOnCameraChangeSettingsFlags(Camera* camera);
 
 void GameInteractor_ExecuteOnPassPlayerInputs(Input* input);
 
-void GameInteractor_ExecuteOnOpenText(u16 textId);
+void GameInteractor_ExecuteOnOpenText(u16* textId, bool* loadFromMessageTable);
 
 bool GameInteractor_ShouldItemGive(u8 item);
 void GameInteractor_ExecuteOnItemGive(u8 item);
@@ -404,6 +412,33 @@ bool GameInteractor_Should(GIVanillaBehavior flag, uint32_t result, ...);
             body;                                                                           \
             va_end(args);                                                                   \
         })
+#define COND_HOOK(hookType, condition, body)                                                     \
+    {                                                                                            \
+        static HOOK_ID hookId = 0;                                                               \
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::hookType>(hookId);          \
+        hookId = 0;                                                                              \
+        if (condition) {                                                                         \
+            hookId = GameInteractor::Instance->RegisterGameHook<GameInteractor::hookType>(body); \
+        }                                                                                        \
+    }
+#define COND_ID_HOOK(hookType, id, condition, body)                                                       \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::hookType>(hookId);              \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::hookType>(id, body); \
+        }                                                                                                 \
+    }
+#define COND_VB_SHOULD(id, condition, body)                                                               \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::ShouldVanillaBehavior>(hookId); \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = REGISTER_VB_SHOULD(id, body);                                                        \
+        }                                                                                                 \
+    }
 
 int GameInteractor_InvertControl(GIInvertType type);
 uint32_t GameInteractor_Dpad(GIDpadType type, uint32_t buttonCombo);

@@ -546,7 +546,8 @@ typedef enum GetItemId {
     /* 0xB7 */ GI_TINGLE_MAP_ROMANI_RANCH,
     /* 0xB8 */ GI_TINGLE_MAP_GREAT_BAY,
     /* 0xB9 */ GI_TINGLE_MAP_STONE_TOWER,
-    /* 0xBA */ GI_MAX
+    /* 0xBA */ GI_SHIP, // 2S2H [Enhancement] Added to enable custom item gives
+    /* 0xBB */ GI_MAX
 } GetItemId;
 
 typedef enum GetItemDrawId {

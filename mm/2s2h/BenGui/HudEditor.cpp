@@ -238,8 +238,9 @@ void HudEditorWindow::DrawElement() {
         ImGui::ColorEdit3("Color", color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
         ImGui::PopItemFlag();
         ImGui::SameLine();
-        if (UIWidgets::CVarCombobox("Mode", hudEditorElements[i].modeCvar, modeNames,
-                                    { .labelPosition = UIWidgets::LabelPosition::None })) {
+        if (UIWidgets::CVarCombobox(
+                "Mode", hudEditorElements[i].modeCvar, modeNames,
+                UIWidgets::ComboboxOptions().LabelPosition(UIWidgets::LabelPosition::None))) {
             CVarClear(hudEditorElements[i].xCvar);
             CVarClear(hudEditorElements[i].yCvar);
             CVarClear(hudEditorElements[i].scaleCvar);
@@ -250,26 +251,32 @@ void HudEditorWindow::DrawElement() {
                                   ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoBordersInBody |
                                       ImGuiTableFlags_SizingStretchSame)) {
                 ImGui::TableNextColumn();
-                UIWidgets::CVarSliderInt("X", hudEditorElements[i].xCvar, -10, 330, hudEditorElements[i].defaultX,
-                                         {
-                                             .showButtons = false,
-                                             .format = "X: %d",
-                                             .labelPosition = UIWidgets::LabelPosition::None,
-                                         });
+                UIWidgets::CVarSliderInt("X", hudEditorElements[i].xCvar,
+                                         UIWidgets::IntSliderOptions()
+                                             .Min(-10)
+                                             .Max(330)
+                                             .DefaultValue(hudEditorElements[i].defaultX)
+                                             .ShowAdjustmentButtons(false)
+                                             .Format("X: %d")
+                                             .LabelPosition(UIWidgets::LabelPosition::None));
                 ImGui::TableNextColumn();
-                UIWidgets::CVarSliderInt("Y", hudEditorElements[i].yCvar, -10, 250, hudEditorElements[i].defaultY,
-                                         {
-                                             .showButtons = false,
-                                             .format = "Y: %d",
-                                             .labelPosition = UIWidgets::LabelPosition::None,
-                                         });
+                UIWidgets::CVarSliderInt("Y", hudEditorElements[i].yCvar,
+                                         UIWidgets::IntSliderOptions()
+                                             .Min(-10)
+                                             .Max(250)
+                                             .DefaultValue(hudEditorElements[i].defaultY)
+                                             .ShowAdjustmentButtons(false)
+                                             .Format("Y: %d")
+                                             .LabelPosition(UIWidgets::LabelPosition::None));
                 ImGui::TableNextColumn();
-                UIWidgets::CVarSliderFloat("Scale", hudEditorElements[i].scaleCvar, 0.25f, 4.0f, 1.0f,
-                                           {
-                                               .showButtons = false,
-                                               .format = "Scale: %.2f",
-                                               .labelPosition = UIWidgets::LabelPosition::None,
-                                           });
+                UIWidgets::CVarSliderFloat("Scale", hudEditorElements[i].scaleCvar,
+                                           UIWidgets::FloatSliderOptions()
+                                               .Min(0.25f)
+                                               .Max(4.0f)
+                                               .DefaultValue(1.0f)
+                                               .ShowAdjustmentButtons(false)
+                                               .Format("Scale: %.2f")
+                                               .LabelPosition(UIWidgets::LabelPosition::None));
                 ImGui::EndTable();
             }
         }

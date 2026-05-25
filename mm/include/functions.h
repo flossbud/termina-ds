@@ -9,8 +9,6 @@ extern "C" {
 #include "z64.h"
 #include "libultraship/luslog.h"
 
-#include <public/bridge/consolevariablebridge.h>
-
 void bootproc(void);
 void ViConfig_UpdateVi(u32 black);
 void ViConfig_UpdateBlack(void);
@@ -333,6 +331,7 @@ PosRot Actor_GetWorldPosShapeRot(Actor* actor);
 
 s32 Target_OutsideLeashRange(Actor* actor, Player* player, s32 ignoreLeash);
 s32 Actor_ProcessTalkRequest(Actor* actor, GameState* gameState);
+s32 Actor_TalkOfferAccepted(Actor* actor, GameState* gameState);
 s32 Actor_OfferTalkExchange(Actor* actor, PlayState* play, f32 xzRange, f32 yRange, PlayerItemAction exchangeItemAction);
 s32 Actor_OfferTalkExchangeEquiCylinder(Actor* actor, PlayState* play, f32 radius, PlayerItemAction exchangeItemAction);
 s32 Actor_OfferTalk(Actor* actor, PlayState* play, f32 radius);
@@ -1342,6 +1341,9 @@ void Flags_SetWeekEventReg(s32 flag);
 void Flags_ClearWeekEventReg(s32 flag);
 void Flags_SetEventInf(s32 flag);
 void Flags_ClearEventInf(s32 flag);
+s32 Flags_GetRandoInf(s32 flag);
+void Flags_SetRandoInf(s32 flag);
+void Flags_ClearRandoInf(s32 flag);
 s32 Ship_CalcShouldDrawAndUpdate(PlayState* play, Actor* actor, Vec3f* projectedPos, f32 projectedW, bool* shouldDraw,
                                  bool* shouldUpdate);
 // #endregion

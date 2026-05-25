@@ -920,6 +920,26 @@ void Flags_ClearEventInf(s32 flag) {
         GameInteractor_ExecuteOnFlagUnset(FLAG_EVENT_INF, flag);
     }
 }
+
+s32 Flags_GetRandoInf(s32 flag) {
+    return gSaveContext.save.shipSaveInfo.rando.randoInf[(flag) >> 4] & (1 << ((flag)&0xF));
+}
+
+void Flags_SetRandoInf(s32 flag) {
+    u8 previouslyOff = !Flags_GetRandoInf(flag);
+    gSaveContext.save.shipSaveInfo.rando.randoInf[flag >> 4] |= (1 << (flag & 0xF));
+    if (previouslyOff) {
+        GameInteractor_ExecuteOnFlagSet(FLAG_RANDO_INF, flag);
+    }
+}
+
+void Flags_ClearRandoInf(s32 flag) {
+    u8 previouslyOn = Flags_GetRandoInf(flag);
+    gSaveContext.save.shipSaveInfo.rando.randoInf[flag >> 4] &= ~(1 << (flag & 0xF));
+    if (previouslyOn) {
+        GameInteractor_ExecuteOnFlagUnset(FLAG_RANDO_INF, flag);
+    }
+}
 // #endregion
 
 /* End of Flags section */
@@ -2034,6 +2054,10 @@ s32 Actor_ProcessTalkRequest(Actor* actor, GameState* gameState) {
     }
 
     return false;
+}
+
+s32 Actor_TalkOfferAccepted(Actor* actor, GameState* gameState) {
+    return Actor_ProcessTalkRequest(actor, gameState);
 }
 
 /**

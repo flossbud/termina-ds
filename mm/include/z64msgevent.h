@@ -60,14 +60,112 @@ typedef enum {
     MSCRIPT_CMD_50
 } MsgScriptCmd;
 
+#define MSCRIPT_CMD_ID_CHECK_WEEK_EVENT_REG MSCRIPT_CMD_00
+#define MSCRIPT_CMD_ID_CHECK_GORON MSCRIPT_CMD_01
+#define MSCRIPT_CMD_ID_CHECK_ZORA MSCRIPT_CMD_02
+#define MSCRIPT_CMD_ID_CHECK_DEKU MSCRIPT_CMD_03
+#define MSCRIPT_CMD_ID_CHECK_HUMAN MSCRIPT_CMD_04
+#define MSCRIPT_CMD_ID_CHECK_TEXT_CHOICE MSCRIPT_CMD_05
+#define MSCRIPT_CMD_ID_OFFER_ITEM MSCRIPT_CMD_06
+#define MSCRIPT_CMD_ID_AUTOTALK MSCRIPT_CMD_07
+#define MSCRIPT_CMD_ID_CHECK_RUPEES MSCRIPT_CMD_08
+#define MSCRIPT_CMD_ID_CHECK_CALLBACK MSCRIPT_CMD_09
+#define MSCRIPT_CMD_ID_CHECK_DAY MSCRIPT_CMD_10
+#define MSCRIPT_CMD_ID_AWAIT_TEXT_JUMP MSCRIPT_CMD_11
+#define MSCRIPT_CMD_ID_AWAIT_TEXT MSCRIPT_CMD_12
+#define MSCRIPT_CMD_ID_AWAIT_TEXT_END MSCRIPT_CMD_13
+#define MSCRIPT_CMD_ID_BEGIN_TEXT MSCRIPT_CMD_14
+#define MSCRIPT_CMD_ID_CONTINUE_TEXT MSCRIPT_CMD_15
+#define MSCRIPT_CMD_ID_DONE MSCRIPT_CMD_16
+#define MSCRIPT_CMD_ID_SET_WEEK_EVENT_REG MSCRIPT_CMD_17
+#define MSCRIPT_CMD_ID_CLOSE_TEXT MSCRIPT_CMD_18
+#define MSCRIPT_CMD_ID_SET_COLLECTIBLE MSCRIPT_CMD_19
+#define MSCRIPT_CMD_ID_CHANGE_RUPEES MSCRIPT_CMD_20
+#define MSCRIPT_CMD_ID_PAUSE MSCRIPT_CMD_21
+#define MSCRIPT_CMD_ID_UNSET_AUTOTALK MSCRIPT_CMD_22
+#define MSCRIPT_CMD_ID_FOCUS_TO_CHILD MSCRIPT_CMD_23
+#define MSCRIPT_CMD_ID_FOCUS_TO_SELF MSCRIPT_CMD_24
+#define MSCRIPT_CMD_ID_JUMP MSCRIPT_CMD_25
+#define MSCRIPT_CMD_ID_CHECK_QUEST_ITEM MSCRIPT_CMD_26
+#define MSCRIPT_CMD_ID_CHECK_EVENT_INF MSCRIPT_CMD_27
+#define MSCRIPT_CMD_ID_SET_EVENT_INF MSCRIPT_CMD_28
+#define MSCRIPT_CMD_ID_UNSET_EVENT_INF MSCRIPT_CMD_29
+#define MSCRIPT_CMD_ID_CHECK_ITEM_ACTION MSCRIPT_CMD_30
+#define MSCRIPT_CMD_ID_CHECK_HAS_SONG MSCRIPT_CMD_31
+#define MSCRIPT_CMD_ID_CHECK_WORN_MASK MSCRIPT_CMD_32
+#define MSCRIPT_CMD_ID_CHECK_AFTER_TIME MSCRIPT_CMD_33
+#define MSCRIPT_CMD_ID_CHECK_BEFORE_TIME MSCRIPT_CMD_34
+#define MSCRIPT_CMD_ID_CHECK_SWITCH_FLAG MSCRIPT_CMD_35
+#define MSCRIPT_CMD_ID_SET_SWITCH_FLAG MSCRIPT_CMD_36
+#define MSCRIPT_CMD_ID_CHECK_ITEM MSCRIPT_CMD_BRANCH_ON_ITEM
+#define MSCRIPT_CMD_ID_CHECK_BETWEEN_TIME MSCRIPT_CMD_38
+#define MSCRIPT_CMD_ID_CHECK_ON_DAY MSCRIPT_CMD_39
+#define MSCRIPT_CMD_ID_CHECK_CALLBACK_CONTINUE MSCRIPT_CMD_40
+#define MSCRIPT_CMD_ID_CHECK_HAS_POWDER_KEG MSCRIPT_CMD_41
+#define MSCRIPT_CMD_ID_DELETE_ITEM MSCRIPT_CMD_DEL_ITEM
+#define MSCRIPT_CMD_ID_CHECK_CALLBACK_MULTI MSCRIPT_CMD_43
+#define MSCRIPT_CMD_ID_PLAYER_TALK MSCRIPT_CMD_44
+#define MSCRIPT_CMD_ID_NOTEBOOK_EVENT MSCRIPT_CMD_45
+#define MSCRIPT_CMD_ID_AWAIT_TEXT_DONE MSCRIPT_CMD_46
+#define MSCRIPT_CMD_ID_JUMP_3 MSCRIPT_CMD_47
+#define MSCRIPT_CMD_ID_PLAY_DECIDE MSCRIPT_CMD_48
+#define MSCRIPT_CMD_ID_PLAY_CANCEL MSCRIPT_CMD_49
+#define MSCRIPT_CMD_ID_PLAY_ERROR MSCRIPT_CMD_50
+
 typedef u8 MsgScript;
 
 typedef s32 (*MsgEventCallback)(struct Actor* thisx, struct PlayState* play);
+typedef MsgEventCallback MsgScriptCallback;
 
 typedef s32 (*MsgEventHandler)(struct Actor* actor, struct PlayState* play, u8** scriptPtr, MsgEventCallback callback, s32*);
 
+typedef struct {
+    /* 0x0 */ u8 cmd;
+} MsgScriptCmdBase;
+
+typedef struct {
+    /* 0x0 */ MsgScriptCmdBase base;
+    /* 0x1 */ u8 offset0H;
+    /* 0x2 */ u8 offset0L;
+    /* 0x3 */ u8 offset1H;
+    /* 0x4 */ u8 offset1L;
+    /* 0x5 */ u8 offset2H;
+    /* 0x6 */ u8 offset2L;
+} MsgScriptCmdCheckTextChoice;
+
+typedef struct {
+    /* 0x0 */ MsgScriptCmdBase base;
+    /* 0x1 */ u8 itemIdH;
+    /* 0x2 */ u8 itemIdL;
+    /* 0x3 */ u8 offsetH;
+    /* 0x4 */ u8 offsetL;
+} MsgScriptCmdOfferItem;
+
+typedef struct {
+    /* 0x0 */ MsgScriptCmdBase base;
+    /* 0x1 */ u8 textIdH;
+    /* 0x2 */ u8 textIdL;
+} MsgScriptCmdBeginText;
+
+typedef struct {
+    /* 0x0 */ MsgScriptCmdBase base;
+    /* 0x1 */ u8 textIdH;
+    /* 0x2 */ u8 textIdL;
+} MsgScriptCmdContinueText;
+
+typedef struct {
+    /* 0x0 */ MsgScriptCmdBase base;
+    /* 0x1 */ u8 itemH;
+    /* 0x2 */ u8 itemL;
+    /* 0x3 */ u8 offsetH;
+    /* 0x4 */ u8 offsetL;
+} MsgScriptCmdCheckItem;
+
 #define MSCRIPT_GET_8(script, i) ((script)[i])
 #define MSCRIPT_GET_16(script, i) ((((script)[i + 1] | ((script)[i] << 8))))
+#define SCRIPT_PACK_16(h, l) (((h) << 8) | (l))
+#define SCRIPT_UNPACK_8(v) (u8)(v)
+#define SCRIPT_UNPACK_16(v) (u8)_SHIFTR(v, 8, 8), (u8)_SHIFTR(v, 0, 8)
 
 // Command macros
 

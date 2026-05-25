@@ -5,10 +5,12 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <libultraship/libultraship.h>
-#include <Fast3D/gfx_pc.h>
+#include <graphic/Fast3D/gfx_pc.h>
 #include "UIWidgets.hpp"
 #include "HudEditor.h"
 #include "Notification.h"
+#include "BenModals.h"
+#include "Rando/CheckTracker/CheckTracker.h"
 
 #ifdef __APPLE__
 #include "graphic/Fast3D/gfx_metal.h"
@@ -23,6 +25,7 @@
 
 #include "Enhancements/Trackers/ItemTracker.h"
 #include "Enhancements/Trackers/ItemTrackerSettings.h"
+#include "Enhancements/Trackers/DisplayOverlay.h"
 
 namespace BenGui {
 // MARK: - Delegates
@@ -39,10 +42,18 @@ std::shared_ptr<ActorViewerWindow> mActorViewerWindow;
 std::shared_ptr<CollisionViewerWindow> mCollisionViewerWindow;
 std::shared_ptr<EventLogWindow> mEventLogWindow;
 std::shared_ptr<BenMenu> mBenMenu;
+std::shared_ptr<BenModalWindow> mModalWindow;
 std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 std::shared_ptr<Notification::Window> mNotificationWindow;
 std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
 std::shared_ptr<ItemTrackerSettingsWindow> mItemTrackerSettingsWindow;
+std::shared_ptr<DisplayOverlayWindow> mDisplayOverlayWindow;
+std::shared_ptr<Rando::CheckTracker::CheckTrackerWindow> mRandoCheckTrackerWindow;
+std::shared_ptr<Rando::CheckTracker::SettingsWindow> mRandoCheckTrackerSettingsWindow;
+
+UIWidgets::Colors GetMenuThemeColor() {
+    return mBenMenu != nullptr ? mBenMenu->GetMenuThemeColor() : UIWidgets::Colors::Blue;
+}
 
 void SetupGuiElements() {
     auto gui = Ship::Context::GetInstance()->GetWindow()->GetGui();
@@ -50,7 +61,7 @@ void SetupGuiElements() {
     auto& style = ImGui::GetStyle();
     style.FramePadding = ImVec2(4.0f, 6.0f);
     style.ItemSpacing = ImVec2(8.0f, 6.0f);
-    style.Colors[ImGuiCol_MenuBarBg] = UIWidgets::Colors::DarkGray;
+    style.Colors[ImGuiCol_MenuBarBg] = UIWidgets::ColorValues.at(UIWidgets::Colors::DarkGray);
 
 #ifdef __ANDROID__
     CVarClear(CVAR_MENU_BAR_OPEN);
@@ -109,6 +120,22 @@ void SetupGuiElements() {
     mItemTrackerSettingsWindow = std::make_shared<ItemTrackerSettingsWindow>("gWindows.ItemTrackerSettings",
                                                                              "Item Tracker Settings", ImVec2(800, 400));
     gui->AddGuiWindow(mItemTrackerSettingsWindow);
+
+    mDisplayOverlayWindow = std::make_shared<DisplayOverlayWindow>("gWindows.DisplayOverlay", "Display Overlay");
+    gui->AddGuiWindow(mDisplayOverlayWindow);
+
+    mModalWindow = std::make_shared<BenModalWindow>("gWindows.Modals", "Modals");
+    gui->AddGuiWindow(mModalWindow);
+    mModalWindow->Show();
+
+    mRandoCheckTrackerWindow =
+        std::make_shared<Rando::CheckTracker::CheckTrackerWindow>("gWindows.CheckTracker", "Check Tracker");
+    gui->AddGuiWindow(mRandoCheckTrackerWindow);
+
+    mRandoCheckTrackerSettingsWindow = std::make_shared<Rando::CheckTracker::SettingsWindow>(
+        "gWindows.CheckTrackerSettings", "Check Tracker Settings", ImVec2(800, 400));
+    gui->AddGuiWindow(mRandoCheckTrackerSettingsWindow);
+
     gui->SetPadBtnTogglesMenu();
 
     mNotificationWindow = std::make_shared<Notification::Window>("gWindows.Notifications", "Notifications Window");
@@ -134,5 +161,22 @@ void Destroy() {
     mActorViewerWindow = nullptr;
     mItemTrackerWindow = nullptr;
     mItemTrackerSettingsWindow = nullptr;
+    mDisplayOverlayWindow = nullptr;
+    mModalWindow = nullptr;
+    mRandoCheckTrackerWindow = nullptr;
+    mRandoCheckTrackerSettingsWindow = nullptr;
+}
+
+void SetDisplayOverlayVisibility(bool visible) {
+    if (mDisplayOverlayWindow != nullptr) {
+        if (visible) {
+            mDisplayOverlayWindow->Show();
+        } else {
+            mDisplayOverlayWindow->Hide();
+        }
+    } else {
+        CVarSetInteger("gWindows.DisplayOverlay", visible ? 1 : 0);
+    }
+    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
 }
 } // namespace BenGui

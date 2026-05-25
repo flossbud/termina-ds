@@ -10,6 +10,10 @@ extern "C" {
 #include "libc/stdint.h"
 #include "libc/stdlib.h"
 
+#ifndef __cplusplus
+#include <public/bridge/consolevariablebridge.h>
+#endif
+
 #include "ultra64.h"
 
 #include "irqmgr.h"
