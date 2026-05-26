@@ -1038,7 +1038,6 @@ void BenMenu::AddEnhancements() {
             "Press C-Up to activate the Pictograph Box once acquired, without needing to equip it to a C-button."));
     AddWidget(path, "Arrow Type Cycling", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.PlayerActions.ArrowCycle")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip(
             "While aiming the bow, use R to cycle between Normal, Fire, Ice and Light arrows."));
     AddWidget(path, "Bomb Arrows", WIDGET_CVAR_CHECKBOX)

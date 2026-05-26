@@ -31,6 +31,7 @@ static const s16 BUTTON_HIGHLIGHT_ALPHA = 128;
 static s16 sButtonFlashTimer = 0;
 static s16 sButtonFlashCount = 0;
 static s8 sJustCycledFrames = 0;
+static bool sCycleButtonWasHeld = false;
 
 enum ArrowCycleType {
     ARROW_CYCLE_NORMAL,
@@ -136,6 +137,14 @@ static bool CanCycleArrows() {
     return !gHorseIsMounted && player->rideActor == NULL && INV_CONTENT(SLOT_BOW) == ITEM_BOW &&
            (INV_CONTENT(ITEM_ARROW_FIRE) == ITEM_ARROW_FIRE || INV_CONTENT(ITEM_ARROW_ICE) == ITEM_ARROW_ICE ||
             INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT || HasBombArrows());
+}
+
+static bool IsCycleButtonPressed(Input* input) {
+    bool isHeld = CHECK_BTN_ANY(input->cur.button, BTN_R);
+    bool isPressed = CHECK_BTN_ANY(input->press.button, BTN_R) || (isHeld && !sCycleButtonWasHeld);
+
+    sCycleButtonWasHeld = isHeld;
+    return isPressed;
 }
 
 // Arrow Cycling Logic
@@ -313,7 +322,7 @@ void ArrowCycleMain() {
         return;
     }
 
-    if (IsAimingBow(player) && CHECK_BTN_ANY(input->press.button, BTN_R) && player->heldActor != NULL &&
+    if (IsAimingBow(player) && IsCycleButtonPressed(input) && player->heldActor != NULL &&
         player->heldActor->id == ACTOR_EN_ARROW) {
         if (IsHoldingMagicBow(player) && gSaveContext.magicState != MAGIC_STATE_IDLE && player->heldActor == NULL) {
             Audio_PlaySfx(NA_SE_SY_ERROR);
