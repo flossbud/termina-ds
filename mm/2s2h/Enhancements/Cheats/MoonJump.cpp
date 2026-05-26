@@ -1,6 +1,9 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 #include "variables.h"
+
+#define CVAR_NAME "gCheats.MoonJumpOnL"
 
 static HOOK_ID moonJumpOnLGameStateUpdateHookId = 0;
 void RegisterMoonJumpOnL() {
@@ -10,7 +13,7 @@ void RegisterMoonJumpOnL() {
         moonJumpOnLGameStateUpdateHookId = 0;
     }
 
-    if (CVarGetInteger("gCheats.MoonJumpOnL", 0)) {
+    if (CVarGetInteger(CVAR_NAME, 0)) {
         moonJumpOnLGameStateUpdateHookId =
             GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateUpdate>([]() {
                 if (gPlayState == nullptr)
@@ -24,3 +27,5 @@ void RegisterMoonJumpOnL() {
             });
     }
 }
+
+static RegisterShipInitFunc initFunc(RegisterMoonJumpOnL, { CVAR_NAME });
