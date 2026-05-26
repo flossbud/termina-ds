@@ -1,6 +1,7 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/Enhancements/Enhancements.h"
+#include "2s2h/ShipInit.hpp"
 #include <stdarg.h>
 
 #define CVAR_NAME "gEnhancements.DifficultyOptions.GibdoTradeSequence"
@@ -66,3 +67,5 @@ void RegisterGibdoTradeSequenceOptions() {
         }
     });
 }
+
+static RegisterShipInitFunc initFunc(RegisterGibdoTradeSequenceOptions, { CVAR_NAME });

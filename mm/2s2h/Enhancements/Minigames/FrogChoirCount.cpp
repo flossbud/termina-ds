@@ -1,5 +1,6 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "variables.h"
@@ -67,3 +68,4 @@ void RegisterFrogChoirCount() {
     });
 }
 
+static RegisterShipInitFunc initFunc(RegisterFrogChoirCount, { CVAR_NAME });

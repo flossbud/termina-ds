@@ -1,5 +1,6 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 #include "variables.h"
 
 #define CVAR_NAME "gEnhancements.DifficultyOptions.JinxedTimer"
@@ -17,3 +18,4 @@ void RegisterJinxedTimer() {
     });
 }
 
+static RegisterShipInitFunc initFunc(RegisterJinxedTimer, { CVAR_NAME });

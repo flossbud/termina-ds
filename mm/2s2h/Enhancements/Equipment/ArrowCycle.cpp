@@ -1,5 +1,6 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "macros.h"
@@ -371,3 +372,5 @@ void RegisterArrowCycle() {
 
     COND_ID_HOOK(OnActorUpdate, ACTOR_PLAYER, CVAR, [](Actor* actor) { ArrowCycleMain(); });
 }
+
+static RegisterShipInitFunc initFunc(RegisterArrowCycle, { CVAR_NAME });

@@ -1,5 +1,6 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 #include "Enhancements/Enhancements.h"
 
 #define CVAR_NAME "gEnhancements.DifficultyOptions.DekuGuardSearchBalls"
@@ -18,3 +19,4 @@ void RegisterShowDekuGuardSearchBalls() {
     });
 }
 
+static RegisterShipInitFunc initFunc(RegisterShowDekuGuardSearchBalls, { CVAR_NAME });

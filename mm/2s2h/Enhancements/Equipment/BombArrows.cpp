@@ -3,6 +3,7 @@
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ObjectExtension/ObjectExtension.h"
+#include "2s2h/ShipInit.hpp"
 #include "2s2h/ShipUtils.h"
 
 extern "C" {
@@ -1178,3 +1179,5 @@ void RegisterBombArrows() {
     COND_VB_SHOULD(VB_KALEIDO_DRAW_EQUIP_ANIM_ICON, CVAR, OnKaleidoDrawEquipAnimIcon(should, args));
     COND_VB_SHOULD(VB_KALEIDO_EQUIP_ITEM_TO_BUTTON, CVAR, OnKaleidoEquipItemToButton(should, args));
 }
+
+static RegisterShipInitFunc initFunc(RegisterBombArrows, { CVAR_NAME });

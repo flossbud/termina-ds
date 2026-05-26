@@ -1,5 +1,6 @@
 #include <libultraship/bridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "variables.h"
@@ -30,3 +31,4 @@ void RegisterHyperEnemies() {
     });
 }
 
+static RegisterShipInitFunc initFunc(RegisterHyperEnemies, { CVAR_NAME });
