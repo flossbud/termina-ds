@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include "overlays/kaleido_scope/ovl_kaleido_scope/z_kaleido_scope.h"
 
 extern f32 sPauseMenuVerticalOffset;

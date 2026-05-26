@@ -3,6 +3,7 @@
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 
 extern "C" {
+#include "variables.h"
 #include "z64.h"
 #include "functions.h"
 #include "overlays/actors/ovl_En_Slime/z_en_slime.h"

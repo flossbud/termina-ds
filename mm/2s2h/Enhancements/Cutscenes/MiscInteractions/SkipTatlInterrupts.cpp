@@ -4,6 +4,7 @@
 #define ELFMSG3_GET_SWITCH_FLAG(thisx) (((thisx)->params & 0x7F00) >> 8)
 
 extern "C" {
+#include "variables.h"
 #include "z64.h"
 extern PlayState* gPlayState;
 extern SaveContext gSaveContext;

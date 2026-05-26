@@ -2082,6 +2082,8 @@ void AudioOcarina_ReadControllerInput(void) {
     sOcarinaInputButtonPrev = ocarinaInputButtonPrev;
     sOcarinaInputStickRel.x = input->rel.stick_x;
     sOcarinaInputStickRel.y = input->rel.stick_y;
+
+    sOcarinaInputButtonCur |= GameInteractor_RightStickOcarina(input);
 }
 
 /**

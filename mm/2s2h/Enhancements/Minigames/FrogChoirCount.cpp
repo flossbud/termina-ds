@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include "overlays/actors/ovl_En_Minifrog/z_en_minifrog.h"
 
 void EnMinifrog_Update(Actor* thisx, PlayState* play);

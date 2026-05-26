@@ -3,6 +3,7 @@
 #include "overlays/actors/ovl_En_M_Thunder/z_en_m_thunder.h"
 
 extern "C" {
+#include "variables.h"
 extern PlayState* gPlayState;
 extern Input* sPlayerControlInput;
 }

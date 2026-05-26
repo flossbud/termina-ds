@@ -3,6 +3,7 @@
 #include "2s2h/Enhancements/Enhancements.h"
 
 extern "C" {
+#include "variables.h"
 #include "overlays/actors/ovl_Door_Ana/z_door_ana.h"
 }
 

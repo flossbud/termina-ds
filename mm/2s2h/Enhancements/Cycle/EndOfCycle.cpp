@@ -99,5 +99,23 @@ void RegisterEndOfCycleSaveHooks() {
         if (CVarGetInteger("gEnhancements.Cycle.DoNotResetTimeSpeed", 0)) {
             gSaveContext.save.timeSpeedOffset = timeSpeedOffsetCopy;
         }
+
+        if (CVarGetInteger("gEnhancements.Cycle.DoNotResetChateau", 0) &&
+            (saveInfoCopy.weekEventReg[WEEKEVENTREG_DRANK_CHATEAU_ROMANI >> 8] &
+             (WEEKEVENTREG_DRANK_CHATEAU_ROMANI & 0xFF))) {
+            SET_WEEKEVENTREG(WEEKEVENTREG_DRANK_CHATEAU_ROMANI);
+        }
+
+        if (CVarGetInteger("gEnhancements.Cycle.DoNotResetScarecrowSong", 0)) {
+            gSaveContext.save.saveInfo.scarecrowSpawnSongSet = saveInfoCopy.scarecrowSpawnSongSet;
+        }
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>([](s16 fileNum) {
+        if (CVarGetInteger("gEnhancements.Cycle.DoNotResetScarecrowSong", 0) && !gSaveContext.save.isOwlSave &&
+            gSaveContext.save.saveInfo.scarecrowSpawnSongSet) {
+            memcpy(gScarecrowSpawnSongPtr, gSaveContext.save.saveInfo.scarecrowSpawnSong,
+                   sizeof(gSaveContext.save.saveInfo.scarecrowSpawnSong));
+        }
     });
 }

@@ -3,6 +3,7 @@
 #include "CameraUtils.h"
 
 extern "C" {
+#include "variables.h"
 #include <macros.h>
 #include <functions.h>
 extern PlayState* gPlayState;

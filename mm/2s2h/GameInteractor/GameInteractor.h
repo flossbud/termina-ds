@@ -47,6 +47,7 @@ typedef enum {
     GI_INVERT_CAMERA_RIGHT_STICK_Y,
     GI_INVERT_MOVEMENT_X,
     GI_INVERT_SHIELD_X,
+    GI_INVERT_SHIELD_Y,
     GI_INVERT_SHOP_X,
     GI_INVERT_HORSE_X,
     GI_INVERT_ZORA_SWIM_X,
@@ -303,6 +304,7 @@ class GameInteractor {
     DEFINE_HOOK(OnGameStateDrawFinish, ());
     DEFINE_HOOK(OnGameStateUpdate, ());
     DEFINE_HOOK(OnConsoleLogoUpdate, ());
+    DEFINE_HOOK(OnInterfaceDrawStart, ());
     DEFINE_HOOK(OnKaleidoUpdate, (PauseContext * pauseCtx));
     DEFINE_HOOK(BeforeKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
     DEFINE_HOOK(AfterKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
@@ -359,6 +361,7 @@ void GameInteractor_ExecuteOnGameStateMainFinish();
 void GameInteractor_ExecuteOnGameStateDrawFinish();
 void GameInteractor_ExecuteOnGameStateUpdate();
 void GameInteractor_ExecuteOnConsoleLogoUpdate();
+void GameInteractor_ExecuteOnInterfaceDrawStart();
 void GameInteractor_ExecuteOnKaleidoUpdate(PauseContext* pauseCtx);
 void GameInteractor_ExecuteBeforeKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);
 void GameInteractor_ExecuteAfterKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);
@@ -442,6 +445,7 @@ bool GameInteractor_Should(GIVanillaBehavior flag, uint32_t result, ...);
 
 int GameInteractor_InvertControl(GIInvertType type);
 uint32_t GameInteractor_Dpad(GIDpadType type, uint32_t buttonCombo);
+uint32_t GameInteractor_RightStickOcarina(Input* input);
 
 #ifdef __cplusplus
 }

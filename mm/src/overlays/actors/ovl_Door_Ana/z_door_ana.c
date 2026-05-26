@@ -5,6 +5,7 @@
  */
 
 #include "z_door_ana.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include "objects/gameplay_field_keep/gameplay_field_keep.h"
 
 #define FLAGS (ACTOR_FLAG_2000000)
@@ -195,7 +196,9 @@ void DoorAna_Update(Actor* thisx, PlayState* play) {
     DoorAna* this = THIS;
 
     this->actionFunc(this, play);
-    this->actor.shape.rot.y = BINANG_ROT180(Camera_GetCamDirYaw(GET_ACTIVE_CAM(play)));
+    if (GameInteractor_Should(VB_ROTATE_GROTTO_ENTRANCE, true)) {
+        this->actor.shape.rot.y = BINANG_ROT180(Camera_GetCamDirYaw(GET_ACTIVE_CAM(play)));
+    }
 }
 
 void DoorAna_Draw(Actor* thisx, PlayState* play) {

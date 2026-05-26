@@ -6,6 +6,7 @@
 #include "2s2h/ShipUtils.h"
 
 extern "C" {
+#include "variables.h"
 #include "archives/icon_item_static/icon_item_static_yar.h"
 #include "assets/objects/object_gi_bomb_1/object_gi_bomb_1.h"
 #include "overlays/actors/ovl_En_Arrow/z_en_arrow.h"

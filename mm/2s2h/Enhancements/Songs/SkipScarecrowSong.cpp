@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include "z64.h"
 #include "functions.h"
 #include "src/overlays/actors/ovl_En_Kakasi/z_en_kakasi.h"

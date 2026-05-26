@@ -7,6 +7,7 @@
 #include "global.h"
 #include "z64shrink_window.h"
 #include "libc/string.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 ActorCutscene sGlobalCutsceneList[] = {
     // CS_ID_GLOBAL_78
@@ -379,6 +380,10 @@ s16 CutsceneManager_Start(s16 csId, Actor* actor) {
     Camera* subCam;
     Camera* retCam;
     s32 csType = 0;
+
+    if (!GameInteractor_Should(VB_START_CUTSCENE, true, &csId, actor)) {
+        return CS_ID_NONE;
+    }
 
     if ((csId <= CS_ID_NONE) || (sCutsceneMgr.csId != CS_ID_NONE)) {
         return csId;

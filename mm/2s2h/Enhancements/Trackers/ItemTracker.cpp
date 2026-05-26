@@ -135,6 +135,7 @@ void ItemTrackerWindow::DrawNote(size_t songIndex, bool drawFaded) {
 }
 
 extern "C" {
+#include "variables.h"
 #include "z64save.h"
 #include "macros.h"
 #include "z64.h"

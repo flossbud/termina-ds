@@ -3,6 +3,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include <variables.h>
 #include <functions.h>
 }
@@ -14,9 +15,22 @@ static uint64_t lastSaveTimestamp = GetUnixTimestamp();
 
 static HOOK_ID autosaveGameStateUpdateHookId = 0;
 static HOOK_ID autosaveGameStateDrawFinishHookId = 0;
+static HOOK_ID skipEntranceCutsceneHookId = 0;
+static HOOK_ID gameplayStartHookId = 0;
+
+static int lastEntrance = -1;
+static int entranceToSave = -1;
 
 // Used for saving through Autosaves and Pause Menu saves.
 extern "C" int SavingEnhancements_GetSaveEntrance() {
+    if (CVarGetInteger("gEnhancements.Saving.RememberSaveLocation", 0)) {
+        for (int i = 0; i < RESPAWN_MODE_MAX; i++) {
+            gSaveContext.save.shipSaveInfo.respawn[i] = gSaveContext.respawn[i];
+        }
+
+        return entranceToSave < 0 ? ENTRANCE(SOUTH_CLOCK_TOWN, 0) : entranceToSave;
+    }
+
     switch (gPlayState->sceneId) {
         // Woodfall Temple + Odolwa
         case SCENE_MITURIN:
@@ -84,6 +98,14 @@ extern "C" bool SavingEnhancements_CanSave() {
     return true;
 }
 
+extern "C" void SavingEnhancements_AdvancePlaytime() {
+    if (gSaveContext.save.shipSaveInfo.fileCompletedAt == 0) {
+        uint64_t timestamp = GetUnixTimestamp();
+        gSaveContext.save.shipSaveInfo.filePlaytime += timestamp - gSaveContext.shipSaveContext.lastTimeLog;
+        gSaveContext.shipSaveContext.lastTimeLog = timestamp;
+    }
+}
+
 void DeleteOwlSave() {
     // Remove Owl Save on time cycle reset, needed when persisting owl saves and/or when
     // creating owl saves without the player being send back to the file select screen.
@@ -146,6 +168,40 @@ void HandleAutoSave() {
     }
 }
 
+static void UnregisterEntranceCutsceneSkip() {
+    if (skipEntranceCutsceneHookId) {
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::ShouldVanillaBehavior>(
+            skipEntranceCutsceneHookId);
+        skipEntranceCutsceneHookId = 0;
+    }
+
+    if (gameplayStartHookId) {
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPassPlayerInputs>(gameplayStartHookId);
+        gameplayStartHookId = 0;
+    }
+}
+
+static void SkipEntranceCutsceneOnLoad() {
+    UnregisterEntranceCutsceneSkip();
+
+    skipEntranceCutsceneHookId = REGISTER_VB_SHOULD(VB_START_CUTSCENE, {
+        if (gSaveContext.gameMode == GAMEMODE_NORMAL && gPlayState != nullptr && gPlayState->sceneId != SCENE_SPOT00) {
+            *should = false;
+        }
+    });
+
+    gameplayStartHookId =
+        GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPassPlayerInputs>([](Input* input) {
+            UnregisterEntranceCutsceneSkip();
+        });
+}
+
+static void LoadRespawnData() {
+    for (int i = 0; i < RESPAWN_MODE_MAX; i++) {
+        gSaveContext.respawn[i] = gSaveContext.save.shipSaveInfo.respawn[i];
+    }
+}
+
 void RegisterSavingEnhancements() {
     REGISTER_VB_SHOULD(VB_DELETE_OWL_SAVE, {
         if (CVarGetInteger("gEnhancements.Saving.PersistentOwlSaves", 0) ||
@@ -157,6 +213,32 @@ void RegisterSavingEnhancements() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::BeforeEndOfCycleSave>([]() { DeleteOwlSave(); });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::BeforeMoonCrashSaveReset>([]() { DeleteOwlSave(); });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>([](s16 fileNum) {
+        if (gSaveContext.save.shipSaveInfo.fileCreatedAt == 0) {
+            gSaveContext.save.shipSaveInfo.fileCreatedAt = GetUnixTimestamp();
+        }
+
+        gSaveContext.shipSaveContext.lastTimeLog = GetUnixTimestamp();
+        lastEntrance = entranceToSave = gSaveContext.save.shipSaveInfo.pauseSaveEntrance;
+
+        if (CVarGetInteger("gEnhancements.Saving.RememberSaveLocation", 0)) {
+            SkipEntranceCutsceneOnLoad();
+            LoadRespawnData();
+        }
+    });
+
+    REGISTER_VB_SHOULD(VB_PLAY_TRANSITION_CS, {
+        if (!CVarGetInteger("gEnhancements.Saving.RememberSaveLocation", 0)) {
+            return;
+        }
+
+        if (lastEntrance != -1 && !(Entrance_GetSceneIdAbsolute(gSaveContext.save.entrance) != SCENE_KAKUSIANA &&
+                                    Entrance_GetSceneIdAbsolute(lastEntrance) == SCENE_KAKUSIANA)) {
+            entranceToSave = gSaveContext.save.entrance;
+        }
+        lastEntrance = gSaveContext.save.entrance;
+    });
 }
 
 void RegisterAutosave() {

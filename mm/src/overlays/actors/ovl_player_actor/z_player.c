@@ -6990,7 +6990,7 @@ s32 func_808373F8(PlayState* play, Player* this, u16 sfxId) {
             Player_PlaySfx(this, (NA_SE_PL_DEKUNUTS_JUMP5 + 1 - this->remainingHopsCounter));
             Player_AnimSfx_PlayVoice(this, sfxId);
             this->remainingHopsCounter--;
-            if (this->remainingHopsCounter == 0) {
+            if (GameInteractor_Should(VB_DEKU_LINK_SPIN_ON_LAST_HOP, this->remainingHopsCounter == 0)) {
                 this->stateFlags2 |= PLAYER_STATE2_80000;
                 func_808373A4(play, this);
             }
@@ -7994,9 +7994,11 @@ s32 Player_ActionChange_10(Player* this, PlayState* play) {
                     } else {
                         func_80836B3C(play, this, 0.0f);
                     }
-                } else if (!(this->stateFlags1 & PLAYER_STATE1_8000000) &&
-                           (Player_GetMeleeWeaponHeld(this) != PLAYER_MELEEWEAPON_NONE) &&
-                           Player_CanUpdateItems(this) && (this->transformation != PLAYER_FORM_GORON)) {
+                } else if (GameInteractor_Should(VB_START_JUMPSLASH,
+                                                  !(this->stateFlags1 & PLAYER_STATE1_8000000) &&
+                                                      (Player_GetMeleeWeaponHeld(this) != PLAYER_MELEEWEAPON_NONE) &&
+                                                      Player_CanUpdateItems(this) &&
+                                                      (this->transformation != PLAYER_FORM_GORON))) {
                     func_808395F0(play, this, PLAYER_MWA_JUMPSLASH_START, 5.0f, 5.0f);
                 } else if (!func_80839A84(play, this)) {
                     func_80836B3C(play, this, 0.0f);
@@ -14773,6 +14775,7 @@ void Player_Action_18(Player* this, PlayState* play) {
         s16 var_a3;
 
         xStick *= GameInteractor_InvertControl(GI_INVERT_SHIELD_X);
+        yStick *= GameInteractor_InvertControl(GI_INVERT_SHIELD_Y);
         var_a1 = (yStick * Math_CosS(temp_a0)) + (Math_SinS(temp_a0) * xStick);
         temp_ft5 = (xStick * Math_CosS(temp_a0)) - (Math_SinS(temp_a0) * yStick);
 
@@ -15027,7 +15030,9 @@ void Player_Action_25(Player* this, PlayState* play) {
             s16 prevYaw = this->currentYaw;
 
             func_808378FC(play, this);
-            func_8083CBC4(this, speedTarget * 0.5f, yawTarget, 2.0f, 0.2f, 0.1f, 0x190);
+            if (GameInteractor_Should(VB_APPLY_AIR_CONTROL, true, &speedTarget)) {
+                func_8083CBC4(this, speedTarget * 0.5f, yawTarget, 2.0f, 0.2f, 0.1f, 0x190);
+            }
 
             if (BEN_ANIM_EQUAL(this->skelAnime.animation, gPlayerAnim_pn_attack)) {
                 this->stateFlags2 |= (PLAYER_STATE2_20 | PLAYER_STATE2_40);

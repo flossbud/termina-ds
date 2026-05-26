@@ -41,6 +41,10 @@ void GameInteractor_ExecuteOnConsoleLogoUpdate() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnConsoleLogoUpdate>();
 }
 
+void GameInteractor_ExecuteOnInterfaceDrawStart() {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnInterfaceDrawStart>();
+}
+
 void GameInteractor_ExecuteOnKaleidoUpdate(PauseContext* pauseCtx) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnKaleidoUpdate>(pauseCtx);
 }
@@ -437,6 +441,11 @@ int GameInteractor_InvertControl(GIInvertType type) {
                 result *= -1;
             }
             break;
+        case GI_INVERT_SHIELD_Y:
+            if (CVarGetInteger("gEnhancements.Equipment.InvertShieldY", 0)) {
+                result *= -1;
+            }
+            break;
     }
 
     // Invert all X axis inputs if the Mirrored World mode is enabled
@@ -466,6 +475,32 @@ int GameInteractor_InvertControl(GIInvertType type) {
         result *= -1;
     }
     */
+
+    return result;
+}
+
+uint32_t GameInteractor_RightStickOcarina(Input* input) {
+    uint32_t result = 0;
+
+    if (!CVarGetInteger("gEnhancements.Playback.RightStickOcarina", 0)) {
+        return result;
+    }
+
+    s8 rstickX = input->cur.right_stick_x;
+    s8 rstickY = input->cur.right_stick_y;
+    const s8 sensitivity = 64;
+
+    if (rstickX > sensitivity) {
+        result |= BTN_CRIGHT;
+    } else if (rstickX < -sensitivity) {
+        result |= BTN_CLEFT;
+    }
+
+    if (rstickY > sensitivity) {
+        result |= BTN_CUP;
+    } else if (rstickY < -sensitivity) {
+        result |= BTN_CDOWN;
+    }
 
     return result;
 }

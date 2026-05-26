@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include "macros.h"
 #include "z64.h"
 extern PlayState* gPlayState;

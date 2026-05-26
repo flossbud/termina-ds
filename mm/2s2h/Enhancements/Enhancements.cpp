@@ -27,6 +27,7 @@ void InitEnhancements() {
 
     // Cycle & Saving
     RegisterEndOfCycleSaveHooks();
+    RegisterMoonCrashSave();
     RegisterSavingEnhancements();
     RegisterAutosave();
     RegisterKeepExpressMail();

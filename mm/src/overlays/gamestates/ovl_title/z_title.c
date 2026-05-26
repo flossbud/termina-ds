@@ -11,7 +11,6 @@
 #include "overlays/gamestates/ovl_opening/z_opening.h"
 #include "misc/nintendo_rogo_static/nintendo_rogo_static.h"
 
-#include "build.h"
 #include "BenPort.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include <stdlib.h>
@@ -21,26 +20,6 @@ static const ALIGN_ASSET(2) char gShipLogoDL[] = dgShipLogoDL;
 
 #define dgLUSLogoTextTex "__OTR__misc/nintendo_rogo_static/gLUSLogoTextTex"
 static const ALIGN_ASSET(2) char gLUSLogoTextTex[] = dgLUSLogoTextTex;
-
-void ConsoleLogo_PrintBuildInfo(ConsoleLogoState* this) {
-    GraphicsContext* gfxCtx = this->state.gfxCtx;
-    GfxPrint printer;
-
-    OPEN_DISPS(gfxCtx);
-
-    Gfx_SetupDL28_Opa(gfxCtx);
-
-    GfxPrint_Init(&printer);
-    GfxPrint_Open(&printer, POLY_OPA_DISP);
-    GfxPrint_SetColor(&printer, 190, 205, 255, 220);
-    GfxPrint_SetPos(&printer, 33, 27);
-    GfxPrint_Printf(&printer, "v%d.%d.%d", gBuildVersionMajor, gBuildVersionMinor, gBuildVersionPatch);
-
-    POLY_OPA_DISP = GfxPrint_Close(&printer);
-    GfxPrint_Destroy(&printer);
-
-    CLOSE_DISPS(gfxCtx);
-}
 
 void ConsoleLogo_UpdateCounters(ConsoleLogoState* this) {
     if ((this->coverAlpha == 0) && (this->visibleDuration != 0)) {
@@ -152,10 +131,6 @@ void ConsoleLogo_Draw(GameState* thisx) {
         gDPSetTileSize(POLY_OPA_DISP++, 1, this->uls, (this->ult & 0x7F) - idx * 4, 0, 0);
         gSPTextureRectangle(POLY_OPA_DISP++, 97 << 2, y << 2, (97 + 192) << 2, (y + 2) << 2, G_TX_RENDERTILE, 0, 0,
                             1 << 10, 1 << 10);
-    }
-
-    if (!CVarGetInteger("gEnhancements.Graphics.AuthenticLogo", 0)) {
-        ConsoleLogo_PrintBuildInfo(this);
     }
 
     Environment_FillScreen(this->state.gfxCtx, 0, 0, 0, this->coverAlpha, FILL_SCREEN_XLU);

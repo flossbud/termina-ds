@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
+#include "variables.h"
 #include "src/overlays/actors/ovl_En_Boom/z_en_boom.h"
 extern PlayState* gPlayState;
 }

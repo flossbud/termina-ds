@@ -4,6 +4,7 @@
 #include "2s2h/Enhancements/Enhancements.h"
 
 extern "C" {
+#include "variables.h"
 #include <variables.h>
 #include <functions.h>
 }

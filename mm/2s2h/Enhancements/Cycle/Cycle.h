@@ -3,5 +3,6 @@
 
 void RegisterEndOfCycleSaveHooks();
 void RegisterKeepExpressMail();
+void RegisterMoonCrashSave();
 
 #endif // CYCLE_H

@@ -4,6 +4,7 @@
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 
 extern "C" {
+#include "variables.h"
 #include "z64.h"
 #include "z64player.h"
 #include "functions.h"

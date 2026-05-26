@@ -5,6 +5,7 @@
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 
 extern "C" {
+#include "variables.h"
 #include <z64.h>
 #include <macros.h>
 #include "overlays/kaleido_scope/ovl_kaleido_scope/z_kaleido_scope.h"

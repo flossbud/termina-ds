@@ -12,5 +12,6 @@ void RegisterCutscenes() {
     RegisterHideTitleCards();
     RegisterSkipEntranceCutscenes();
     RegisterSkipIntroSequence();
+    RegisterSkipOnePointCutscenes();
     RegisterSkipToFileSelect();
 }
