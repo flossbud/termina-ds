@@ -9,6 +9,7 @@
 #include "2s2h/BenGui/Notification.h"
 
 extern "C" {
+#include "z64save.h"
 #include "functions.h"
 #include "variables.h"
 #include "ShipUtils.h"
@@ -21,7 +22,37 @@ bool sPendingStartingItemsGrant = false;
 void GrantStartingItemsWhenReady() {
     sPendingStartingItemsGrant = true;
 }
+
+bool ShouldGrantStartingItems() {
+    if (!IS_RANDO) {
+        return false;
+    }
+
+    std::vector<RandoItemId> startingItems = Rando::GetStartingItemsFromSave(gSaveContext.save.shipSaveInfo.rando);
+    std::vector<RandoItemId> computedStartingItems =
+        Rando::GetComputedStartingItems(gSaveContext.save.shipSaveInfo.rando);
+    startingItems.insert(startingItems.end(), computedStartingItems.begin(), computedStartingItems.end());
+
+    for (RandoItemId startingItem : startingItems) {
+        if (Rando::IsItemObtainable(startingItem)) {
+            return true;
+        }
+    }
+
+    if (RANDO_SAVE_OPTIONS[RO_STARTING_HEALTH] != 3 &&
+        gSaveContext.save.saveInfo.playerData.healthCapacity < RANDO_SAVE_OPTIONS[RO_STARTING_HEALTH] * 0x10) {
+        return true;
+    }
+
+    return false;
+}
 } // namespace
+
+void Rando::MiscBehavior::QueueStartingItemsGrantIfNeeded() {
+    if (ShouldGrantStartingItems()) {
+        GrantStartingItemsWhenReady();
+    }
+}
 
 void Rando::MiscBehavior::GrantPendingStartingItems() {
     if (!sPendingStartingItemsGrant || !IS_RANDO || gPlayState == nullptr) {
@@ -30,6 +61,10 @@ void Rando::MiscBehavior::GrantPendingStartingItems() {
 
     Rando::GrantStartingItems();
     sPendingStartingItemsGrant = false;
+
+    if (gSaveContext.fileNum != 0xFF) {
+        Sram_SaveSpecialEnterClockTown(gPlayState);
+    }
 }
 
 // Very primitive randomizer implementation, when a save is created, if rando is enabled

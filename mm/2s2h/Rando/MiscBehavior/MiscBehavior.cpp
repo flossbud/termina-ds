@@ -15,6 +15,7 @@ void Rando::MiscBehavior::Init() {
 }
 
 void Rando::MiscBehavior::OnFileLoad() {
+    Rando::MiscBehavior::QueueStartingItemsGrantIfNeeded();
     Rando::MiscBehavior::CheckQueueReset();
     Rando::MiscBehavior::InitKaleidoItemPage();
     Rando::MiscBehavior::InitOfferGetItemBehavior();
