@@ -8,6 +8,238 @@ extern "C" {
 #include "functions.h"
 }
 
+namespace {
+
+void GiveItemSaveContextOnly(u8 item) {
+    if (item == ITEM_NONE) {
+        return;
+    }
+
+    if (item == ITEM_BOMBERS_NOTEBOOK) {
+        SET_QUEST_ITEM(QUEST_BOMBERS_NOTEBOOK);
+        return;
+    }
+
+    if ((item == ITEM_HEART_PIECE_2) || (item == ITEM_HEART_PIECE)) {
+        INCREMENT_QUEST_HEART_PIECE_COUNT;
+        if (EQ_MAX_QUEST_HEART_PIECE_COUNT) {
+            RESET_HEART_PIECE_COUNT;
+            gSaveContext.save.saveInfo.playerData.healthCapacity += 0x10;
+            gSaveContext.save.saveInfo.playerData.health += 0x10;
+        }
+        return;
+    }
+
+    if (item == ITEM_HEART_CONTAINER) {
+        gSaveContext.save.saveInfo.playerData.healthCapacity += 0x10;
+        gSaveContext.save.saveInfo.playerData.health += 0x10;
+        return;
+    }
+
+    if ((item >= ITEM_SONG_SONATA) && (item <= ITEM_SONG_LULLABY_INTRO)) {
+        SET_QUEST_ITEM(item - ITEM_SONG_SONATA + QUEST_SONG_SONATA);
+        return;
+    }
+
+    if ((item >= ITEM_SWORD_KOKIRI) && (item <= ITEM_SWORD_GILDED)) {
+        SET_EQUIP_VALUE(EQUIP_TYPE_SWORD, item - ITEM_SWORD_KOKIRI + EQUIP_VALUE_SWORD_KOKIRI);
+        BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_B) = item;
+        if (item == ITEM_SWORD_RAZOR) {
+            gSaveContext.save.saveInfo.playerData.swordHealth = 100;
+        }
+        return;
+    }
+
+    if ((item >= ITEM_SHIELD_HERO) && (item <= ITEM_SHIELD_MIRROR)) {
+        SET_EQUIP_VALUE(EQUIP_TYPE_SHIELD, item - ITEM_SHIELD_HERO + EQUIP_VALUE_SHIELD_HERO);
+        return;
+    }
+
+    if ((item == ITEM_QUIVER_30) || (item == ITEM_BOW)) {
+        if (CUR_UPG_VALUE(UPG_QUIVER) == 0) {
+            Inventory_ChangeUpgrade(UPG_QUIVER, 1);
+            INV_CONTENT(ITEM_BOW) = ITEM_BOW;
+            AMMO(ITEM_BOW) = CAPACITY(UPG_QUIVER, 1);
+        } else if (++AMMO(ITEM_BOW) > (s8)CUR_CAPACITY(UPG_QUIVER)) {
+            AMMO(ITEM_BOW) = CUR_CAPACITY(UPG_QUIVER);
+        }
+        return;
+    }
+
+    if (item == ITEM_QUIVER_40) {
+        Inventory_ChangeUpgrade(UPG_QUIVER, 2);
+        INV_CONTENT(ITEM_BOW) = ITEM_BOW;
+        AMMO(ITEM_BOW) = CAPACITY(UPG_QUIVER, 2);
+        return;
+    }
+
+    if (item == ITEM_QUIVER_50) {
+        Inventory_ChangeUpgrade(UPG_QUIVER, 3);
+        INV_CONTENT(ITEM_BOW) = ITEM_BOW;
+        AMMO(ITEM_BOW) = CAPACITY(UPG_QUIVER, 3);
+        return;
+    }
+
+    if (item == ITEM_BOMB_BAG_20) {
+        if (CUR_UPG_VALUE(UPG_BOMB_BAG) == 0) {
+            Inventory_ChangeUpgrade(UPG_BOMB_BAG, 1);
+            INV_CONTENT(ITEM_BOMB) = ITEM_BOMB;
+            AMMO(ITEM_BOMB) = CAPACITY(UPG_BOMB_BAG, 1);
+        } else if (++AMMO(ITEM_BOMB) > CUR_CAPACITY(UPG_BOMB_BAG)) {
+            AMMO(ITEM_BOMB) = CUR_CAPACITY(UPG_BOMB_BAG);
+        }
+        return;
+    }
+
+    if (item == ITEM_BOMB_BAG_30) {
+        Inventory_ChangeUpgrade(UPG_BOMB_BAG, 2);
+        INV_CONTENT(ITEM_BOMB) = ITEM_BOMB;
+        AMMO(ITEM_BOMB) = CAPACITY(UPG_BOMB_BAG, 2);
+        return;
+    }
+
+    if (item == ITEM_BOMB_BAG_40) {
+        Inventory_ChangeUpgrade(UPG_BOMB_BAG, 3);
+        INV_CONTENT(ITEM_BOMB) = ITEM_BOMB;
+        AMMO(ITEM_BOMB) = CAPACITY(UPG_BOMB_BAG, 3);
+        return;
+    }
+
+    if (item == ITEM_WALLET_ADULT) {
+        Inventory_ChangeUpgrade(UPG_WALLET, 1);
+        return;
+    }
+
+    if (item == ITEM_WALLET_GIANT) {
+        Inventory_ChangeUpgrade(UPG_WALLET, 2);
+        return;
+    }
+
+    if (item == ITEM_DEKU_STICK) {
+        if (INV_CONTENT(ITEM_DEKU_STICK) != ITEM_DEKU_STICK) {
+            Inventory_ChangeUpgrade(UPG_DEKU_STICKS, 1);
+            INV_CONTENT(ITEM_DEKU_STICK) = ITEM_DEKU_STICK;
+            AMMO(ITEM_DEKU_STICK) = 1;
+        } else if (++AMMO(ITEM_DEKU_STICK) > CUR_CAPACITY(UPG_DEKU_STICKS)) {
+            AMMO(ITEM_DEKU_STICK) = CUR_CAPACITY(UPG_DEKU_STICKS);
+        }
+        return;
+    }
+
+    if (item == ITEM_DEKU_NUT) {
+        if (INV_CONTENT(ITEM_DEKU_NUT) != ITEM_DEKU_NUT) {
+            Inventory_ChangeUpgrade(UPG_DEKU_NUTS, 1);
+            INV_CONTENT(ITEM_DEKU_NUT) = ITEM_DEKU_NUT;
+            AMMO(ITEM_DEKU_NUT) = 1;
+        } else if (++AMMO(ITEM_DEKU_NUT) > CUR_CAPACITY(UPG_DEKU_NUTS)) {
+            AMMO(ITEM_DEKU_NUT) = CUR_CAPACITY(UPG_DEKU_NUTS);
+        }
+        return;
+    }
+
+    if (item == ITEM_POWDER_KEG) {
+        INV_CONTENT(ITEM_POWDER_KEG) = ITEM_POWDER_KEG;
+        AMMO(ITEM_POWDER_KEG) = 1;
+        return;
+    }
+
+    if (item == ITEM_BOMB) {
+        if (++AMMO(ITEM_BOMB) > CUR_CAPACITY(UPG_BOMB_BAG)) {
+            AMMO(ITEM_BOMB) = CUR_CAPACITY(UPG_BOMB_BAG);
+        }
+        return;
+    }
+
+    if (item == ITEM_BOMBCHU) {
+        if (INV_CONTENT(ITEM_BOMBCHU) != ITEM_BOMBCHU) {
+            INV_CONTENT(ITEM_BOMBCHU) = ITEM_BOMBCHU;
+            AMMO(ITEM_BOMBCHU) = 10;
+        } else if ((AMMO(ITEM_BOMBCHU) += 10) > CUR_CAPACITY(UPG_BOMB_BAG)) {
+            AMMO(ITEM_BOMBCHU) = CUR_CAPACITY(UPG_BOMB_BAG);
+        }
+        return;
+    }
+
+    if ((item >= ITEM_ARROWS_10) && (item <= ITEM_ARROWS_50)) {
+        static constexpr s16 arrowRefills[] = { 10, 30, 40, 50 };
+        AMMO(ITEM_BOW) += arrowRefills[item - ITEM_ARROWS_10];
+        if ((AMMO(ITEM_BOW) >= CUR_CAPACITY(UPG_QUIVER)) || (AMMO(ITEM_BOW) < 0)) {
+            AMMO(ITEM_BOW) = CUR_CAPACITY(UPG_QUIVER);
+        }
+        return;
+    }
+
+    if (item == ITEM_OCARINA_OF_TIME) {
+        INV_CONTENT(ITEM_OCARINA_OF_TIME) = ITEM_OCARINA_OF_TIME;
+        return;
+    }
+
+    if (item == ITEM_MAGIC_BEANS) {
+        INV_CONTENT(ITEM_MAGIC_BEANS) = ITEM_MAGIC_BEANS;
+        AMMO(ITEM_MAGIC_BEANS) = MIN(AMMO(ITEM_MAGIC_BEANS) + 1, 20);
+        return;
+    }
+
+    if ((item >= ITEM_REMAINS_ODOLWA) && (item <= ITEM_REMAINS_TWINMOLD)) {
+        SET_QUEST_ITEM(item - ITEM_REMAINS_ODOLWA + QUEST_REMAINS_ODOLWA);
+        return;
+    }
+
+    if ((item >= ITEM_RUPEE_GREEN) && (item <= ITEM_RUPEE_HUGE)) {
+        static constexpr s16 rupeeRefills[] = { 1, 5, 10, 20, 50, 100, 200 };
+        gSaveContext.rupeeAccumulator += rupeeRefills[item - ITEM_RUPEE_GREEN];
+        return;
+    }
+
+    if (item == ITEM_LONGSHOT) {
+        item = ITEM_POTION_RED;
+    }
+
+    if ((item == ITEM_BOTTLE) || (item == ITEM_MILK_BOTTLE) || (item == ITEM_POE) || (item == ITEM_GOLD_DUST) ||
+        (item == ITEM_CHATEAU) || (item == ITEM_HYLIAN_LOACH) || ((item >= ITEM_POTION_RED) && (item <= ITEM_OBABA_DRINK)) ||
+        (item == ITEM_CHATEAU_2) || (item == ITEM_MILK) || (item == ITEM_GOLD_DUST_2) ||
+        (item == ITEM_HYLIAN_LOACH_2) || (item == ITEM_SEAHORSE_CAUGHT)) {
+        if (item == ITEM_CHATEAU_2) {
+            item = ITEM_CHATEAU;
+        } else if (item == ITEM_MILK) {
+            item = ITEM_MILK_BOTTLE;
+        } else if (item == ITEM_GOLD_DUST_2) {
+            item = ITEM_GOLD_DUST;
+        } else if (item == ITEM_HYLIAN_LOACH_2) {
+            item = ITEM_HYLIAN_LOACH;
+        } else if (item == ITEM_SEAHORSE_CAUGHT) {
+            item = ITEM_SEAHORSE;
+        }
+
+        u8 slot = SLOT(item);
+        for (u8 i = BOTTLE_FIRST; i < BOTTLE_MAX; i++) {
+            if (gSaveContext.save.saveInfo.inventory.items[slot + i] == ITEM_NONE ||
+                gSaveContext.save.saveInfo.inventory.items[slot + i] == ITEM_BOTTLE) {
+                gSaveContext.save.saveInfo.inventory.items[slot + i] = item;
+                return;
+            }
+        }
+        return;
+    }
+
+    if ((item >= ITEM_MOONS_TEAR) && (item <= ITEM_MASK_GIANT)) {
+        INV_CONTENT(item) = item;
+        return;
+    }
+
+    INV_CONTENT(item) = item;
+}
+
+void GiveItemLiveOrSaveContext(u8 item) {
+    if (gPlayState != nullptr) {
+        Item_Give(gPlayState, item);
+    } else {
+        GiveItemSaveContextOnly(item);
+    }
+}
+
+} // namespace
+
 void Rando::GiveItem(RandoItemId randoItemId) {
     switch (randoItemId) {
         case RI_CLOCK_TOWN_STRAY_FAIRY:
@@ -135,13 +367,13 @@ void Rando::GiveItem(RandoItemId randoItemId) {
         case RI_BOMB_BAG_20:
         case RI_BOMB_BAG_30:
         case RI_BOMB_BAG_40:
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             INV_CONTENT(ITEM_BOMBCHU) = ITEM_BOMBCHU;
             AMMO(ITEM_BOMB) = AMMO(ITEM_BOMBCHU) = CUR_CAPACITY(UPG_BOMB_BAG);
             break;
         case RI_WALLET_ADULT:
         case RI_WALLET_GIANT:
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             // Fill Rupees to max, this may be opt-in later
             // Use remaining space rather than full capacity to avoid excess in the accumulator.
             gSaveContext.rupeeAccumulator = CUR_CAPACITY(UPG_WALLET) - gSaveContext.save.saveInfo.playerData.rupees;
@@ -161,43 +393,43 @@ void Rando::GiveItem(RandoItemId randoItemId) {
             break;
         case RI_MOONS_TEAR:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_MOONS_TEAR);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_DEED_LAND:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_DEED_LAND);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_DEED_SWAMP:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_DEED_SWAMP);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_DEED_MOUNTAIN:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_DEED_MOUNTAIN);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_DEED_OCEAN:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_DEED_OCEAN);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_ROOM_KEY:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_ROOM_KEY);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_LETTER_TO_MAMA:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_LETTER_TO_MAMA);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_LETTER_TO_KAFEI:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_LETTER_TO_KAFEI);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_PENDANT_OF_MEMORIES:
             Flags_SetRandoInf(RANDO_INF_OBTAINED_PENDANT_OF_MEMORIES);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_POWDER_KEG:
             Flags_SetWeekEventReg(WEEKEVENTREG_HAS_POWDERKEG_PRIVILEGES);
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_SWORD_GILDED:
         case RI_SWORD_KOKIRI:
@@ -209,7 +441,7 @@ void Rando::GiveItem(RandoItemId randoItemId) {
                 SET_STOLEN_ITEM_2(STOLEN_ITEM_NONE);
             }
 
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_TINGLE_MAP_CLOCK_TOWN:
             Inventory_SetWorldMapCloudVisibility(TINGLE_MAP_CLOCK_TOWN);
@@ -288,12 +520,12 @@ void Rando::GiveItem(RandoItemId randoItemId) {
         case RI_HEART_CONTAINER:
         case RI_HEART_PIECE:
             gSaveContext.healthAccumulator = gSaveContext.save.saveInfo.playerData.healthCapacity + 0x10;
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
         case RI_BOTTLE_RED_POTION:
             // ITEM_LONGSHOT will give a Red Potion bottle on the first available bottle slot
             // ITEM_POTION_RED will put a Red Potion bottle on the first bottle slot
-            Item_Give(gPlayState, ITEM_LONGSHOT);
+            GiveItemLiveOrSaveContext(ITEM_LONGSHOT);
             break;
         case RI_SOUL_BOSS_GOHT:
         case RI_SOUL_BOSS_GYORG:
@@ -384,7 +616,7 @@ void Rando::GiveItem(RandoItemId randoItemId) {
         case RI_NONE:
             break;
         default:
-            Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
+            GiveItemLiveOrSaveContext(Rando::StaticData::Items[randoItemId].itemId);
             break;
     }
 }
