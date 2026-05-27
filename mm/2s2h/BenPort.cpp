@@ -142,7 +142,7 @@ static void CancelAltAssetsStartupRefresh() {
 static void RegisterAltAssetsStartupRefresh() {
     CancelAltAssetsStartupRefresh();
 
-    if (!prevAltAssets) {
+    if (!CVarGetInteger("gEnhancements.Mods.AlternateAssets", 0)) {
         return;
     }
 
@@ -725,6 +725,8 @@ extern "C" void InitOTR() {
     OTRMessage_Init();
     OTRAudio_Init();
     OTRExtScanner();
+    prevAltAssets = CVarGetInteger("gEnhancements.Mods.AlternateAssets", 0);
+    Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(prevAltAssets);
     PlayerCustomFlipbooks_Patch();
     RegisterAltAssetsStartupRefresh();
 

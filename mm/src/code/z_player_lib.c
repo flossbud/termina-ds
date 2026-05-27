@@ -1738,11 +1738,11 @@ TexturePtr sPlayerEyesTextures[PLAYER_FORM_MAX][PLAYER_EYES_MAX] = {
         gLinkHumanEyesOpenTex,        // PLAYER_EYES_OPEN
         gLinkHumanEyesHalfTex,        // PLAYER_EYES_HALF
         gLinkHumanEyesClosedTex,      // PLAYER_EYES_CLOSED
-        gLinkHumanEyesRollRightTex,   // PLAYER_EYES_ROLL_RIGHT
-        gLinkHumanEyesRollLeftTex,    // PLAYER_EYES_ROLL_LEFT
-        gLinkHumanEyesRollUpTex,      // PLAYER_EYES_ROLL_UP
-        gLinkHumanEyesRollDownTex,    // PLAYER_EYES_ROLL_DOWN
-        object_link_child_Tex_003800, // PLAYER_EYES_7
+        gLinkHumanEyesRightTex,   // PLAYER_EYES_ROLL_RIGHT
+        gLinkHumanEyesLeftTex,    // PLAYER_EYES_ROLL_LEFT
+        gLinkHumanEyesUpTex,      // PLAYER_EYES_ROLL_UP
+        gLinkHumanEyesDownTex,    // PLAYER_EYES_ROLL_DOWN
+        gLinkHumanEyesWincingTex, // PLAYER_EYES_7
     },
 };
 
@@ -1768,9 +1768,9 @@ TexturePtr sPlayerMouthTextures[PLAYER_FORM_MAX][PLAYER_MOUTH_MAX] = {
     { NULL, NULL, NULL, NULL },
     {
         gLinkHumanMouthClosedTex, // PLAYER_MOUTH_CLOSED
-        gLinkHumanMouthTeethTex,  // PLAYER_MOUTH_TEETH
-        gLinkHumanMouthAngryTex,  // PLAYER_MOUTH_ANGRY
-        gLinkHumanMouthHappyTex,  // PLAYER_MOUTH_HAPPY
+        gLinkHumanMouthHalfTex,   // PLAYER_MOUTH_TEETH
+        gLinkHumanMouthOpenTex,   // PLAYER_MOUTH_ANGRY
+        gLinkHumanMouthSmileTex,  // PLAYER_MOUTH_HAPPY
     },
 };
 
