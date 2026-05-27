@@ -116,17 +116,6 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                         (uint32_t)CVarGetInteger(randoStaticOption.cvar, randoStaticOption.defaultValue);
                 }
 
-#ifdef __ANDROID__
-                if (RANDO_SAVE_OPTIONS[RO_LOGIC] == RO_LOGIC_GLITCHLESS) {
-                    RANDO_SAVE_OPTIONS[RO_LOGIC] = RO_LOGIC_NEARLY_NO_LOGIC;
-                    Notification::Emit({
-                        .prefix = "Randomizer Beta:",
-                        .prefixColor = ImVec4(1.0f, 0.85f, 0.25f, 1.0f),
-                        .message = "Glitchless logic is not available on Android yet; using Nearly No Logic.",
-                    });
-                }
-#endif
-
                 // If Skulltula tokens are not shuffled, use the vanilla requirement
                 if (!RANDO_SAVE_OPTIONS[RO_SHUFFLE_GOLD_SKULLTULAS]) {
                     RANDO_SAVE_OPTIONS[RO_SKULLTULA_TOKENS_REQUIRED] = SPIDER_HOUSE_TOKENS_REQUIRED;
