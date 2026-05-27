@@ -991,8 +991,7 @@ extern "C" void Graph_ProcessGfxCommands(Gfx* commands) {
         Ship::Context::GetInstance()->GetResourceManager()->SetAltAssetsEnabled(curAltAssets);
         gfx_texture_cache_clear();
         PlayerCustomFlipbooks_Patch();
-        // TODO: skeleton patch, hooks
-        // SOH::SkeletonPatcher::UpdateSkeletons();
+        SOH::SkeletonPatcher::UpdateSkeletons();
         // GameInteractor::Instance->ExecuteHooks<GameInteractor::OnAssetAltChange>();
     }
 
@@ -1455,7 +1454,32 @@ extern "C" int ResourceMgr_OTRSigCheck(char* imgData) {
     return 0;
 }
 
+// Load animation with explicit alt asset path checking.
+// When Alt Assets is ON, try the alt path first and fall back to the regular path if the alt resource is missing or invalid.
 extern "C" AnimationHeaderCommon* ResourceMgr_LoadAnimByName(const char* path) {
+    bool isAlt = ResourceMgr_IsAltAssetsEnabled();
+
+    if (isAlt) {
+        std::string pathStr = std::string(path);
+        static const std::string sOtr = "__OTR__";
+
+        if (pathStr.starts_with(sOtr)) {
+            pathStr = pathStr.substr(sOtr.length());
+        }
+
+        pathStr = Ship::IResource::gAltAssetPrefix + pathStr;
+        AnimationHeaderCommon* animHeader = (AnimationHeaderCommon*)ResourceGetDataByName(pathStr.c_str());
+
+        if (animHeader != NULL && animHeader->frameCount > 0) {
+            AnimationHeader* normalAnim = (AnimationHeader*)animHeader;
+            PlayerAnimationHeader* playerAnim = (PlayerAnimationHeader*)animHeader;
+
+            if (normalAnim->frameData != NULL || playerAnim->segmentVoid != NULL) {
+                return animHeader;
+            }
+        }
+    }
+
     return (AnimationHeaderCommon*)ResourceGetDataByName(path);
 }
 
@@ -1484,7 +1508,7 @@ extern "C" SkeletonHeader* ResourceMgr_LoadSkeletonByName(const char* path, Skel
     // Therefore we can take this opportunity to take note of the Skeleton that is created...
     if (skelAnime != nullptr) {
         auto stringPath = std::string(path);
-        // Ship::SkeletonPatcher::RegisterSkeleton(stringPath, skelAnime);
+        SOH::SkeletonPatcher::RegisterSkeleton(stringPath, skelAnime);
     }
 
     return skelHeader;
