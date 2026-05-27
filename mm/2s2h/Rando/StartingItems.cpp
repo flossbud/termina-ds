@@ -190,7 +190,7 @@ void SetStartingItemsInConfig(std::vector<RandoItemId>& startingItems) {
         }
     }
     Ship::Context::GetInstance()->GetConfig()->SetBlock("CVars.gRando.StartingItems", startingItemsJson);
-    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    Ship::Context::GetInstance()->GetConfig()->Save();
 }
 
 } // namespace Rando
