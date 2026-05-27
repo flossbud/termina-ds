@@ -289,14 +289,7 @@ static void DrawGeneralTab() {
     ImGui::PopStyleColor();
 
     ImGui::SeparatorText("Seed Generation");
-#ifdef __ANDROID__
-    ImGui::TextWrapped("Experimental: Android seed generation is not enabled in this build.");
-    ImGui::BeginDisabled();
-#endif
     UIWidgets::CVarCheckbox("Enable Rando (Randomizes new files upon creation)", "gRando.Enabled");
-#ifdef __ANDROID__
-    ImGui::EndDisabled();
-#endif
 
     if (UIWidgets::CVarCombobox("Seed", "gRando.SpoilerFileIndex", Rando::Spoiler::spoilerOptions)) {
         if (CVarGetInteger("gRando.SpoilerFileIndex", 0) == 0) {

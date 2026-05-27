@@ -15,17 +15,32 @@ extern "C" {
 #include "overlays/actors/ovl_En_Sth/z_en_sth.h"
 }
 
+namespace {
+bool sPendingStartingItemsGrant = false;
+
+void GrantStartingItemsWhenReady() {
+    if (gPlayState == nullptr) {
+        sPendingStartingItemsGrant = true;
+        return;
+    }
+
+    Rando::GrantStartingItems();
+    sPendingStartingItemsGrant = false;
+}
+} // namespace
+
+void Rando::MiscBehavior::GrantPendingStartingItems() {
+    if (!sPendingStartingItemsGrant || !IS_RANDO || gPlayState == nullptr) {
+        return;
+    }
+
+    Rando::GrantStartingItems();
+    sPendingStartingItemsGrant = false;
+}
+
 // Very primitive randomizer implementation, when a save is created, if rando is enabled
 // we set the save type to rando and shuffle all checks and persist the results to the save
 void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
-#ifdef __ANDROID__
-    if (CVarGetInteger("gRando.Enabled", 0)) {
-        SPDLOG_WARN("Randomizer file creation is disabled on Android while the flow is experimental.");
-        CVarSetInteger("gRando.Enabled", 0);
-    }
-    return;
-#endif
-
     if (CVarGetInteger("gRando.Enabled", 0)) {
         gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_RANDO;
         // Zero out the rando struct
@@ -140,8 +155,8 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     }
                 }
 
-                // Grant the starting stuff
-                Rando::GrantStartingItems();
+                // Grant the starting stuff once a live play state exists.
+                GrantStartingItemsWhenReady();
 
                 // Run prelim compatibility/validation checks before attempting to place items
 
@@ -153,8 +168,10 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                 }
 
                 if (RANDO_SAVE_OPTIONS[RO_LOGIC] == RO_LOGIC_VANILLA) {
-                    GiveItem(RI_SWORD_KOKIRI);
-                    GiveItem(RI_SHIELD_HERO);
+                    if (gPlayState != nullptr) {
+                        GiveItem(RI_SWORD_KOKIRI);
+                        GiveItem(RI_SHIELD_HERO);
+                    }
 
                     for (auto& [randoCheckId, randoStaticCheck] : Rando::StaticData::Checks) {
                         if (randoStaticCheck.randoCheckId != RC_UNKNOWN) {
@@ -192,8 +209,8 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                 nlohmann::json spoiler = Rando::Spoiler::LoadFromFile(fileName);
 
                 Rando::Spoiler::ApplyToSaveContext(spoiler);
-                // Grant the starting stuff
-                Rando::GrantStartingItems();
+                // Grant the starting stuff once a live play state exists.
+                GrantStartingItemsWhenReady();
 
                 Audio_PlaySfx(NA_SE_SY_ATTENTION_SOUND);
             }
