@@ -226,6 +226,7 @@ void RefreshMetrics() {
 static RegisterShipInitFunc refreshMetricsInit(RefreshMetrics, {
                                                                    // I Don't love this, but it works...
                                                                    "gRando.ExcludedChecks",
+                                                                   "gRando.StartingItems",
                                                                    "gRando.Options.RO_ACCESS_DUNGEONS",
                                                                    "gRando.Options.RO_ACCESS_MAJORA_MASKS_COUNT",
                                                                    "gRando.Options.RO_ACCESS_MAJORA_REMAINS_COUNT",
@@ -783,6 +784,8 @@ static void DrawStartingItemsTab() {
             setStartingItemsList.erase(setStartingItemsList.begin() + listIndex);
             Rando::SetStartingItemsInConfig(setStartingItemsList);
             RefreshMetrics();
+            ImGui::PopID();
+            break;
         }
         UIWidgets::Tooltip(tooltipText.c_str());
         listIndex++;
