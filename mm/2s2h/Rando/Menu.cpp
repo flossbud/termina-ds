@@ -783,7 +783,6 @@ static void DrawStartingItemsTab() {
                                ImVec4(0, 0, 0, 0), tintColor)) {
             setStartingItemsList.erase(setStartingItemsList.begin() + listIndex);
             Rando::SetStartingItemsInConfig(setStartingItemsList);
-            RefreshMetrics();
             ImGui::PopID();
             break;
         }
@@ -867,7 +866,6 @@ static void DrawStartingItemsTab() {
 
                             setStartingItemsList.push_back(item);
                             Rando::SetStartingItemsInConfig(setStartingItemsList);
-                            RefreshMetrics();
                         }
                     }
                     UIWidgets::Tooltip(tooltipText.c_str());
