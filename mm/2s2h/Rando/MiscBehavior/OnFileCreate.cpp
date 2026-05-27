@@ -19,13 +19,7 @@ namespace {
 bool sPendingStartingItemsGrant = false;
 
 void GrantStartingItemsWhenReady() {
-    if (gPlayState == nullptr) {
-        sPendingStartingItemsGrant = true;
-        return;
-    }
-
-    Rando::GrantStartingItems();
-    sPendingStartingItemsGrant = false;
+    sPendingStartingItemsGrant = true;
 }
 } // namespace
 
@@ -86,6 +80,17 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     RANDO_SAVE_OPTIONS[randoOptionId] =
                         (uint32_t)CVarGetInteger(randoStaticOption.cvar, randoStaticOption.defaultValue);
                 }
+
+#ifdef __ANDROID__
+                if (RANDO_SAVE_OPTIONS[RO_LOGIC] == RO_LOGIC_GLITCHLESS) {
+                    RANDO_SAVE_OPTIONS[RO_LOGIC] = RO_LOGIC_NEARLY_NO_LOGIC;
+                    Notification::Emit({
+                        .prefix = "Randomizer Beta:",
+                        .prefixColor = ImVec4(1.0f, 0.85f, 0.25f, 1.0f),
+                        .message = "Glitchless logic is not available on Android yet; using Nearly No Logic.",
+                    });
+                }
+#endif
 
                 // If Skulltula tokens are not shuffled, use the vanilla requirement
                 if (!RANDO_SAVE_OPTIONS[RO_SHUFFLE_GOLD_SKULLTULAS]) {
@@ -155,9 +160,6 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     }
                 }
 
-                // Grant the starting stuff once a live play state exists.
-                GrantStartingItemsWhenReady();
-
                 // Run prelim compatibility/validation checks before attempting to place items
 
                 // Verify we have at least one time item if clock shuffle is enabled
@@ -168,11 +170,6 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                 }
 
                 if (RANDO_SAVE_OPTIONS[RO_LOGIC] == RO_LOGIC_VANILLA) {
-                    if (gPlayState != nullptr) {
-                        GiveItem(RI_SWORD_KOKIRI);
-                        GiveItem(RI_SHIELD_HERO);
-                    }
-
                     for (auto& [randoCheckId, randoStaticCheck] : Rando::StaticData::Checks) {
                         if (randoStaticCheck.randoCheckId != RC_UNKNOWN) {
                             RANDO_SAVE_CHECKS[randoCheckId].randoItemId = randoStaticCheck.randoItemId;
@@ -202,6 +199,9 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     }
                     Rando::Spoiler::RefreshOptions();
                 }
+
+                // Grant starting inventory after the seed has been written and an actual scene is active.
+                GrantStartingItemsWhenReady();
 
                 Audio_PlaySfx(NA_SE_SY_ATTENTION_SOUND);
             } else {
