@@ -320,6 +320,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE assets
     ${CMAKE_CURRENT_SOURCE_DIR}/../libultraship/src/graphic/Fast3D/U64/PR
     ${CMAKE_CURRENT_SOURCE_DIR}/../libultraship/src/graphic
     ${CMAKE_CURRENT_SOURCE_DIR}/../ZAPDTR/ZAPD/resource/type
+    ${CMAKE_BINARY_DIR}/_deps/png-src
+    ${CMAKE_BINARY_DIR}/_deps/png-build
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/2s2h/
 	${SDL2-INCLUDE}
@@ -619,6 +621,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "libultraship;"
         "ZAPDLib;"
+        "png;"
         SDL2::SDL2
         Threads::Threads
     )
