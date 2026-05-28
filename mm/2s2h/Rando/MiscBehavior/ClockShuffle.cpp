@@ -6,6 +6,15 @@
 
 extern "C" {
 #include "variables.h"
+#include "functions.h"
+#include "overlays/actors/ovl_En_Test4/z_en_test4.h"
+#include "overlays/actors/ovl_Obj_Tokei_Step/z_obj_tokei_step.h"
+
+void func_80A42198(EnTest4* thisx);
+void func_80A425E4(EnTest4* thisx, PlayState* play);
+void ObjTokeiStep_SetupOpen(ObjTokeiStep* thisx);
+void ObjTokeiStep_DrawOpen(Actor* thisx, PlayState* play);
+void ObjTokeiStep_DoNothing(ObjTokeiStep* thisx, PlayState* play);
 }
 
 static constexpr u16 DAWN_TIME = CLOCK_TIME(6, 0);
@@ -268,6 +277,115 @@ static void EnforceOwnedTime() {
     }
 }
 
+static bool SceneNeedsReloadForTimeSkip(s16 sceneId) {
+    return sceneId == SCENE_BOWLING;
+}
+
+static void ForceSceneReload() {
+    Player* player = GET_PLAYER(gPlayState);
+
+    gPlayState->nextEntrance = gSaveContext.save.entrance;
+    gPlayState->transitionTrigger = TRANS_TRIGGER_START;
+    gPlayState->transitionType = TRANS_TYPE_FADE_BLACK_FAST;
+
+    Play_SetRespawnData(&gPlayState->state, RESPAWN_MODE_RETURN, gSaveContext.save.entrance,
+                        gPlayState->roomCtx.curRoom.num, PLAYER_PARAMS(0xFF, PLAYER_INITMODE_B), &player->unk_3C0,
+                        player->unk_3CC);
+
+    gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK;
+    gSaveContext.respawnFlag = 2;
+}
+
+static bool CheckSkippedTime(u8* day, u16* time) {
+    if (gPlayState == NULL || gPlayState->envCtx.sceneTimeSpeed == 0 || Play_InCsMode(gPlayState) || *day >= 4) {
+        return false;
+    }
+
+    if (IsInTerminalRange(*day, *time)) {
+        return false;
+    }
+
+    int currentHalfDay = GetHalfDayIndexFromTime(*day, *time);
+    if (Rando::Logic::OwnsClockHalfDay(currentHalfDay)) {
+        return false;
+    }
+
+    int nextHalfDay = FindNextOwnedHalfDayAfter(currentHalfDay, Rando::ClockItems::GetAllOwnedHalfDaysMask());
+    if (nextHalfDay == Rando::ClockItems::TERMINAL_STATE) {
+        *day = 3;
+        *time = GetConfiguredTerminalTime();
+    } else {
+        *day = (nextHalfDay / 2) + 1;
+        *time = (nextHalfDay & 1) ? DUSK_TIME : DAWN_TIME;
+    }
+
+    return true;
+}
+
+static bool CheckAndSkipUnownedTime(Actor* timeActor) {
+    EnTest4* enTest4 = (EnTest4*)timeActor;
+    u8 day = gSaveContext.save.day;
+    u16 time = gSaveContext.save.time + CLOCK_TIME_MINUTE;
+
+    if (IsNight(enTest4->unk_146) && !IsNight(time)) {
+        day++;
+    }
+
+    if (day >= 4 || !CheckSkippedTime(&day, &time)) {
+        return false;
+    }
+
+    gSaveContext.save.day = day;
+    gSaveContext.save.time = time;
+
+    if (SceneNeedsReloadForTimeSkip(gPlayState->sceneId)) {
+        ForceSceneReload();
+        return true;
+    }
+
+    gWeatherMode = WEATHER_MODE_CLEAR;
+    gPlayState->envCtx.lightningState = LIGHTNING_OFF;
+
+    if (time == DAWN_TIME) {
+        enTest4->csIdIndex = 0;
+        gSaveContext.save.day--;
+    } else {
+        enTest4->csIdIndex = (time == DUSK_TIME) ? 1 : (IsNight(time) ? 0 : 1);
+        Interface_NewDay(gPlayState, gSaveContext.save.day);
+        gPlayState->numSetupActors = -gPlayState->numSetupActors;
+
+        enTest4->lastBellTime = time;
+        if (gSaveContext.save.day == 3) {
+            func_80A42198(enTest4);
+        } else {
+            func_80A425E4(enTest4, gPlayState);
+        }
+    }
+
+    if (gPlayState->sequenceCtx.ambienceId != AMBIENCE_ID_13) {
+        SEQCMD_STOP_SEQUENCE(SEQ_PLAYER_AMBIENCE, 0);
+        SEQCMD_STOP_SEQUENCE(SEQ_PLAYER_BGM_MAIN, 240);
+        gSaveContext.seqId = (u8)NA_BGM_DISABLED;
+        gSaveContext.ambienceId = AMBIENCE_ID_DISABLED;
+        Environment_PlaySceneSequence(gPlayState);
+    }
+
+    gSaveContext.screenScaleFlag = false;
+    gSaveContext.screenScale = 1000.0f;
+
+    if (gSaveContext.save.day == 3 && time < DAWN_TIME) {
+        ObjTokeiStep* objTokeiStep = (ObjTokeiStep*)Actor_FindNearby(
+            gPlayState, &GET_PLAYER(gPlayState)->actor, ACTOR_OBJ_TOKEI_STEP, ACTORCAT_BG, 99999.9f);
+        if (objTokeiStep != NULL && objTokeiStep->actionFunc == ObjTokeiStep_DoNothing) {
+            objTokeiStep->dyna.actor.draw = ObjTokeiStep_DrawOpen;
+            ObjTokeiStep_SetupOpen(objTokeiStep);
+        }
+    }
+
+    enTest4->unk_146 = (time == DAWN_TIME) ? (time - CLOCK_TIME_MINUTE) : time;
+    return true;
+}
+
 void Rando::ClockShuffle::OnFileLoad() {
     bool shouldRegister = IS_RANDO && RANDO_SAVE_OPTIONS[RO_CLOCK_SHUFFLE];
 
@@ -276,6 +394,14 @@ void Rando::ClockShuffle::OnFileLoad() {
     }
 
     COND_HOOK(OnPlayDestroy, shouldRegister, []() { EnforceOwnedTime(); });
+
+    COND_ID_HOOK(ShouldActorUpdate, ACTOR_EN_TEST4, shouldRegister, [](Actor* actor, bool* should) {
+        if (!CHECK_EVENTINF(EVENTINF_17) && CheckAndSkipUnownedTime(actor)) {
+            *should = false;
+            return;
+        }
+        *should = true;
+    });
 
     COND_ID_HOOK(OnOpenText, 0x1B8A, shouldRegister, [](u16* textId, bool* loadFromMessageTable) {
         ProcessClockShuffleMessage(textId, loadFromMessageTable, true);
