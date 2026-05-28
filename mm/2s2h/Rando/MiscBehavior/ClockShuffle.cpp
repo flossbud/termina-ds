@@ -1,5 +1,15 @@
 #include "ClockShuffle.h"
+#include "Rando/Rando.h"
 #include "Rando/Logic/Logic.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/CustomMessage/CustomMessage.h"
+
+extern "C" {
+#include "variables.h"
+}
+
+static constexpr u16 DAWN_TIME = CLOCK_TIME(6, 0);
+static constexpr u16 DUSK_TIME = CLOCK_TIME(18, 0);
 
 int Rando::ClockItems::GetHalfDayIndexFromClockItem(RandoItemId clockItemId) {
     switch (clockItemId) {
@@ -66,16 +76,244 @@ bool Rando::ClockItems::IsDayClock(RandoItemId itemId) {
     return itemId == RI_TIME_DAY_1 || itemId == RI_TIME_DAY_2 || itemId == RI_TIME_DAY_3;
 }
 
-void Rando::ClockShuffle::OnFileLoad() {
+static int FindNextOwnedHalfDayAfter(int startHalfDay, u8 ownedMask) {
+    if (startHalfDay < 0 || startHalfDay >= Rando::ClockItems::HALF_COUNT) {
+        return Rando::ClockItems::TERMINAL_STATE;
+    }
+
+    for (int halfDayIndex = startHalfDay + 1; halfDayIndex < Rando::ClockItems::HALF_COUNT; ++halfDayIndex) {
+        if (ownedMask & (1 << halfDayIndex)) {
+            return halfDayIndex;
+        }
+    }
+
+    return Rando::ClockItems::TERMINAL_STATE;
 }
 
-void Rando::ClockShuffle::SetTimeToHalfDayStart(int halfDayIndex) {
+static bool IsNight(u16 time) {
+    return (time < DAWN_TIME) || (time >= DUSK_TIME);
+}
+
+static u16 GetConfiguredTerminalTime() {
+    int terminalMinutes = RANDO_SAVE_OPTIONS[RO_CLOCK_TERMINAL_TIME];
+    return CLOCK_TIME(0, terminalMinutes);
+}
+
+static bool IsInTerminalRange(s32 day, u16 time) {
+    if (day != 3) {
+        return false;
+    }
+
+    u16 terminalTime = GetConfiguredTerminalTime();
+
+    if (terminalTime >= DUSK_TIME) {
+        return (time >= terminalTime) || (time < DAWN_TIME);
+    }
+
+    return (time >= terminalTime && time < DAWN_TIME);
+}
+
+static int GetHalfDayIndexFromTime(s32 day, u16 time) {
+    if (day < 1) {
+        return Rando::ClockItems::HALF_DAY1_DAY;
+    }
+
+    int halfDay = (day - 1) * 2;
+    if (IsNight(time)) {
+        halfDay++;
+    }
+    return halfDay;
+}
+
+static int GetCurrentHalfDayIndex() {
+    u16 currentTime = gSaveContext.save.time;
+    s32 currentDay = gSaveContext.save.day;
+
+    if (currentDay >= 4 || currentDay == 0) {
+        return Rando::ClockItems::TERMINAL_STATE;
+    }
+
+    if (IsInTerminalRange(currentDay, currentTime)) {
+        return Rando::ClockItems::TERMINAL_STATE;
+    }
+
+    return GetHalfDayIndexFromTime(currentDay, currentTime);
 }
 
 bool Rando::ClockShuffle::IsTimeOwnedForClockShuffle(s32 day, u16 time) {
-    return true;
+    if (!RANDO_SAVE_OPTIONS[RO_CLOCK_SHUFFLE]) {
+        return true;
+    }
+    if (day < 1 || day > 3) {
+        return true;
+    }
+    if (IsInTerminalRange(day, time)) {
+        return true;
+    }
+
+    return Rando::Logic::OwnsClockHalfDay(GetHalfDayIndexFromTime(day, time));
 }
 
 std::string Rando::ClockShuffle::GetTimeDescriptionForMessage(s32 day, u16 time) {
-    return "";
+    if (IsInTerminalRange(day, time)) {
+        return "%rFinal Hours%w";
+    }
+
+    bool isNight = IsNight(time);
+    std::string description = isNight ? "%rNight of the " : "%rDawn of the ";
+
+    if (day == 1) {
+        description += "First";
+    } else if (day == 2) {
+        description += "Second";
+    } else if (day == 3) {
+        description += "Third";
+    } else {
+        description += "Unknown";
+    }
+
+    description += " Day%w";
+    return description;
+}
+
+void Rando::ClockShuffle::SetTimeToHalfDayStart(int halfDayIndex) {
+    if (halfDayIndex < 0 || halfDayIndex >= Rando::ClockItems::HALF_COUNT) {
+        return;
+    }
+
+    gSaveContext.save.day = (halfDayIndex / 2) + 1;
+    gSaveContext.save.time = (halfDayIndex & 1) ? DUSK_TIME : DAWN_TIME;
+}
+
+static std::string GetHalfDayDescriptionForMessage(int halfDayIndex) {
+    if (halfDayIndex == Rando::ClockItems::TERMINAL_STATE) {
+        return "%rFinal Hours%w";
+    }
+
+    int targetDay = (halfDayIndex / 2) + 1;
+    bool isNight = (halfDayIndex & 1);
+    return Rando::ClockShuffle::GetTimeDescriptionForMessage(targetDay, isNight ? DUSK_TIME : DAWN_TIME);
+}
+
+static void ProcessClockShuffleMessage(u16* textId, bool* loadFromMessageTable, bool isSongOfTime) {
+    auto entry = CustomMessage::LoadVanillaMessageTableEntry(*textId);
+    int targetHalfDay;
+
+    if (isSongOfTime) {
+        targetHalfDay = Rando::ClockItems::FindOwnedHalfDay(false);
+    } else {
+        int currentHalfDay = GetCurrentHalfDayIndex();
+        u8 ownedHalfDaysMask = Rando::ClockItems::GetAllOwnedHalfDaysMask();
+        targetHalfDay = FindNextOwnedHalfDayAfter(currentHalfDay, ownedHalfDaysMask);
+    }
+
+    std::string destinationText = GetHalfDayDescriptionForMessage(targetHalfDay);
+    if (isSongOfTime) {
+        entry.msg = "Save and return to " + destinationText + "?\n%gYes\nNo\xC2";
+    } else {
+        entry.msg = "Time moves strangely...\nProceed to " + destinationText + "?\n%gYes\nNo\xC2";
+    }
+
+    CustomMessage::LoadCustomMessageIntoFont(entry);
+    *loadFromMessageTable = false;
+}
+
+static void EnforceOwnedTime() {
+    bool isCycleStart =
+        (gSaveContext.save.day == 0 || (gSaveContext.save.day == 1 && gSaveContext.save.time == DAWN_TIME));
+    bool isPendingDayTelop = (CHECK_EVENTINF(EVENTINF_TRIGGER_DAYTELOP) && gSaveContext.respawnFlag == -4);
+
+    if (!isCycleStart && !isPendingDayTelop) {
+        return;
+    }
+
+    int targetHalfDay = 0;
+    if (isPendingDayTelop) {
+        u8 nextDay = gSaveContext.save.day + 1;
+        targetHalfDay = (nextDay < 1) ? 0 : ((nextDay - 1) * 2);
+    }
+
+    int validHalfDay = Rando::ClockItems::TERMINAL_STATE;
+    if (Rando::Logic::OwnsClockHalfDay(targetHalfDay)) {
+        validHalfDay = targetHalfDay;
+    } else {
+        for (int i = targetHalfDay + 1; i < Rando::ClockItems::HALF_COUNT; ++i) {
+            if (Rando::Logic::OwnsClockHalfDay(i)) {
+                validHalfDay = i;
+                break;
+            }
+        }
+    }
+
+    if (validHalfDay != Rando::ClockItems::TERMINAL_STATE) {
+        if (validHalfDay == targetHalfDay) {
+            return;
+        }
+
+        if (validHalfDay & 1) {
+            gSaveContext.save.day = (validHalfDay / 2) + 1;
+            gSaveContext.save.time = DUSK_TIME;
+        } else {
+            gSaveContext.save.day = validHalfDay / 2;
+            gSaveContext.save.time = DAWN_TIME - 1;
+        }
+    } else {
+        gSaveContext.save.day = 3;
+        gSaveContext.save.time = GetConfiguredTerminalTime();
+    }
+
+    if (isPendingDayTelop) {
+        CLEAR_EVENTINF(EVENTINF_TRIGGER_DAYTELOP);
+        gSaveContext.respawnFlag = -8;
+    }
+}
+
+void Rando::ClockShuffle::OnFileLoad() {
+    bool shouldRegister = IS_RANDO && RANDO_SAVE_OPTIONS[RO_CLOCK_SHUFFLE];
+
+    if (shouldRegister) {
+        EnforceOwnedTime();
+    }
+
+    COND_HOOK(OnPlayDestroy, shouldRegister, []() { EnforceOwnedTime(); });
+
+    COND_ID_HOOK(OnOpenText, 0x1B8A, shouldRegister, [](u16* textId, bool* loadFromMessageTable) {
+        ProcessClockShuffleMessage(textId, loadFromMessageTable, true);
+    });
+
+    auto onDoubleTime = [](u16* textId, bool* loadFromMessageTable) {
+        ProcessClockShuffleMessage(textId, loadFromMessageTable, false);
+    };
+
+    COND_ID_HOOK(OnOpenText, 0x1B91, shouldRegister, onDoubleTime);
+    COND_ID_HOOK(OnOpenText, 0x1B90, shouldRegister, onDoubleTime);
+    COND_ID_HOOK(OnOpenText, 0x1B8F, shouldRegister, onDoubleTime);
+    COND_ID_HOOK(OnOpenText, 0x1B92, shouldRegister, onDoubleTime);
+    COND_ID_HOOK(OnOpenText, 0x1B8E, shouldRegister, onDoubleTime);
+
+    COND_VB_SHOULD(VB_TIME_UNTIL_MOON_CRASH_CALCULATION, shouldRegister, {
+        *should = false;
+        u32* timeVar = va_arg(args, u32*);
+        u8 ownedHalfDaysMask = Rando::ClockItems::GetAllOwnedHalfDaysMask();
+        u32 totalHours = 0;
+
+        for (int halfDayIndex = 0; halfDayIndex < Rando::ClockItems::HALF_COUNT; ++halfDayIndex) {
+            if (ownedHalfDaysMask & (1 << halfDayIndex)) {
+                totalHours += 12;
+            }
+        }
+
+        bool shouldIncludeTerminalHours = (GetCurrentHalfDayIndex() == Rando::ClockItems::TERMINAL_STATE) ||
+                                          !Rando::Logic::OwnsClockHalfDay(Rando::ClockItems::HALF_DAY3_NIGHT);
+
+        if (shouldIncludeTerminalHours) {
+            u16 terminalTime = GetConfiguredTerminalTime();
+            u32 terminalZeroed = ZERO_DAY_START(terminalTime);
+            u32 timeDiff = (DAY_LENGTH - terminalZeroed) % DAY_LENGTH;
+            u32 terminalHours = (timeDiff + CLOCK_TIME_HOUR - 1) / CLOCK_TIME_HOUR;
+            totalHours += terminalHours;
+        }
+
+        *timeVar = totalHours * CLOCK_TIME_HOUR;
+    });
 }
