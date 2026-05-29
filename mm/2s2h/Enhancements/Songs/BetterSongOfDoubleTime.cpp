@@ -44,7 +44,7 @@ static const char* sDoWeekTableCopy[] = {
     gClockDayFinalTex,
 };
 
-static HOOK_ID onPlayerUpdateHookId = 0;
+static HOOK_ID onTimePickerUpdateHookId = 0;
 static HOOK_ID onEnTest6KillHookId = 0;
 static HOOK_ID onPlayDestroyHookId = 0;
 
@@ -92,10 +92,10 @@ void UpdateStickDirectionPromptAnim() {
     sArrowAnimColor.a = COL_CHAN_MIX(200, 50.0f, arrowAnimTween);
 }
 
-void OnPlayerUpdate(Actor* actor) {
+void OnTimePickerUpdate() {
     if (!sActivelyChangingTime) {
-        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnActorUpdate>(onPlayerUpdateHookId);
-        onPlayerUpdateHookId = 0;
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateUpdate>(onTimePickerUpdateHookId);
+        onTimePickerUpdateHookId = 0;
         return;
     }
 
@@ -110,6 +110,8 @@ void OnPlayerUpdate(Actor* actor) {
         Audio_PlaySfx_MessageCancel();
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_END;
         sActivelyChangingTime = false;
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateUpdate>(onTimePickerUpdateHookId);
+        onTimePickerUpdateHookId = 0;
         return;
     }
 
@@ -132,6 +134,8 @@ void OnPlayerUpdate(Actor* actor) {
         Audio_PlaySfx_MessageDecide();
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_APPLY_DOUBLE_SOT;
         sActivelyChangingTime = false;
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateUpdate>(onTimePickerUpdateHookId);
+        onTimePickerUpdateHookId = 0;
 
         // Use a hook for when the song of double time cutscene is finished to reload the scene via a respawn
         // This is to ensure that no actors or scripts are processed with the new time on the fly,
@@ -348,9 +352,11 @@ void RegisterBetterSongOfDoubleTime() {
         sSelectedTime = CLOCK_TIME(0, 0);
         sSelectedDay = 0;
 
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateUpdate>(onTimePickerUpdateHookId);
         GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnActorKill>(onEnTest6KillHookId);
         GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPlayDestroy>(onPlayDestroyHookId);
 
+        onTimePickerUpdateHookId = 0;
         onEnTest6KillHookId = 0;
         onPlayDestroyHookId = 0;
     });
@@ -380,8 +386,8 @@ void RegisterBetterSongOfDoubleTime() {
         sSelectedTime = gSaveContext.save.time;
         sSelectedDay = gSaveContext.save.day;
 
-        onPlayerUpdateHookId = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::OnActorUpdate>(
-            ACTOR_PLAYER, OnPlayerUpdate);
+        onTimePickerUpdateHookId =
+            GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateUpdate>(OnTimePickerUpdate);
     });
 
     COND_VB_SHOULD(VB_PREVENT_CLOCK_DISPLAY, CVAR, {
