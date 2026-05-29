@@ -13,6 +13,15 @@ extern "C" {
 #include "assets/objects/gameplay_keep/gameplay_keep.h"
 #include "assets/interface/message_static/message_static.h"
 #include "assets/interface/nes_font_static/nes_font_static.h"
+
+typedef struct OcarinaControlStick {
+    s8 x;
+    s8 y;
+} OcarinaControlStick;
+
+extern OcarinaControlStick sOcarinaInputStickRel;
+extern u32 sOcarinaInputButtonCur;
+extern s32 sOcarinaInputButtonPress;
 }
 
 #define CVAR_NAME "gEnhancements.Songs.BetterSongOfDoubleTime"
@@ -104,9 +113,11 @@ void OnTimePickerUpdate() {
     gPlayState->interfaceCtx.bAlpha = 255;
 
     Input* input = &gPlayState->state.input[0];
+    u32 buttonsCur = input->cur.button | sOcarinaInputButtonCur;
+    u32 buttonsPress = input->press.button | (u32)sOcarinaInputButtonPress;
 
     // Pressing B should cancel the song
-    if (CHECK_BTN_ALL(input->press.button, BTN_B)) {
+    if (CHECK_BTN_ALL(buttonsPress, BTN_B)) {
         Audio_PlaySfx_MessageCancel();
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_END;
         sActivelyChangingTime = false;
@@ -116,7 +127,7 @@ void OnTimePickerUpdate() {
     }
 
     // Pressing A should confirm the song
-    if (CHECK_BTN_ALL(input->press.button, BTN_A) && gPlayState->msgCtx.msgMode == MSGMODE_NONE) {
+    if (CHECK_BTN_ALL(buttonsPress, BTN_A) && gPlayState->msgCtx.msgMode == MSGMODE_NONE) {
         // Check if the selected time is owned in ClockShuffle mode
         if (!Rando::ClockShuffle::IsTimeOwnedForClockShuffle(sSelectedDay, sSelectedTime)) {
             // Play error sound
@@ -178,8 +189,8 @@ void OnTimePickerUpdate() {
 
     static s8 sDPadRepeatState = 0;
     static s8 sDPadRepeatTimer = 0;
-    bool leftHeld = CHECK_BTN_ALL(input->cur.button, BTN_DLEFT) || CHECK_BTN_ALL(input->cur.button, BTN_CLEFT);
-    bool rightHeld = CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT) || CHECK_BTN_ALL(input->cur.button, BTN_CRIGHT);
+    bool leftHeld = CHECK_BTN_ALL(buttonsCur, BTN_DLEFT) || CHECK_BTN_ALL(buttonsCur, BTN_CLEFT);
+    bool rightHeld = CHECK_BTN_ALL(buttonsCur, BTN_DRIGHT) || CHECK_BTN_ALL(buttonsCur, BTN_CRIGHT);
 
     // Check for DPad/C-button movement first, inheriting full speed. The Android touch overlay maps its directional pad
     // through the C/right-stick path, so accept both while preserving the upstream DPad behavior.
@@ -215,8 +226,12 @@ void OnTimePickerUpdate() {
         sDPadRepeatState = 0;
     }
 
-    // Then analog stick direction, clamped to 30 minutes. Accept the right stick too for Android's touch overlay.
+    // Then analog stick direction, clamped to 30 minutes. The active song state mirrors input through the ocarina
+    // cache, and Android's touch overlay can also arrive through the right-stick/C-button path.
     s8 stickX = input->rel.stick_x;
+    if (ABS(sOcarinaInputStickRel.x) > ABS(stickX)) {
+        stickX = sOcarinaInputStickRel.x;
+    }
     if (ABS(input->cur.right_stick_x) > ABS(stickX)) {
         stickX = input->cur.right_stick_x;
     }
@@ -229,9 +244,9 @@ void OnTimePickerUpdate() {
         interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(stickX / 2, 30);
     }
 
-    if (CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
+    if (CHECK_BTN_ALL(buttonsCur, BTN_Z)) { // Holding Z slows the interval
         interval /= 6;
-    } else if (CHECK_BTN_ALL(input->cur.button, BTN_R)) { // Holding R speeds up the interval
+    } else if (CHECK_BTN_ALL(buttonsCur, BTN_R)) { // Holding R speeds up the interval
         interval *= 2;
     }
 
