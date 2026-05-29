@@ -322,6 +322,9 @@ bool Extractor::GetRomPathFromBox() {
         //Do nothing until it's chosen
         SDL_Delay(250);
     }
+    if (javaRomPath == NULL) {
+        return false;
+    }
     SDL_Log("%s",javaRomPath);
     selection.push_back(javaRomPath);
 #endif
@@ -588,6 +591,16 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     std::string romPath = std::filesystem::absolute(mCurrentRomPath).string();
     installPath = std::filesystem::absolute(installPath).string();
     exportdir = std::filesystem::absolute(exportdir).string();
+
+#ifdef __ANDROID__
+    if (!std::filesystem::exists(exportdir) || !std::filesystem::is_directory(exportdir) ||
+        access(exportdir.c_str(), W_OK) != 0) {
+        ShowErrorBox("Storage Permission Required",
+                     "The 2S2H folder is not writable. Please grant file access and restart the app.");
+        return false;
+    }
+#endif
+
     // Work this out in the temporary folder
     std::string tempdir = Mkdtemp();
     std::string curdir = std::filesystem::current_path().string();

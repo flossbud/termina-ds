@@ -46,10 +46,8 @@ public class MainActivity extends SDLActivity{
 
         preferences = getSharedPreferences("com.dishii.mm.prefs",Context.MODE_PRIVATE);
 
-        // Check if storage permissions are granted
         if (hasStoragePermission()) {
-            doVersionCheck();
-            checkAndSetupFiles();
+            beginSetupIfStorageReady();
         } else {
             requestStoragePermission();
         }
@@ -123,14 +121,65 @@ public class MainActivity extends SDLActivity{
         fileOrDirectory.delete();
     }
 
+    private File getTargetRootFolder() {
+        return new File(Environment.getExternalStorageDirectory(), "2S2H");
+    }
 
+    private void beginSetupIfStorageReady() {
+        File targetRootFolder = getTargetRootFolder();
+        if (!ensureTargetRootFolderReady(targetRootFolder)) {
+            showStorageAccessFailure();
+            return;
+        }
+
+        doVersionCheck();
+        checkAndSetupFiles();
+    }
 
     // Check if storage permission is granted
     private boolean hasStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+
         return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean ensureTargetRootFolderReady(File targetRootFolder) {
+        if (!isExternalStorageWritable() || !hasStoragePermission()) {
+            return false;
+        }
+
+        if (!targetRootFolder.exists() && !targetRootFolder.mkdirs()) {
+            Log.e("setupFiles", "Failed to create root folder: " + targetRootFolder.getAbsolutePath());
+            return false;
+        }
+
+        if (!targetRootFolder.isDirectory() || !targetRootFolder.canWrite()) {
+            Log.e("setupFiles", "Root folder is not writable: " + targetRootFolder.getAbsolutePath());
+            return false;
+        }
+
+        File probeFile = new File(targetRootFolder, ".write_test");
+        try (OutputStream out = new FileOutputStream(probeFile)) {
+            out.write(0);
+        } catch (IOException e) {
+            Log.e("setupFiles", "Write probe failed for: " + targetRootFolder.getAbsolutePath(), e);
+            return false;
+        }
+
+        if (probeFile.exists() && !probeFile.delete()) {
+            Log.w("setupFiles", "Failed to delete write probe: " + probeFile.getAbsolutePath());
+        }
+
+        return true;
     }
 
     private static final int STORAGE_PERMISSION_REQUEST_CODE = 2296;
@@ -144,8 +193,7 @@ public class MainActivity extends SDLActivity{
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
             } else {
-                // Already granted
-                checkAndSetupFiles();
+                beginSetupIfStorageReady();
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android 6–10 → request READ/WRITE at runtime
@@ -157,12 +205,12 @@ public class MainActivity extends SDLActivity{
                     STORAGE_PERMISSION_REQUEST_CODE);
         } else {
             // Below Android 6 → permissions granted at install time
-            checkAndSetupFiles();
+            beginSetupIfStorageReady();
         }
     }
 
     public void checkAndSetupFiles() {
-        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        File targetRootFolder = getTargetRootFolder();
         File assetsFolder = new File(targetRootFolder, "assets");
         File sohOtrFile = new File(targetRootFolder, "2ship.o2r");
 
@@ -191,11 +239,16 @@ public class MainActivity extends SDLActivity{
     private void setupFilesInBackground(File targetRootFolder) {
         boolean setupFailed = false;
 
+        if (!ensureTargetRootFolderReady(targetRootFolder)) {
+            showStorageAccessFailure();
+            return;
+        }
+
         File sourceOldRoot = getExternalFilesDir(null);
-        File sourceSavesDir = new File(sourceOldRoot, "saves"); // how to tell if there's anything to migrate
+        File sourceSavesDir = sourceOldRoot == null ? null : new File(sourceOldRoot, "saves"); // how to tell if there's anything to migrate
 
         // === Migration from old Android/data/.../files/ directory ===
-        if (sourceOldRoot != null && sourceSavesDir.isDirectory()) {
+        if (sourceOldRoot != null && sourceSavesDir != null && sourceSavesDir.isDirectory()) {
             Log.i("setupFiles", "Migrating old data from: " + sourceOldRoot.getAbsolutePath());
 
             File[] sourceFiles = sourceOldRoot.listFiles();
@@ -234,15 +287,16 @@ public class MainActivity extends SDLActivity{
 
         // Always ensure mods folder exists
         File targetModsDir = new File(targetRootFolder, "mods");
-        if (!targetModsDir.exists()) {
-            targetModsDir.mkdirs();
+        if (!targetModsDir.exists() && !targetModsDir.mkdirs()) {
+            showSetupFailure("Failed to create the mods folder.");
+            return;
         }
 
         // Copy assets/ from internal
         File targetAssetsDir = new File(targetRootFolder, "assets");
         try {
-            if (!targetAssetsDir.exists()) {
-                targetAssetsDir.mkdirs();
+            if (!targetAssetsDir.exists() && !targetAssetsDir.mkdirs()) {
+                throw new IOException("Failed to create assets folder: " + targetAssetsDir.getAbsolutePath());
             }
             AssetCopyUtil.copyAssetsToExternal(this, "assets", targetAssetsDir.getAbsolutePath());
             runOnUiThread(() -> Toast.makeText(this, "Assets copied", Toast.LENGTH_SHORT).show());
@@ -302,10 +356,10 @@ public class MainActivity extends SDLActivity{
             Uri selectedFileUri = data.getData();
             String fileName = "MM.z64";
 
-            File destinationDirectory = new File(Environment.getExternalStorageDirectory(), "2S2H");
+            File destinationDirectory = getTargetRootFolder();
             File destinationFile = new File(destinationDirectory, fileName);
 
-            if (destinationDirectory != null && selectedFileUri != null) {
+            if (selectedFileUri != null && ensureTargetRootFolderReady(destinationDirectory)) {
                 try {
                     InputStream in = getContentResolver().openInputStream(selectedFileUri);
                     OutputStream out = new FileOutputStream(destinationFile);
@@ -320,7 +374,12 @@ public class MainActivity extends SDLActivity{
                     out.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    showSetupFailure("The selected file could not be copied into the 2S2H folder.");
+                    return;
                 }
+            } else {
+                showStorageAccessFailure();
+                return;
             }
 
             // Now pass the path of the file in the new folder
@@ -330,12 +389,35 @@ public class MainActivity extends SDLActivity{
             // Handle MANAGE_EXTERNAL_STORAGE result
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (Environment.isExternalStorageManager()) {
-                    checkAndSetupFiles();
+                    beginSetupIfStorageReady();
                 } else {
                     Toast.makeText(this, "Storage permission is required to access files.", Toast.LENGTH_LONG).show();
                 }
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+            if (hasStoragePermission()) {
+                beginSetupIfStorageReady();
+            } else {
+                showStorageAccessFailure();
+            }
+        }
+    }
+
+    private void showStorageAccessFailure() {
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle("Storage Permission Required")
+                .setMessage("The app needs file access to create and update the 2S2H folder. Please grant storage access and try again.")
+                .setCancelable(false)
+                .setPositiveButton("Open Settings", (dialog, which) -> requestStoragePermission())
+                .setNegativeButton("Close", (dialog, which) -> finish())
+                .show());
     }
 
 
