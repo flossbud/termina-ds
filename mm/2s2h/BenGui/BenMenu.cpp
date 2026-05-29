@@ -1382,7 +1382,6 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Ocarina", WIDGET_SEPARATOR_TEXT);
     AddWidget(path, "Better Song of Double Time", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Songs.BetterSongOfDoubleTime")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip(
             "When playing the Song of Double Time, you can now choose the exact time you want to go "
             "to, similar to the 3DS version.\n\n"
@@ -1438,14 +1437,6 @@ void BenMenu::AddEnhancements() {
         .CVar("gEnhancements.Songs.SkipSoaringCutscene")
         .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Skips the cutscene when using the Song of Soaring to warp."));
-
-    // Item Enhancements
-    path.column = SECTION_COLUMN_3;
-    AddWidget(path, "Items", WIDGET_SEPARATOR_TEXT);
-    AddWidget(path, "Color Pictograph", WIDGET_CVAR_CHECKBOX)
-        .CVar("gEnhancements.Items.ColorPictograph")
-        .PreFunc(HideUnsupportedAndroidOption)
-        .Options(CheckboxOptions().Tooltip("Will take and display pictographs in color."));
 
     // Time Savers
     path = { "Enhancements", "Time Savers", SECTION_COLUMN_1 };
