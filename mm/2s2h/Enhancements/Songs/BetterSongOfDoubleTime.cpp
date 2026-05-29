@@ -171,6 +171,7 @@ void OnPlayerUpdate(Actor* actor) {
 
     AdjustDirection adjustMode = ADJUST_DIRECTION_NONE;
     f32 interval = (CLOCK_TIME_MINUTE_F * 30);
+    bool usingShoulderStep = false;
 
     static s8 sDPadRepeatState = 0;
     static s8 sDPadRepeatTimer = 0;
@@ -217,9 +218,19 @@ void OnPlayerUpdate(Actor* actor) {
         interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(input->rel.stick_x / 2, 30);
     }
 
-    if (CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
+    // On Android handhelds, the prompt exposes Z/R as actionable controls. Let the mapped Z/R buttons step the picker
+    // directly while preserving their upstream behavior as speed modifiers when holding a direction.
+    if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->press.button, BTN_Z)) {
+        adjustMode = ADJUST_DIRECTION_REVERSE;
+        usingShoulderStep = true;
+    } else if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->press.button, BTN_R)) {
+        adjustMode = ADJUST_DIRECTION_FORWARD;
+        usingShoulderStep = true;
+    }
+
+    if (!usingShoulderStep && CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
         interval /= 6;
-    } else if (CHECK_BTN_ALL(input->cur.button, BTN_R)) { // Holding R speeds up the interval
+    } else if (!usingShoulderStep && CHECK_BTN_ALL(input->cur.button, BTN_R)) { // Holding R speeds up the interval
         interval *= 2;
     }
 
