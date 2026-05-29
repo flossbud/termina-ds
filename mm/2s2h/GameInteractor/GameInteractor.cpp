@@ -45,6 +45,14 @@ void GameInteractor_ExecuteOnInterfaceDrawStart() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnInterfaceDrawStart>();
 }
 
+void GameInteractor_ExecuteBeforeInterfaceClockDraw() {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::BeforeInterfaceClockDraw>();
+}
+
+void GameInteractor_ExecuteAfterInterfaceClockDraw() {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::AfterInterfaceClockDraw>();
+}
+
 void GameInteractor_ExecuteOnKaleidoUpdate(PauseContext* pauseCtx) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnKaleidoUpdate>(pauseCtx);
 }

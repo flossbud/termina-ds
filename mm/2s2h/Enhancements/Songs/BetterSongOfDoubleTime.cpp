@@ -110,8 +110,6 @@ void OnTimePickerUpdate() {
         Audio_PlaySfx_MessageCancel();
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_END;
         sActivelyChangingTime = false;
-        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateMainFinish>(onTimePickerUpdateHookId);
-        onTimePickerUpdateHookId = 0;
         return;
     }
 
@@ -134,8 +132,6 @@ void OnTimePickerUpdate() {
         Audio_PlaySfx_MessageDecide();
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_APPLY_DOUBLE_SOT;
         sActivelyChangingTime = false;
-        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateMainFinish>(onTimePickerUpdateHookId);
-        onTimePickerUpdateHookId = 0;
 
         // Use a hook for when the song of double time cutscene is finished to reload the scene via a respawn
         // This is to ensure that no actors or scripts are processed with the new time on the fly,
@@ -359,6 +355,23 @@ void RegisterBetterSongOfDoubleTime() {
         onTimePickerUpdateHookId = 0;
         onEnTest6KillHookId = 0;
         onPlayDestroyHookId = 0;
+    });
+
+    // Temporarily point the HUD clock at the selected value so the picker visibly moves while choosing a time.
+    COND_HOOK(BeforeInterfaceClockDraw, CVAR, []() {
+        if (sActivelyChangingTime) {
+            gSaveContext.save.time = sSelectedTime;
+            gSaveContext.save.day = sSelectedDay;
+            UpdateDayTexture(gPlayState, CURRENT_DAY);
+        }
+    });
+
+    COND_HOOK(AfterInterfaceClockDraw, CVAR, []() {
+        if (sActivelyChangingTime) {
+            gSaveContext.save.time = sOriginalTime;
+            gSaveContext.save.day = sOriginalDay;
+            UpdateDayTexture(gPlayState, CURRENT_DAY);
+        }
     });
 
     COND_VB_SHOULD(VB_DISPLAY_SONG_OF_DOUBLE_TIME_PROMPT, CVAR, {

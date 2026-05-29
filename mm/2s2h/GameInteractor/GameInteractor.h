@@ -305,6 +305,8 @@ class GameInteractor {
     DEFINE_HOOK(OnGameStateUpdate, ());
     DEFINE_HOOK(OnConsoleLogoUpdate, ());
     DEFINE_HOOK(OnInterfaceDrawStart, ());
+    DEFINE_HOOK(BeforeInterfaceClockDraw, ());
+    DEFINE_HOOK(AfterInterfaceClockDraw, ());
     DEFINE_HOOK(OnKaleidoUpdate, (PauseContext * pauseCtx));
     DEFINE_HOOK(BeforeKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
     DEFINE_HOOK(AfterKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex));
@@ -362,6 +364,8 @@ void GameInteractor_ExecuteOnGameStateDrawFinish();
 void GameInteractor_ExecuteOnGameStateUpdate();
 void GameInteractor_ExecuteOnConsoleLogoUpdate();
 void GameInteractor_ExecuteOnInterfaceDrawStart();
+void GameInteractor_ExecuteBeforeInterfaceClockDraw();
+void GameInteractor_ExecuteAfterInterfaceClockDraw();
 void GameInteractor_ExecuteOnKaleidoUpdate(PauseContext* pauseCtx);
 void GameInteractor_ExecuteBeforeKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);
 void GameInteractor_ExecuteAfterKaleidoDrawPage(PauseContext* pauseCtx, u16 pauseIndex);

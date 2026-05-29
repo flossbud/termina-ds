@@ -6164,7 +6164,10 @@ void Interface_DrawClock(PlayState* play) {
     s16 finalHoursClockSlots[8];
     s16 index;
 
+    GameInteractor_ExecuteBeforeInterfaceClockDraw();
+
     if (GameInteractor_Should(VB_PREVENT_CLOCK_DISPLAY, false)) {
+        GameInteractor_ExecuteAfterInterfaceClockDraw();
         return;
     }
 
@@ -6798,6 +6801,8 @@ void Interface_DrawClock(PlayState* play) {
     }
 
     CLOSE_DISPS(play->state.gfxCtx);
+
+    GameInteractor_ExecuteAfterInterfaceClockDraw();
 }
 
 void Interface_SetPerfectLetters(PlayState* play, s16 perfectLettersType) {
