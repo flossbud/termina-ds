@@ -4,6 +4,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/Rando/MiscBehavior/ClockShuffle.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
+#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "variables.h"
@@ -413,3 +414,5 @@ void RegisterBetterSongOfDoubleTime() {
 
     COND_VB_SHOULD(VB_ALLOW_SONG_DOUBLE_TIME_ON_FINAL_NIGHT, CVAR, { *should = true; });
 }
+
+static RegisterShipInitFunc initFunc(RegisterBetterSongOfDoubleTime, { CVAR_NAME });
