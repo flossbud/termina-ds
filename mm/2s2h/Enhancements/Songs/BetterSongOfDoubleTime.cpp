@@ -175,6 +175,8 @@ void OnPlayerUpdate(Actor* actor) {
 
     static s8 sDPadRepeatState = 0;
     static s8 sDPadRepeatTimer = 0;
+    static s8 sShoulderRepeatState = 0;
+    static s8 sShoulderRepeatTimer = 0;
 
     // Check for DPad movement first, inheriting full speed
     if (CHECK_BTN_ALL(input->cur.button, BTN_DLEFT)) {
@@ -220,12 +222,34 @@ void OnPlayerUpdate(Actor* actor) {
 
     // On Android handhelds, the prompt exposes Z/R as actionable controls. Let the mapped Z/R buttons step the picker
     // directly while preserving their upstream behavior as speed modifiers when holding a direction.
-    if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->press.button, BTN_Z)) {
-        adjustMode = ADJUST_DIRECTION_REVERSE;
-        usingShoulderStep = true;
-    } else if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->press.button, BTN_R)) {
-        adjustMode = ADJUST_DIRECTION_FORWARD;
-        usingShoulderStep = true;
+    if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->cur.button, BTN_Z)) {
+        if (sShoulderRepeatState == -1) {
+            sShoulderRepeatTimer--;
+            if (sShoulderRepeatTimer < 0) {
+                sShoulderRepeatTimer = 2;
+                adjustMode = ADJUST_DIRECTION_REVERSE;
+            }
+        } else {
+            sShoulderRepeatTimer = 10;
+            sShoulderRepeatState = -1;
+            adjustMode = ADJUST_DIRECTION_REVERSE;
+        }
+        usingShoulderStep = adjustMode == ADJUST_DIRECTION_REVERSE;
+    } else if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->cur.button, BTN_R)) {
+        if (sShoulderRepeatState == 1) {
+            sShoulderRepeatTimer--;
+            if (sShoulderRepeatTimer < 0) {
+                sShoulderRepeatTimer = 2;
+                adjustMode = ADJUST_DIRECTION_FORWARD;
+            }
+        } else {
+            sShoulderRepeatTimer = 10;
+            sShoulderRepeatState = 1;
+            adjustMode = ADJUST_DIRECTION_FORWARD;
+        }
+        usingShoulderStep = adjustMode == ADJUST_DIRECTION_FORWARD;
+    } else {
+        sShoulderRepeatState = 0;
     }
 
     if (!usingShoulderStep && CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
