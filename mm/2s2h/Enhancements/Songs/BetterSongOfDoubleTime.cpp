@@ -171,15 +171,15 @@ void OnPlayerUpdate(Actor* actor) {
 
     AdjustDirection adjustMode = ADJUST_DIRECTION_NONE;
     f32 interval = (CLOCK_TIME_MINUTE_F * 30);
-    bool usingShoulderStep = false;
 
     static s8 sDPadRepeatState = 0;
     static s8 sDPadRepeatTimer = 0;
-    static s8 sShoulderRepeatState = 0;
-    static s8 sShoulderRepeatTimer = 0;
+    bool leftHeld = CHECK_BTN_ALL(input->cur.button, BTN_DLEFT) || CHECK_BTN_ALL(input->cur.button, BTN_CLEFT);
+    bool rightHeld = CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT) || CHECK_BTN_ALL(input->cur.button, BTN_CRIGHT);
 
-    // Check for DPad movement first, inheriting full speed
-    if (CHECK_BTN_ALL(input->cur.button, BTN_DLEFT)) {
+    // Check for DPad/C-button movement first, inheriting full speed. The Android touch overlay maps its directional pad
+    // through the C/right-stick path, so accept both while preserving the upstream DPad behavior.
+    if (leftHeld && !rightHeld) {
         if (sDPadRepeatState == -1) {
             sDPadRepeatTimer--;
             if (sDPadRepeatTimer < 0) {
@@ -193,7 +193,7 @@ void OnPlayerUpdate(Actor* actor) {
             sDPadRepeatState = -1;
             adjustMode = ADJUST_DIRECTION_REVERSE;
         }
-    } else if (CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT)) {
+    } else if (rightHeld && !leftHeld) {
         if (sDPadRepeatState == 1) {
             sDPadRepeatTimer--;
             if (sDPadRepeatTimer < 0) {
@@ -211,50 +211,23 @@ void OnPlayerUpdate(Actor* actor) {
         sDPadRepeatState = 0;
     }
 
-    // Then analog stick direction, clamped to 30 minutes
-    if (input->rel.stick_x < -5) {
+    // Then analog stick direction, clamped to 30 minutes. Accept the right stick too for Android's touch overlay.
+    s8 stickX = input->rel.stick_x;
+    if (ABS(input->cur.right_stick_x) > ABS(stickX)) {
+        stickX = input->cur.right_stick_x;
+    }
+
+    if (stickX < -5) {
         adjustMode = ADJUST_DIRECTION_REVERSE;
-        interval = CLOCK_TIME_MINUTE_F * CLAMP_MIN(input->rel.stick_x / -2, -30);
-    } else if (input->rel.stick_x > 5) {
+        interval = CLOCK_TIME_MINUTE_F * CLAMP_MIN(stickX / -2, -30);
+    } else if (stickX > 5) {
         adjustMode = ADJUST_DIRECTION_FORWARD;
-        interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(input->rel.stick_x / 2, 30);
+        interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(stickX / 2, 30);
     }
 
-    // On Android handhelds, the prompt exposes Z/R as actionable controls. Let the mapped Z/R buttons step the picker
-    // directly while preserving their upstream behavior as speed modifiers when holding a direction.
-    if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->cur.button, BTN_Z)) {
-        if (sShoulderRepeatState == -1) {
-            sShoulderRepeatTimer--;
-            if (sShoulderRepeatTimer < 0) {
-                sShoulderRepeatTimer = 2;
-                adjustMode = ADJUST_DIRECTION_REVERSE;
-            }
-        } else {
-            sShoulderRepeatTimer = 10;
-            sShoulderRepeatState = -1;
-            adjustMode = ADJUST_DIRECTION_REVERSE;
-        }
-        usingShoulderStep = adjustMode == ADJUST_DIRECTION_REVERSE;
-    } else if (adjustMode == ADJUST_DIRECTION_NONE && CHECK_BTN_ALL(input->cur.button, BTN_R)) {
-        if (sShoulderRepeatState == 1) {
-            sShoulderRepeatTimer--;
-            if (sShoulderRepeatTimer < 0) {
-                sShoulderRepeatTimer = 2;
-                adjustMode = ADJUST_DIRECTION_FORWARD;
-            }
-        } else {
-            sShoulderRepeatTimer = 10;
-            sShoulderRepeatState = 1;
-            adjustMode = ADJUST_DIRECTION_FORWARD;
-        }
-        usingShoulderStep = adjustMode == ADJUST_DIRECTION_FORWARD;
-    } else {
-        sShoulderRepeatState = 0;
-    }
-
-    if (!usingShoulderStep && CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
+    if (CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
         interval /= 6;
-    } else if (!usingShoulderStep && CHECK_BTN_ALL(input->cur.button, BTN_R)) { // Holding R speeds up the interval
+    } else if (CHECK_BTN_ALL(input->cur.button, BTN_R)) { // Holding R speeds up the interval
         interval *= 2;
     }
 
