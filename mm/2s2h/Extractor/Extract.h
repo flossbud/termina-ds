@@ -48,10 +48,8 @@ class Extractor {
     void GetRoms(std::vector<std::string>& roms);
     void ShowSizeErrorBox() const;
     void ShowCrcErrorBox() const;
-    void ShowUnsupportedVersionErrorBox() const;
     void ShowCompressedErrorBox() const;
     int ShowRomPickBox(uint32_t verCrc) const;
-    bool ConfirmUnsupportedRom() const;
     bool ManuallySearchForRom();
     bool ManuallySearchForRomMatchingType(RomSearchMode searchMode);
 

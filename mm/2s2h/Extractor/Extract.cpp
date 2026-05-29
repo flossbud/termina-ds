@@ -121,11 +121,6 @@ void Extractor::ShowCrcErrorBox() const {
                  "Visit https://2ship.equipment/ to validate your ROM and see a list of compatible versions");
 }
 
-void Extractor::ShowUnsupportedVersionErrorBox() const {
-    ShowErrorBox("Unsupported Rom",
-                 "This rom does not match a known supported version, so the app cannot choose an extraction layout.");
-}
-
 void Extractor::ShowCompressedErrorBox() const {
     ShowErrorBox("File is Compressed", "The selected file appears to be compressed. Please extract before using.");
 }
@@ -181,13 +176,6 @@ int Extractor::ShowYesNoBox(const char* title, const char* box) {
     SDL_ShowMessageBox(&boxData, &ret);
 #endif
     return ret;
-}
-
-bool Extractor::ConfirmUnsupportedRom() const {
-    return ShowYesNoBox("Unsupported Rom",
-                        "This rom has a recognized layout, but its full CRC does not match the known compatible "
-                        "rom list.\n\n"
-                        "It may fail to extract, crash, or behave incorrectly. Continue anyway?") == IDYES;
 }
 
 void Extractor::SetRomInfo(const std::string& path) {
@@ -407,14 +395,7 @@ bool Extractor::ValidateRom(bool skipCrcTextBox) {
         ShowSizeErrorBox();
         return false;
     }
-    if (!verMap.contains(GetRomVerCrc())) {
-        ShowUnsupportedVersionErrorBox();
-        return false;
-    }
     if (!ValidateAndFixRom()) {
-        if (ConfirmUnsupportedRom()) {
-            return true;
-        }
         if (!skipCrcTextBox) {
             ShowCrcErrorBox();
         }
@@ -525,7 +506,7 @@ bool Extractor::Run(std::string searchPath, RomSearchMode searchMode) {
         if (option == (int)ButtonId::YES) {
             if (!ValidateRom(true)) {
                 if (rom == roms.back()) {
-                    ShowErrorBox("No rom provided", "No compatible rom provided. Exiting");
+                    ShowCrcErrorBox();
                 } else {
                     ShowErrorBox(
                         "Rom CRC invalid",
