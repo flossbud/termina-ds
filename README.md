@@ -2,14 +2,14 @@
 
 An unofficial Android fork of 2 Ship 2 Harkinian, based on Waterdish's Android port and the HarbourMasters upstream project.
 
-This fork keeps the Android build moving while preserving the original project's expectations: no copyrighted game assets are included, and users must provide their own legally obtained copy of game.
+This fork keeps the Android build moving while preserving the original project's expectations: no copyrighted game assets are included, and users must provide their own legally obtained copy of the game.
 
 Original Android port: https://github.com/Waterdish/2ship2harkinian-Android  
 Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
 
 ## Current Release
 
-2 Ship Android 1.2.4
+2 Ship Android 1.4.0
 
 Android package id: `com.twoshipfork.mm`  
 App label: `2 Ship 2 Harkinian`
@@ -30,7 +30,7 @@ App label: `2 Ship 2 Harkinian`
 
 1. Install the APK from this fork's GitHub Releases.
 2. Open the app once. It will create the folder it needs for your ROM. Allow file permissions, then close and reopen the app.
-3. When prompted, choose to generate an O2R file and select your legally obtained rom.
+3. When prompted, choose to generate an O2R file and select your legally obtained ROM.
 4. After extraction, future launches should go straight into the game.
 
 Use the Back/Select/- controller button, or the Android back gesture/button, to open the Enhancements menu. Use touch controls to navigate menus.
