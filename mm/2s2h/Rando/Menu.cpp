@@ -81,7 +81,7 @@ static const ImVec4 CLOCK_NIGHT_TINT = ImVec4(0.3f, 0.5f, 1.0f, 1.0f);
 static const float DISABLED_ITEM_ALPHA = 0.3f;
 static const char* CLOCK_PROGRESSIVE_TOOLTIP =
     "\n\nTime items are not compatible with Progressive Time modes.\nSwitch to Random mode to use starting time.";
-static constexpr const char* RANDO_MENU_LABEL = "Randomizer Beta";
+static constexpr const char* RANDO_MENU_LABEL = "Randomizer";
 
 // Apply clock-specific rendering (tint colors and tooltips) based on progressive mode
 static void ApplyClockItemRendering(RandoItemId item, ImVec4& tintColor, std::string& tooltipText,
@@ -660,7 +660,7 @@ static void DrawItemsTab() {
             .Min(1)
             .Max(100)
             .DefaultValue(5));
-    ImGui::TextWrapped("Trap behavior can be altered at Rando Beta > General near the bottom of the page.");
+    ImGui::TextWrapped("Trap behavior can be altered at Randomizer > General near the bottom of the page.");
     ImGui::SeparatorText("Toggle Trap Types");
     CVarCheckbox(
         "Freeze Traps", "gRando.Traps.Freeze",
@@ -1155,8 +1155,6 @@ void Rando::RegisterMenu() {
     mBenMenu->AddMenuEntry(RANDO_MENU_LABEL, "gSettings.Menu.RandoSidebarSection");
     mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "General", 1);
     WidgetPath path = { RANDO_MENU_LABEL, "General", SECTION_COLUMN_1 };
-    mBenMenu->AddWidget(path, "Beta / experimental: randomizer support is still being tested on Android.",
-                        WIDGET_TEXT);
     mBenMenu->AddWidget(path, "General", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { DrawGeneralTab(); });
     mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Logic/Conditions", 1);
     path.sidebarName = "Logic/Conditions";
