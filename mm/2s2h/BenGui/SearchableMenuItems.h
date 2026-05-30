@@ -1406,9 +1406,9 @@ void AddEnhancements() {
           3,
           { // Fixes
             { { .widgetName = "Fixes", .widgetType = WIDGET_SEPARATOR_TEXT },
-              { "Fix Ammo Count Color", "gFixes.FixAmmoCountEnvColor",
-                "Fixes a missing gDPSetEnvColor, which causes the ammo count to be "
-                "the wrong color prior to obtaining magic or other conditions.",
+              { "Fix Button Env Color", "gFixes.FixButtonEnvColor",
+                "Fixes a missing gDPSetEnvColor, which causes ammo counts and B button "
+                "action labels to be the wrong color prior to obtaining magic or other conditions.",
                 WIDGET_CVAR_CHECKBOX },
               { "Fix Fierce Deity Z-Target movement", "gEnhancements.Fixes.FierceDeityZTargetMovement",
                 "Fixes Fierce Deity movement being choppy when Z-targeting", WIDGET_CVAR_CHECKBOX },

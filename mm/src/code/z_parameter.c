@@ -5655,9 +5655,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
         // but prior to that, when certain conditions are met, the color will have last been set by the wallet icon
         // causing the ammo count to be drawn incorrectly. This is most obvious when you get deku nuts early on, and
         // the ammo count is drawn with a shade of green.
-        if (CVarGetInteger("gFixes.FixAmmoCountEnvColor", 0)) {
-            gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 0, 255);
-        }
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
 
         if ((button == EQUIP_SLOT_B) && (gSaveContext.minigameStatus == MINIGAME_STATUS_ACTIVE)) {
             ammo = play->interfaceCtx.minigameAmmo;
@@ -5746,6 +5744,10 @@ void Interface_DrawBButtonIcons(PlayState* play) {
         gDPPipeSync(OVERLAY_DISP++);
         gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
                           PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        //! @bug Same missing gDPSetEnvColor as in Interface_DrawAmmoCount. The B button action label
+        //! uses ENVIRONMENT in its combine mode and will be drawn with the last env color set (e.g. green
+        //! from the wallet icon) prior to obtaining magic.
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->bAlpha);
         gDPLoadTextureBlock_4b(OVERLAY_DISP++, interfaceCtx->doActionSegment[DO_ACTION_SEG_B].mainTex, G_IM_FMT_IA, 48,
                                16, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -5787,6 +5789,10 @@ void Interface_DrawBButtonIcons(PlayState* play) {
         gDPPipeSync(OVERLAY_DISP++);
         gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
                           PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        //! @bug Same missing gDPSetEnvColor as in Interface_DrawAmmoCount. The B button action label
+        //! uses ENVIRONMENT in its combine mode and will be drawn with the last env color set (e.g. green
+        //! from the wallet icon) prior to obtaining magic.
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->bAlpha);
         gDPLoadTextureBlock_4b(OVERLAY_DISP++, interfaceCtx->doActionSegment[DO_ACTION_SEG_B].subTex, G_IM_FMT_IA, 48,
                                16, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
