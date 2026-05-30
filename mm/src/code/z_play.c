@@ -1340,15 +1340,20 @@ void Play_DrawMain(PlayState* this) {
             if (!gSaveContext.screenScaleFlag) {
                 PreRender_ApplyFiltersSlowlyInit(&this->pauseBgPreRender);
             }
-            R_PAUSE_BG_PRERENDER_STATE = PAUSE_BG_PRERENDER_READY;
-            SREG(33) |= 1;
 
-            // 2S2H [Port] Jump to the pause render flow to avoid flashing a blank screen
-            // since previous framebuffers aren't retained like hardware does
-            goto PauseRenderDraw;
+            if (hasCapturedPauseBuffer) {
+                R_PAUSE_BG_PRERENDER_STATE = PAUSE_BG_PRERENDER_READY;
+                SREG(33) |= 1;
+
+                // 2S2H [Port] Jump to the pause render flow to avoid flashing a blank screen
+                // since previous framebuffers aren't retained like hardware does
+                goto PauseRenderDraw;
+            }
+
+            R_PAUSE_BG_PRERENDER_STATE = PAUSE_BG_PRERENDER_SETUP;
         } else {
         PauseRenderDraw:
-            if (R_PAUSE_BG_PRERENDER_STATE == PAUSE_BG_PRERENDER_READY) {
+            if ((R_PAUSE_BG_PRERENDER_STATE == PAUSE_BG_PRERENDER_READY) && hasCapturedPauseBuffer) {
                 Gfx* sp8C = POLY_OPA_DISP;
 
                 FB_DrawFromFramebuffer(&sp8C, gPauseFrameBuffer, 255);
@@ -1495,7 +1500,7 @@ void Play_DrawMain(PlayState* this) {
                     FB_CopyToFramebuffer(&sp74, 0, gPauseFrameBuffer, false, &hasCapturedPauseBuffer);
 
                     // Set the state back to ready after the recapture is done
-                    if (recapturePauseBuffer) {
+                    if (recapturePauseBuffer && hasCapturedPauseBuffer) {
                         R_PAUSE_BG_PRERENDER_STATE = PAUSE_BG_PRERENDER_READY;
                     }
                     // #endregion
