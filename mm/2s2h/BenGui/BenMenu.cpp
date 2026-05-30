@@ -1107,14 +1107,13 @@ void BenMenu::AddEnhancements() {
                      .ComboVec(&cremiaRewardOptions));
     AddWidget(path, "Ammo Buyback Options", WIDGET_CVAR_COMBOBOX)
         .CVar("gEnhancements.Items.AmmoBuyback")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(ComboboxOptions()
                      .Tooltip("Choose whether to allow selling ammo items (Arrows, Bombs, Bombchus, Deku Sticks, Deku "
                               "Nuts, Magic Beans, Powder Keg) "
                               "to the Curiosity Shop owner for Rupees.\n"
                               "-Vanilla: Ammo items cannot be sold\n"
                               "-Full Price: Sell at full value\n"
-                              "-Half Price: Sell at half value (rounded up)"
+                              "-Half Price: Sell at half value (rounded up)\n"
                               "Arrows will always be sold back at Full Price.")
                      .ComboVec(&ammoBuybackOptions));
     AddWidget(path, "Extra Powder Kegs", WIDGET_CVAR_CHECKBOX)
@@ -1479,6 +1478,7 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip("This skips many minor cutscenes and interactions."));
     AddWidget(path, "Skip Enemy Cutscenes", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Cutscenes.SkipEnemyCutscenes")
+        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Skips cutscenes specific to enemies and boss battles."));
     AddWidget(path, "Skip Item Get Cutscene", WIDGET_CVAR_COMBOBOX)
         .CVar("gEnhancements.Cutscenes.SkipGetItemCutscenes")
