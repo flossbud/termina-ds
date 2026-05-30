@@ -24,12 +24,12 @@ class OTRGlobals {
   public:
     static OTRGlobals* Instance;
 
-    ImFont* fontStandard;
-    ImFont* fontStandardLarger;
-    ImFont* fontStandardLargest;
-    ImFont* fontMono;
-    ImFont* fontMonoLarger;
-    ImFont* fontMonoLargest;
+    ImFont* fontStandard = nullptr;
+    ImFont* fontStandardLarger = nullptr;
+    ImFont* fontStandardLargest = nullptr;
+    ImFont* fontMono = nullptr;
+    ImFont* fontMonoLarger = nullptr;
+    ImFont* fontMonoLargest = nullptr;
 
     std::shared_ptr<Ship::Context> context;
 

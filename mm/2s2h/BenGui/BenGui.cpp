@@ -167,6 +167,25 @@ void Destroy() {
     mRandoCheckTrackerSettingsWindow = nullptr;
 }
 
+void RegisterPopup(std::string title, std::string message, std::string button1, std::string button2,
+                   std::function<void()> button1callback, std::function<void()> button2callback) {
+    if (mModalWindow != nullptr) {
+        mModalWindow->RegisterPopup(title, message, button1, button2, button1callback, button2callback);
+    }
+}
+
+size_t PopupsQueued() {
+    return mModalWindow != nullptr ? mModalWindow->PopupsQueued() : 0;
+}
+
+bool DismissPopup(std::string title) {
+    if (mModalWindow != nullptr && mModalWindow->IsPopupOpen(title)) {
+        mModalWindow->DismissPopup();
+        return true;
+    }
+    return false;
+}
+
 void SetDisplayOverlayVisibility(bool visible) {
     if (mDisplayOverlayWindow != nullptr) {
         if (visible) {
