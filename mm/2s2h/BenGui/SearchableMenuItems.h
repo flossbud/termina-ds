@@ -423,6 +423,18 @@ static const std::unordered_map<int32_t, const char*> timeStopOptions = {
     { TIME_STOP_TEMPLES_DUNGEONS, "Temples + Mini Dungeons" },
 };
 
+static const std::unordered_map<int32_t, const char*> mirroredWorldModes = {
+    { MIRRORED_WORLD_OFF, "Off" },
+    { MIRRORED_WORLD_ALWAYS, "Always" },
+    { MIRRORED_WORLD_RANDOM, "Random" },
+    { MIRRORED_WORLD_RANDOM_SEEDED, "Random (Seeded)" },
+    { MIRRORED_WORLD_DUNGEONS_TEMPLES, "Dungeons (Temples)" },
+    { MIRRORED_WORLD_DUNGEONS_SPIDERS, "Dungeons (Spider Houses)" },
+    { MIRRORED_WORLD_DUNGEONS_ALL, "Dungeons (All)" },
+    { MIRRORED_WORLD_DUNGEONS_RANDOM, "Dungeons Random" },
+    { MIRRORED_WORLD_DUNGEONS_RANDOM_SEEDED, "Dungeons Random (Seeded)" },
+};
+
 static const std::unordered_map<int32_t, const char*> speedModifierModeOptions = {
     { 0, "Off" },
     { 1, "On" },
@@ -1137,15 +1149,8 @@ void AddEnhancements() {
               { "Mirrored World",
                 "gModes.MirroredWorld.Mode",
                 "Mirrors the world horizontally.",
-                WIDGET_CVAR_CHECKBOX,
-                {},
-                ([](widgetInfo& info) {
-                    if (CVarGetInteger("gModes.MirroredWorld.Mode", 0)) {
-                        CVarSetInteger("gModes.MirroredWorld.State", 1);
-                    } else {
-                        CVarClear("gModes.MirroredWorld.State");
-                    }
-                }) } },
+                WIDGET_CVAR_COMBOBOX,
+                { .comboBoxOptions = mirroredWorldModes } } },
             { { .widgetName = "Saving", .widgetType = WIDGET_SEPARATOR_TEXT },
               { "Persistent Owl Saves", "gEnhancements.Saving.PersistentOwlSaves",
                 "Continuing a save will not remove the owl save. Playing Song of "
