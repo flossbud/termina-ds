@@ -62,6 +62,7 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/SaveManager/SaveManager.h"
 #include "2s2h/ShipUtils.h"
 #include "2s2h/ShipInit.hpp"
+#include "2s2h/config/ConfigUpdaters.h"
 
 // Resource Types/Factories
 #include "resource/type/Blob.h"
@@ -708,6 +709,12 @@ extern "C" void InitOTR() {
 #endif
 
     OTRGlobals::Instance = new OTRGlobals();
+
+    std::shared_ptr<Ship::Config> conf = OTRGlobals::Instance->context->GetConfig();
+    conf->RegisterConfigVersionUpdater(std::make_shared<Ben::ConfigVersion1Updater>());
+    conf->RunVersionUpdates();
+    Ship::Context::GetInstance()->GetConsoleVariables()->Save();
+
     GameInteractor::Instance = new GameInteractor();
     LoadGuiTextures();
     BenGui::SetupGuiElements();
@@ -750,8 +757,6 @@ extern "C" void InitOTR() {
         CrowdControl::Instance->Disable();
     }
 #endif
-
-    std::shared_ptr<Ship::Config> conf = OTRGlobals::Instance->context->GetConfig();
 }
 
 extern "C" void SaveManager_ThreadPoolWait() {
