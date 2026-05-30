@@ -106,8 +106,16 @@ void RegisterEndOfCycleSaveHooks() {
             SET_WEEKEVENTREG(WEEKEVENTREG_DRANK_CHATEAU_ROMANI);
         }
 
-        if (CVarGetInteger("gEnhancements.Cycle.DoNotResetScarecrowSong", 0)) {
-            gSaveContext.save.saveInfo.scarecrowSpawnSongSet = saveInfoCopy.scarecrowSpawnSongSet;
+        if (CVarGetInteger("gEnhancements.Cycle.DoNotResetScarecrowSong", 0) && saveInfoCopy.scarecrowSpawnSongSet) {
+            gSaveContext.save.saveInfo.scarecrowSpawnSongSet = true;
+            memcpy(gSaveContext.save.saveInfo.scarecrowSpawnSong, saveInfoCopy.scarecrowSpawnSong,
+                   sizeof(gSaveContext.save.saveInfo.scarecrowSpawnSong));
+            memcpy(gScarecrowSpawnSongPtr, saveInfoCopy.scarecrowSpawnSong,
+                   sizeof(gSaveContext.save.saveInfo.scarecrowSpawnSong));
+
+            if (saveInfoCopy.weekEventReg[WEEKEVENTREG_79_08 >> 8] & (WEEKEVENTREG_79_08 & 0xFF)) {
+                SET_WEEKEVENTREG(WEEKEVENTREG_79_08);
+            }
         }
     });
 
