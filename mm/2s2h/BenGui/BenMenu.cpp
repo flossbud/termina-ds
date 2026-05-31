@@ -1432,7 +1432,6 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip("Skips the cutscenes when playing any of the Song of Time songs."));
     AddWidget(path, "Skip Soaring cutscene", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Songs.SkipSoaringCutscene")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Skips the cutscene when using the Song of Soaring to warp."));
 
     // Time Savers
@@ -1476,7 +1475,6 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip("This skips many minor cutscenes and interactions."));
     AddWidget(path, "Skip Enemy Cutscenes", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Cutscenes.SkipEnemyCutscenes")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip("Skips cutscenes specific to enemies and boss battles."));
     AddWidget(path, "Skip Item Get Cutscene", WIDGET_CVAR_COMBOBOX)
         .CVar("gEnhancements.Cutscenes.SkipGetItemCutscenes")

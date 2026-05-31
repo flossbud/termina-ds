@@ -29,6 +29,8 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Color Pictograph (`#1484`) | Ported | Local release `v1.3.1`; verify against current upstream later for minor deltas. |
 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Ported source and enabled Android menu entry in the current local batch. |
 | Song Items (`#1566`, `#1696`) | Done locally | Ported upstream source, enabled Android menu entry, and added gossip-stone softlock vanilla-behavior hooks. |
+| Skip Enemy Cutscenes (`#1038`) | Verified present | Source is already ported and self-registering; Android menu entry is enabled in the current local batch. |
+| Skip Soaring cutscene (`#1383`) | Done locally | Ported actor-init shortcut with Android/local EnTest7 names and enabled Android menu entry. |
 | Disable SFX replacement (`#1679`) | Verified Android-handled | No SFX replacement lookup is active locally; no source change needed. |
 | Android release Node/action updates | Ported | Workflow currently passes with action versions used in release `26700931957`. |
 
@@ -42,6 +44,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Write parity tracker | Done locally | Low | This file. |
 | Run native compile check | Passed | Medium | `:app:externalNativeBuildDebug` passes; use GitHub release workflow for final APK confidence. |
 | Song Items plus softlock fix | Done locally | Medium | Source/menu/actor hooks ported; native compile check passes. |
+| Skip Soaring cutscene and Skip Enemy Cutscenes menu exposure | Done locally | Medium | Skip Soaring source is ported; Skip Enemy source was already present; native compile check passes. |
 
 ## Next Candidate Batch
 
