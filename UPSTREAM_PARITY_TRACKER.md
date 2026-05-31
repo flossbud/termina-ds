@@ -53,6 +53,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Gossip Stone hint weights (`#1567`) | Verified present | Gossip hint strength option and weighted item-type handling are already present. |
 | Flippers icon (`#1586`) | Verified present | Flippers texture and draw-item wiring are already present. |
 | Chu drops flagged-bomb fix (`#1587`) | Verified present | Chu drop replacement masks actor params before comparing bomb-drop IDs. |
+| Arrow buyback full-price fix (`#1555`) | Done locally | Arrows now ignore Half Price buyback mode and always sell at full value, matching upstream/MMR behavior. |
 | Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
@@ -86,6 +87,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Custom Ocarina Controls | Done locally | Medium | Upstream feature ported with Android-specific `uint32_t` button masks above the virtual-stick range; native compile check passes. |
 | Extraction flow and Android menu-scale cleanup | Done locally | Medium | ROM archive compatibility now checks major version only, ROM picker cancel no longer shows an extra error, and Android menu scale applies widget spacing live. |
 | Rando/timesaver presence audit | Done locally | Low | Confirmed Transformation Mask Hints, NNL cow blacklist, RI_TRAP lesser type, Shrine feathers, Picto C-Up, Extra Powder Kegs, Better Owl Warp, Bank Reward Hint, Tycoon's Wallet, Gossip Stone weights, Flippers icon, and Chu drop fix are already present. |
+| Arrow buyback full-price fix | Done locally | Low | Small upstream gameplay fix; native compile check passes. |
 
 ## Next Candidate Batch
 
