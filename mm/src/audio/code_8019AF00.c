@@ -2083,7 +2083,12 @@ void AudioOcarina_ReadControllerInput(void) {
     sOcarinaInputStickRel.x = input->rel.stick_x;
     sOcarinaInputStickRel.y = input->rel.stick_y;
 
+    if (CVarGetInteger("gEnhancements.Playback.CustomizeOcarinaControls", 0)) {
+        sOcarinaInputButtonCur &= ~(BTN_A | BTN_CUP | BTN_CDOWN | BTN_CLEFT | BTN_CRIGHT | BTN_L | BTN_R | BTN_Z);
+    }
+
     sOcarinaInputButtonCur |= GameInteractor_RightStickOcarina(input);
+    sOcarinaInputButtonCur |= GameInteractor_CustomOcarinaControls(input);
 }
 
 /**

@@ -513,6 +513,43 @@ uint32_t GameInteractor_RightStickOcarina(Input* input) {
     return result;
 }
 
+uint32_t GameInteractor_CustomOcarinaControls(Input* input) {
+    uint32_t result = 0;
+
+    if (!CVarGetInteger("gEnhancements.Playback.CustomizeOcarinaControls", 0)) {
+        return result;
+    }
+
+    if (input->cur.button & BTN_CUSTOM_OCARINA_NOTE_D4) {
+        result |= BTN_A;
+    }
+    if (input->cur.button & BTN_CUSTOM_OCARINA_NOTE_F4) {
+        result |= BTN_CDOWN;
+    }
+    if (input->cur.button & BTN_CUSTOM_OCARINA_NOTE_A4) {
+        result |= BTN_CRIGHT;
+    }
+    if (input->cur.button & BTN_CUSTOM_OCARINA_NOTE_B4) {
+        result |= BTN_CLEFT;
+    }
+    if (input->cur.button & BTN_CUSTOM_OCARINA_NOTE_D5) {
+        result |= BTN_CUP;
+    }
+
+    if (input->cur.button & BTN_CUSTOM_OCARINA_DISABLE_SONGS) {
+        result |= BTN_L;
+    }
+
+    if (input->cur.button & BTN_CUSTOM_OCARINA_PITCH_UP) {
+        result |= BTN_R;
+    }
+    if (input->cur.button & BTN_CUSTOM_OCARINA_PITCH_DOWN) {
+        result |= BTN_Z;
+    }
+
+    return result;
+}
+
 uint32_t GameInteractor_Dpad(GIDpadType type, uint32_t buttonCombo) {
     uint32_t result = 0;
 

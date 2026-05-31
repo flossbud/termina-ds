@@ -439,7 +439,7 @@ void PadMgr_AdjustInput(Input* input) {
  * Updates `sPadMgrInstance->inputs` based on the error response of each controller
  */
 void PadMgr_UpdateInputs(void) {
-    s32 diff;
+    u32 diff;
     Input* input = &sPadMgrInstance->inputs[0];
     s32 i;
     OSContPad* pad = &sPadMgrInstance->pads[0];
@@ -497,8 +497,8 @@ void PadMgr_UpdateInputs(void) {
 
         // Calculate pressed and relative inputs
         diff = input->prev.button ^ input->cur.button;
-        input->press.button |= (u16)(diff & input->cur.button);
-        input->rel.button |= (u16)(diff & input->prev.button);
+        input->press.button |= diff & input->cur.button;
+        input->rel.button |= diff & input->prev.button;
 
         if (1) {}
         PadMgr_AdjustInput(input);

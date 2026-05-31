@@ -1,6 +1,7 @@
 #include "BenInputEditorWindow.h"
 #include "Context.h"
 #include "Gui.h"
+#include "UIWidgets.hpp"
 #include "utils/StringHelper.h"
 #include "public/bridge/consolevariablebridge.h"
 #include "controller/controldevice/controller/mapping/sdl/SDLAxisDirectionToButtonMapping.h"
@@ -204,8 +205,10 @@ void BenInputEditorWindow::DrawInputChip(const char* buttonName, ImVec4 color = 
 
 void BenInputEditorWindow::DrawButtonLineAddMappingButton(uint8_t port, CONTROLLERBUTTONS_T bitmask) {
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-    auto popupId = StringHelper::Sprintf("addButtonMappingPopup##%d-%d", port, bitmask);
-    if (ImGui::Button(StringHelper::Sprintf("%s###addButtonMappingButton%d-%d", ICON_FA_PLUS, port, bitmask).c_str(),
+    auto popupId = StringHelper::Sprintf("addButtonMappingPopup##%d-%u", port, static_cast<uint32_t>(bitmask));
+    if (ImGui::Button(StringHelper::Sprintf("%s###addButtonMappingButton%d-%u", ICON_FA_PLUS, port,
+                                            static_cast<uint32_t>(bitmask))
+                          .c_str(),
                       ImVec2(SCALE_IMGUI_SIZE(20.0f), 0.0f))) {
         ImGui::OpenPopup(popupId.c_str());
     };
@@ -1563,6 +1566,42 @@ void BenInputEditorWindow::DrawPortTabContents(uint8_t portIndex) {
         DrawLEDSection(portIndex);
     } else {
         DrawLEDDeviceIcons(portIndex);
+    }
+
+    if (ImGui::CollapsingHeader("Custom Ocarina Controls")) {
+        bool customOcarinaEnabled = CVarGetInteger("gEnhancements.Playback.CustomizeOcarinaControls", 0);
+        if (ImGui::Checkbox("Enable Custom Ocarina Controls", &customOcarinaEnabled)) {
+            CVarSetInteger("gEnhancements.Playback.CustomizeOcarinaControls", customOcarinaEnabled);
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        }
+        UIWidgets::Tooltip("Allow customization of which physical buttons are used for ocarina playback.\nWARNING: "
+                           "This disables the normal ocarina controls (A and C buttons).");
+
+        if (customOcarinaEnabled) {
+            ImGui::AlignTextToFramePadding();
+            ImGui::BulletText("Notes");
+            DrawButtonLine("A (D4)##OcarinaD4", portIndex, BTN_CUSTOM_OCARINA_NOTE_D4);
+            DrawButtonLine(StringHelper::Sprintf("%s (F4)##OcarinaF4", ICON_FA_ARROW_DOWN).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_NOTE_F4);
+            DrawButtonLine(StringHelper::Sprintf("%s (A4)##OcarinaA4", ICON_FA_ARROW_RIGHT).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_NOTE_A4);
+            DrawButtonLine(StringHelper::Sprintf("%s (B4)##OcarinaB4", ICON_FA_ARROW_LEFT).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_NOTE_B4);
+            DrawButtonLine(StringHelper::Sprintf("%s (D5)##OcarinaD5", ICON_FA_ARROW_UP).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_NOTE_D5);
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::BulletText("Disable song detection");
+            DrawButtonLine(StringHelper::Sprintf("%s##OcarinaDisableSongs", ICON_FA_BAN).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_DISABLE_SONGS);
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::BulletText("Pitch");
+            DrawButtonLine(StringHelper::Sprintf("%s##OcarinaPitchUp", ICON_FA_ARROW_UP).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_PITCH_UP);
+            DrawButtonLine(StringHelper::Sprintf("%s##OcarinaPitchDown", ICON_FA_ARROW_DOWN).c_str(), portIndex,
+                           BTN_CUSTOM_OCARINA_PITCH_DOWN);
+        }
     }
 
     ImGui::PopStyleColor();
