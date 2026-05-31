@@ -9,7 +9,7 @@ Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
 
 ## Current Release
 
-2 Ship Android 4.0.2-android.3
+2 Ship Android 4.0.2-android.3.1
 
 Upstream base: HarbourMasters 4.0.2 / Keiichi Charlie
 
