@@ -5,6 +5,7 @@
  */
 
 #include "z_en_ma4.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_10 | ACTOR_FLAG_20 | ACTOR_FLAG_2000000)
 
@@ -751,7 +752,7 @@ void EnMa4_HorsebackGameWait(EnMa4* this, PlayState* play) {
     }
 
     if ((gSaveContext.timerCurTimes[TIMER_ID_MINIGAME_2] >= SECONDS_TO_TIMER(120)) ||
-        (this->poppedBalloonCounter == 10)) {
+        GameInteractor_Should(VB_WIN_ROMANI_PRACTICE, this->poppedBalloonCounter == 10, this)) {
         gSaveContext.timerStates[TIMER_ID_MINIGAME_2] = TIMER_STATE_6;
         EnMa4_SetupHorsebackGameEnd(this, play);
         D_80AC0258 = 0;

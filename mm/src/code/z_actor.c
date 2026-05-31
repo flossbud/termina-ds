@@ -14,6 +14,7 @@
 
 #include "code/fbdemo_circle/fbdemo_circle.h"
 #include "overlays/actors/ovl_En_Horse/z_en_horse.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include "overlays/actors/ovl_En_Part/z_en_part.h"
 #include "overlays/actors/ovl_En_Box/z_en_box.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
@@ -1526,6 +1527,10 @@ void Actor_SpawnHorse(PlayState* play, Player* player) {
  * Player must leave the cutscene action state and enter it again before halting actors can be toggled.
  */
 s32 Player_SetCsAction(PlayState* play, Actor* csActor, u8 csAction) {
+    if (!GameInteractor_Should(VB_PLAYER_CUTSCENE_ACTION, true, csActor)) {
+        return false;
+    }
+
     Player* player = GET_PLAYER(play);
 
     if ((player->csAction == PLAYER_CSACTION_5) ||
@@ -2275,7 +2280,9 @@ s32 Actor_OfferGetItem(Actor* actor, PlayState* play, GetItemId getItemId, f32 x
                 s16 yawDiff = actor->yawTowardsPlayer - player->actor.shape.rot.y;
                 s32 absYawDiff = ABS_ALT(yawDiff);
 
-                if ((getItemId != GI_NONE) || (player->getItemDirection < absYawDiff)) {
+                if (GameInteractor_Should(VB_GIVE_ITEM_FROM_OFFER,
+                                          ((getItemId != GI_NONE) || (player->getItemDirection < absYawDiff)),
+                                          &getItemId, actor)) {
                     player->getItemId = getItemId;
                     player->interactRangeActor = actor;
                     player->getItemDirection = absYawDiff;

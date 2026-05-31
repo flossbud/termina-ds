@@ -5,6 +5,7 @@
  */
 
 #include "z_en_owl.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_10)
 
@@ -522,8 +523,10 @@ void func_8095B574(EnOwl* this, PlayState* play) {
 
 void func_8095B650(EnOwl* this, PlayState* play) {
     if (this->actionFlags & 1) {
-        EnOwl_ChangeMode(this, func_8095B574, func_8095C484, &this->skelAnimePerching, &gOwlPerchAnim, 0.0f);
-        this->actor.textId = 0xBF5;
+        if (GameInteractor_Should(VB_OWL_TELL_ABOUT_SHRINE, true, this)) {
+            EnOwl_ChangeMode(this, func_8095B574, func_8095C484, &this->skelAnimePerching, &gOwlPerchAnim, 0.0f);
+            this->actor.textId = 0xBF5;
+        }
         this->actionFlags &= ~8;
     }
     func_8095B480(this, play);
@@ -564,8 +567,10 @@ void func_8095B76C(EnOwl* this, PlayState* play) {
             return;
         }
 
-        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_OWL, this->actor.world.pos.x, this->actor.world.pos.y,
-                    this->actor.world.pos.z, 0, 0, 0, 0xF00);
+        if (GameInteractor_Should(VB_OWL_SPAWN_FEATHER, true, this)) {
+            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_OWL, this->actor.world.pos.x, this->actor.world.pos.y,
+                        this->actor.world.pos.z, 0, 0, 0, 0xF00);
+        }
         this->actor.home.rot.x++;
         if (this->actor.home.rot.x >= 3) {
             func_8095ACEC(this);

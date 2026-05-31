@@ -319,6 +319,9 @@ s16 CutsceneManager_Update(void) {
 }
 
 void CutsceneManager_Queue(s16 csId) {
+    if (!GameInteractor_Should(VB_QUEUE_CUTSCENE, true, &csId)) {
+        return;
+    }
     if (csId >= 0) {
         sWaitingCutsceneList[csId >> 3] |= 1 << (csId & 7);
     }
