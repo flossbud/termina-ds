@@ -6,6 +6,7 @@
 
 #include "z_file_select.h"
 #include "z64rumble.h"
+#include <libultraship/bridge.h>
 
 // When choosing a file to copy or erase, the 6 main menu buttons are placed at these offsets
 s16 sChooseFileYOffsets[] = { -48, -48, -48, -24, -24, 0 };
@@ -103,11 +104,19 @@ void FileSelect_SelectCopySource(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY >= 30) {
                 this->buttonIndex--;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_COPY_FILE_3) {
+                    this->buttonIndex = FS_BTN_COPY_FILE_2;
+                }
                 if (this->buttonIndex < FS_BTN_COPY_FILE_1) {
                     this->buttonIndex = FS_BTN_COPY_QUIT;
                 }
             } else {
                 this->buttonIndex++;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_COPY_FILE_3) {
+                    this->buttonIndex = FS_BTN_COPY_QUIT;
+                }
                 if (this->buttonIndex > FS_BTN_COPY_QUIT) {
                     this->buttonIndex = FS_BTN_COPY_FILE_1;
                 }
@@ -229,10 +238,18 @@ void FileSelect_SelectCopyDest(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY >= 30) {
                 this->buttonIndex--;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_COPY_FILE_3) {
+                    this->buttonIndex = FS_BTN_COPY_FILE_2;
+                }
                 if (this->buttonIndex == this->selectedFileIndex) {
                     this->buttonIndex--;
                     if (this->buttonIndex < FS_BTN_COPY_FILE_1) {
                         this->buttonIndex = FS_BTN_COPY_QUIT;
+                    }
+                    if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                        this->buttonIndex == FS_BTN_COPY_FILE_3) {
+                        this->buttonIndex = FS_BTN_COPY_FILE_2;
                     }
                 } else if (this->buttonIndex < FS_BTN_COPY_FILE_1) {
                     this->buttonIndex = FS_BTN_COPY_QUIT;
@@ -244,6 +261,10 @@ void FileSelect_SelectCopyDest(GameState* thisx) {
                 }
                 if (this->buttonIndex == this->selectedFileIndex) {
                     this->buttonIndex++;
+                }
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_COPY_FILE_3) {
+                    this->buttonIndex = FS_BTN_COPY_QUIT;
                 }
             }
         }
@@ -802,11 +823,19 @@ void FileSelect_EraseSelect(GameState* thisx) {
 
             if (this->stickAdjY >= 30) {
                 this->buttonIndex--;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_ERASE_FILE_3) {
+                    this->buttonIndex = FS_BTN_ERASE_FILE_2;
+                }
                 if (this->buttonIndex < FS_BTN_ERASE_FILE_1) {
                     this->buttonIndex = FS_BTN_ERASE_QUIT;
                 }
             } else {
                 this->buttonIndex++;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_ERASE_FILE_3) {
+                    this->buttonIndex = FS_BTN_ERASE_QUIT;
+                }
                 if (this->buttonIndex > FS_BTN_ERASE_QUIT) {
                     this->buttonIndex = FS_BTN_ERASE_FILE_1;
                 }

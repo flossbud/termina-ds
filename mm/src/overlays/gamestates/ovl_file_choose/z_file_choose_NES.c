@@ -16,6 +16,7 @@
 #include "2s2h_assets.h"
 #include <string.h>
 #include "BenPort.h"
+#include <libultraship/bridge.h>
 
 s32 D_808144F10 = 100;
 f32 D_808144F14 = 8.0f;
@@ -23,6 +24,10 @@ f32 D_808144F18 = 100.0f;
 s32 D_808144F1C = 0;
 
 FileSelectState* gFileSelectState = NULL;
+
+// 2S2H [Enhancement] Let the third save slot be toggled from the enhancements menu.
+#undef FILE_NUM_MAX
+#define FILE_NUM_MAX (CVarGetInteger("gEnhancements.Saving.FileSlot3", true) ? 3 : 2)
 
 static Gfx sScreenFillSetupDL[] = {
     gsDPPipeSync(),
@@ -327,11 +332,19 @@ void FileSelect_UpdateMainMenu(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY > 30) {
                 this->buttonIndex--;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_MAIN_FILE_3) {
+                    this->buttonIndex = FS_BTN_MAIN_FILE_2;
+                }
                 if (this->buttonIndex < FS_BTN_MAIN_FILE_1) {
                     this->buttonIndex = FS_BTN_MAIN_OPTIONS;
                 }
             } else {
                 this->buttonIndex++;
+                if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
+                    this->buttonIndex == FS_BTN_MAIN_FILE_3) {
+                    this->buttonIndex = FS_BTN_MAIN_COPY;
+                }
                 if (this->buttonIndex > FS_BTN_MAIN_OPTIONS) {
                     this->buttonIndex = FS_BTN_MAIN_FILE_1;
                 }
