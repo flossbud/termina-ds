@@ -115,6 +115,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Older rendering/cutscene microfix audit (`#1316`, `#1315`, `#1280`, `#1288`, `#1265`) | Done locally | Low | Bomb Shop owner draw restriction, telescope BGM guard, and Rosa Sisters Item_Give skip were already present; ported lens actor visibility and Skulltula flag-mask fixes. |
 | Older POW/Toto/rando script audit (`#1273`, `#1277`, `#1286`, `dc9587914`) | Done locally | Low | Secret Shrine freestanding logic and rando message-script arg safety were already present; ported Pause Owl Warp pictograph-state cleanup and Toto Fierce Deity prompt guard. |
 | Older seed/cutscene/authentic patch audit (`#1291`, `72ae14553`, `#970`, `#1285`) | Done locally | Low | Seed special-character cleanup, Epona skip talk-flag constant, and Moon Crash skip were already present; ported the missing Smithy chimney fire matrix-stack patch. |
+| Mask disable / Toto polish audit (`#1268`, `#1276`, `#1277`) | Done locally | Low | Underwater item hooks, Giant's Mask soul restriction, Multi-Window default, and Toto FD guard were already present; ported the missing Fierce Deity Anywhere underwater-use hooks. |
 
 ## Next Candidate Batch
 
