@@ -2,6 +2,13 @@
 #include "HudEditor.h"
 #include "macros.h"
 #include "2s2h/ShipInit.hpp"
+#include "2s2h/BenPort.h"
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <string>
 
 extern "C" int16_t OTRGetRectDimensionFromLeftEdge(float v);
 extern "C" int16_t OTRGetRectDimensionFromRightEdge(float v);
@@ -179,10 +186,101 @@ const char* presetNames[] = {
     "Widescreen",
     "OoT Layout",
     "Pro Controller Layout",
+    "HUD Preset 1",
+    "HUD Preset 2",
+    "HUD Preset 3",
 };
 
 static CosmeticOption& HudEditor_GetCosmeticOption(const char* cosmeticOptionId) {
     return cosmeticOptions.at(cosmeticOptionId);
+}
+
+static const char* HudEditor_GetElementKey(HudEditorElementID id) {
+    switch (id) {
+        case HUD_EDITOR_ELEMENT_B:
+            return "B";
+        case HUD_EDITOR_ELEMENT_C_LEFT:
+            return "CLeft";
+        case HUD_EDITOR_ELEMENT_C_DOWN:
+            return "CDown";
+        case HUD_EDITOR_ELEMENT_C_RIGHT:
+            return "CRight";
+        case HUD_EDITOR_ELEMENT_A:
+            return "A";
+        case HUD_EDITOR_ELEMENT_C_UP:
+            return "CUp";
+        case HUD_EDITOR_ELEMENT_D_PAD:
+            return "DPad";
+        case HUD_EDITOR_ELEMENT_MINIMAP:
+            return "Minimap";
+        case HUD_EDITOR_ELEMENT_START:
+            return "Start";
+        case HUD_EDITOR_ELEMENT_CARROT:
+            return "Carrots";
+        case HUD_EDITOR_ELEMENT_CLOCK:
+            return "Clock";
+        case HUD_EDITOR_ELEMENT_HEARTS:
+            return "Hearts";
+        case HUD_EDITOR_ELEMENT_MAGIC_METER:
+            return "Magic";
+        case HUD_EDITOR_ELEMENT_TIMERS:
+            return "Timers";
+        case HUD_EDITOR_ELEMENT_TIMERS_MOON_CRASH:
+            return "SkullKidTimer";
+        case HUD_EDITOR_ELEMENT_MINIGAME_COUNTER:
+            return "Minigames";
+        case HUD_EDITOR_ELEMENT_RUPEE_COUNTER:
+            return "Rupees";
+        case HUD_EDITOR_ELEMENT_KEY_COUNTER:
+            return "Keys";
+        case HUD_EDITOR_ELEMENT_SKULLTULA_COUNTER:
+            return "Skulltulas";
+        default:
+            return "";
+    }
+}
+
+static HudEditorElementMode HudEditor_ModeFromString(const std::string& mode, HudEditorElementMode fallback) {
+    if (mode == "vanilla") {
+        return HUD_EDITOR_ELEMENT_MODE_VANILLA;
+    }
+    if (mode == "hidden") {
+        return HUD_EDITOR_ELEMENT_MODE_HIDDEN;
+    }
+    if (mode == "center") {
+        return HUD_EDITOR_ELEMENT_MODE_MOVABLE_43;
+    }
+    if (mode == "left") {
+        return HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT;
+    }
+    if (mode == "right") {
+        return HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT;
+    }
+    return fallback;
+}
+
+static const char* HudEditor_ModeToString(HudEditorElementMode mode) {
+    switch (mode) {
+        case HUD_EDITOR_ELEMENT_MODE_HIDDEN:
+            return "hidden";
+        case HUD_EDITOR_ELEMENT_MODE_MOVABLE_43:
+            return "center";
+        case HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT:
+            return "left";
+        case HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT:
+            return "right";
+        case HUD_EDITOR_ELEMENT_MODE_VANILLA:
+        default:
+            return "vanilla";
+    }
+}
+
+static std::filesystem::path HudEditor_GetPresetDirectory() {
+    return Ship::Context::GetPathRelativeToAppDirectory("hud-presets", appShortName);
+}
+
+static std::filesystem::path HudEditor_GetPresetSlotPath(int slot) {
+    return HudEditor_GetPresetDirectory() / ("preset" + std::to_string(slot) + ".json");
 }
 
 static void HudEditor_SetElementLayout(HudEditorElementID id, HudEditorElementMode mode, int32_t x, int32_t y,
@@ -197,6 +295,109 @@ static void HudEditor_SetElementHidden(HudEditorElementID id) {
     CVarSetInteger(hudEditorElements[id].modeCvar, HUD_EDITOR_ELEMENT_MODE_HIDDEN);
 }
 
+static nlohmann::json HudEditor_ExportLayoutJson(const std::string& name) {
+    nlohmann::json elements = nlohmann::json::object();
+
+    for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
+        HudEditorElementMode mode = (HudEditorElementMode)CVarGetInteger(hudEditorElements[i].modeCvar,
+                                                                         HUD_EDITOR_ELEMENT_MODE_VANILLA);
+        elements[HudEditor_GetElementKey((HudEditorElementID)i)] = {
+            { "mode", HudEditor_ModeToString(mode) },
+            { "x", CVarGetInteger(hudEditorElements[i].xCvar, hudEditorElements[i].defaultX) },
+            { "y", CVarGetInteger(hudEditorElements[i].yCvar, hudEditorElements[i].defaultY) },
+            { "scale", CVarGetFloat(hudEditorElements[i].scaleCvar, 1.0f) },
+        };
+    }
+
+    return {
+        { "type", "2s2h-hud-layout" },
+        { "version", 1 },
+        { "name", name },
+        { "globalScale", CVarGetFloat(HUD_EDITOR_GLOBAL_SCALE_CVAR, 1.0f) },
+        { "elements", elements },
+    };
+}
+
+static bool HudEditor_SaveLayoutPreset(int slot, std::string& statusMessage) {
+    std::error_code ec;
+    const auto presetDir = HudEditor_GetPresetDirectory();
+    std::filesystem::create_directories(presetDir, ec);
+    if (ec) {
+        statusMessage = "Could not create hud-presets directory.";
+        return false;
+    }
+
+    const auto presetPath = HudEditor_GetPresetSlotPath(slot);
+    std::ofstream file(presetPath);
+    if (!file.is_open()) {
+        statusMessage = "Could not write HUD preset file.";
+        return false;
+    }
+
+    file << HudEditor_ExportLayoutJson("HUD Preset " + std::to_string(slot)).dump(4);
+    statusMessage = "Saved HUD Preset " + std::to_string(slot) + " to " + presetPath.filename().string();
+    return true;
+}
+
+static bool HudEditor_ApplyLayoutPreset(const std::filesystem::path& presetPath, std::string& statusMessage) {
+    std::ifstream file(presetPath);
+    if (!file.is_open()) {
+        statusMessage = "Could not open HUD preset file.";
+        return false;
+    }
+
+    nlohmann::json presetJson;
+    try {
+        presetJson = nlohmann::json::parse(file, nullptr, true, true);
+    } catch (const nlohmann::json::exception&) {
+        statusMessage = "HUD preset JSON could not be parsed.";
+        return false;
+    }
+
+    if (presetJson.value("type", "") != "2s2h-hud-layout" || !presetJson.contains("elements") ||
+        !presetJson["elements"].is_object()) {
+        statusMessage = "HUD preset has an unsupported format.";
+        return false;
+    }
+
+    if (presetJson.contains("globalScale") && presetJson["globalScale"].is_number()) {
+        CVarSetFloat(HUD_EDITOR_GLOBAL_SCALE_CVAR, std::clamp(presetJson["globalScale"].get<f32>(), 0.25f, 2.0f));
+    }
+
+    const auto& elements = presetJson["elements"];
+    for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
+        const char* key = HudEditor_GetElementKey((HudEditorElementID)i);
+        if (!elements.contains(key) || !elements[key].is_object()) {
+            continue;
+        }
+
+        const auto& element = elements[key];
+        HudEditorElementMode currentMode = (HudEditorElementMode)CVarGetInteger(hudEditorElements[i].modeCvar,
+                                                                                HUD_EDITOR_ELEMENT_MODE_VANILLA);
+        HudEditorElementMode mode = currentMode;
+        if (element.contains("mode") && element["mode"].is_string()) {
+            mode = HudEditor_ModeFromString(element["mode"].get<std::string>(), currentMode);
+        }
+
+        CVarSetInteger(hudEditorElements[i].modeCvar, mode);
+        if (element.contains("x") && element["x"].is_number()) {
+            CVarSetInteger(hudEditorElements[i].xCvar,
+                           std::clamp((int32_t)element["x"].get<f32>(), -320, 640));
+        }
+        if (element.contains("y") && element["y"].is_number()) {
+            CVarSetInteger(hudEditorElements[i].yCvar,
+                           std::clamp((int32_t)element["y"].get<f32>(), -240, 480));
+        }
+        if (element.contains("scale") && element["scale"].is_number()) {
+            CVarSetFloat(hudEditorElements[i].scaleCvar, std::clamp(element["scale"].get<f32>(), 0.25f, 4.0f));
+        }
+    }
+
+    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    statusMessage = "Loaded " + presetPath.filename().string();
+    return true;
+}
+
 namespace HudEditor {
 enum Presets {
     VANILLA,
@@ -204,25 +405,34 @@ enum Presets {
     WIDESCREEN,
     OCARINA_OF_TIME,
     PRO_CONTROLLER,
+    HUD_PRESET_1,
+    HUD_PRESET_2,
+    HUD_PRESET_3,
 };
 };
 
 void HudEditorWindow::DrawElement() {
     static HudEditor::Presets preset = HudEditor::Presets::VANILLA;
+    static std::string presetStatusMessage;
+
     if (UIWidgets::Combobox("Preset", &preset, presetNames)) {
-        CVarClear(HUD_EDITOR_GLOBAL_SCALE_CVAR);
-        for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
-            CVarClear(hudEditorElements[i].xCvar);
-            CVarClear(hudEditorElements[i].yCvar);
-            CVarClear(hudEditorElements[i].scaleCvar);
-            CVarClear(hudEditorElements[i].modeCvar);
-            // Also clear cosmetic colors for elements with mappings
-            if (hudEditorElements[i].cosmeticOptionId != nullptr) {
-                CosmeticOption& cosmeticElement = HudEditor_GetCosmeticOption(hudEditorElements[i].cosmeticOptionId);
-                CVarClear(cosmeticElement.colorCvar);
-                CVarClear(cosmeticElement.colorChangedCvar);
-                ShipInit::Init(cosmeticElement.colorCvar);
-                ShipInit::Init(cosmeticElement.colorChangedCvar);
+        bool loadingSlotPreset = preset >= HudEditor::Presets::HUD_PRESET_1 && preset <= HudEditor::Presets::HUD_PRESET_3;
+
+        if (!loadingSlotPreset) {
+            CVarClear(HUD_EDITOR_GLOBAL_SCALE_CVAR);
+            for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
+                CVarClear(hudEditorElements[i].xCvar);
+                CVarClear(hudEditorElements[i].yCvar);
+                CVarClear(hudEditorElements[i].scaleCvar);
+                CVarClear(hudEditorElements[i].modeCvar);
+                // Also clear cosmetic colors for elements with mappings
+                if (hudEditorElements[i].cosmeticOptionId != nullptr) {
+                    CosmeticOption& cosmeticElement = HudEditor_GetCosmeticOption(hudEditorElements[i].cosmeticOptionId);
+                    CVarClear(cosmeticElement.colorCvar);
+                    CVarClear(cosmeticElement.colorChangedCvar);
+                    ShipInit::Init(cosmeticElement.colorCvar);
+                    ShipInit::Init(cosmeticElement.colorChangedCvar);
+                }
             }
         }
 
@@ -354,8 +564,31 @@ void HudEditorWindow::DrawElement() {
                                            26, 190, 1.0f);
                 break;
             }
+            case HudEditor::Presets::HUD_PRESET_1:
+            case HudEditor::Presets::HUD_PRESET_2:
+            case HudEditor::Presets::HUD_PRESET_3: {
+                int slot = (int)preset - (int)HudEditor::Presets::HUD_PRESET_1 + 1;
+                HudEditor_ApplyLayoutPreset(HudEditor_GetPresetSlotPath(slot), presetStatusMessage);
+                break;
+            }
         }
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    }
+
+    ImGui::SeparatorText("Shared Presets");
+    if (ImGui::Button("Save to HUD Preset 1")) {
+        HudEditor_SaveLayoutPreset(1, presetStatusMessage);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Save to HUD Preset 2")) {
+        HudEditor_SaveLayoutPreset(2, presetStatusMessage);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Save to HUD Preset 3")) {
+        HudEditor_SaveLayoutPreset(3, presetStatusMessage);
+    }
+    if (!presetStatusMessage.empty()) {
+        ImGui::TextWrapped("%s", presetStatusMessage.c_str());
     }
 
     UIWidgets::CVarSliderFloat("Global Scale", HUD_EDITOR_GLOBAL_SCALE_CVAR,
