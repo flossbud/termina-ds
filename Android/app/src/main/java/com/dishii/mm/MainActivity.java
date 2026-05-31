@@ -35,6 +35,8 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -274,20 +276,50 @@ public class MainActivity extends SDLActivity{
 
     private void showDataRootChooser(boolean restartRequired) {
         List<DataRootOption> options = getDataRootOptions();
-        String[] labels = new String[options.size()];
-        for (int i = 0; i < options.size(); i++) {
-            labels[i] = options.get(i).label;
+
+        if (options.size() < 2) {
+            runOnUiThread(() -> new AlertDialog.Builder(this)
+                    .setTitle("Change Data Folder")
+                    .setMessage("No alternate writable data folder was found. Insert or mount an SD card and try again.")
+                    .setPositiveButton("OK", null)
+                    .setCancelable(true)
+                    .show());
+            return;
         }
 
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setTitle("Choose Data Folder")
-                .setMessage("Choose where 2S2H stores saves, mods, settings, and support files.")
-                .setItems(labels, (dialog, which) -> {
-                    DataRootOption selected = options.get(which);
-                    Executors.newSingleThreadExecutor().execute(() -> applyDataRootSelection(selected.folder, restartRequired));
-                })
-                .setCancelable(false)
-                .show());
+        runOnUiThread(() -> {
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            int padding = (int) (20 * getResources().getDisplayMetrics().density);
+            layout.setPadding(padding, padding, padding, padding);
+
+            TextView message = new TextView(this);
+            message.setText("Choose where 2S2H stores saves, mods, settings, and support files.");
+            message.setTextColor(Color.BLACK);
+            layout.addView(message);
+
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Change Data Folder")
+                    .setView(layout)
+                    .setNegativeButton("Cancel", null)
+                    .setCancelable(true)
+                    .create();
+
+            for (DataRootOption option : options) {
+                Button optionButton = new Button(this);
+                optionButton.setAllCaps(false);
+                optionButton.setText(option.label);
+                optionButton.setTextColor(Color.BLACK);
+                optionButton.setOnClickListener((view) -> {
+                    dialog.dismiss();
+                    Executors.newSingleThreadExecutor()
+                            .execute(() -> applyDataRootSelection(option.folder, restartRequired));
+                });
+                layout.addView(optionButton);
+            }
+
+            dialog.show();
+        });
     }
 
     private void applyDataRootSelection(File targetRootFolder, boolean restartRequired) {
@@ -646,11 +678,6 @@ public class MainActivity extends SDLActivity{
     }
 
     public void changeDataFolderFromNative() {
-        if (getDataRootOptions().size() < 2) {
-            runOnUiThread(() -> Toast.makeText(this, "No alternate data folder is available.", Toast.LENGTH_LONG).show());
-            return;
-        }
-
         showDataRootChooser(true);
     }
 
