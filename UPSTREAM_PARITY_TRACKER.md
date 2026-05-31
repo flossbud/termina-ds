@@ -32,6 +32,9 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Skip Enemy Cutscenes (`#1038`) | Verified present | Source is already ported and self-registering; Android menu entry is enabled in the current local batch. |
 | Skip Soaring cutscene (`#1383`) | Done locally | Ported actor-init shortcut with Android/local EnTest7 names and enabled Android menu entry. |
 | Sun's Song/Faster Song Playback ocarina end fix (`#1542`) | Done locally | Ported guard so Sun's Song does not force ocarina end while faster playback is active. |
+| Hyrule Warriors Styled Link | Done locally | Ported missing source hook for an already-visible Android menu option. |
+| Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
+| Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
 | Disable SFX replacement (`#1679`) | Verified Android-handled | No SFX replacement lookup is active locally; no source change needed. |
 | Android release Node/action updates | Ported | Workflow currently passes with action versions used in release `26700931957`. |
 
@@ -47,6 +50,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Song Items plus softlock fix | Done locally | Medium | Source/menu/actor hooks ported; native compile check passes. |
 | Skip Soaring cutscene and Skip Enemy Cutscenes menu exposure | Done locally | Medium | Skip Soaring source is ported; Skip Enemy source was already present; native compile check passes. |
 | Sun's Song/Faster Song Playback ocarina end fix | Done locally | Low | Small upstream gameplay guard ported; native compile check passes. |
+| Hyrule Warriors Styled Link source hook | Done locally | Low | Menu entry was already visible; missing source registration is now ported; native compile check passes. |
 
 ## Next Candidate Batch
 

@@ -103,6 +103,7 @@ void InitEnhancements() {
     // Modes
     RegisterPlayAsKafei();
     RegisterTimeMovesWhenYouMove();
+    RegisterHyruleWarriorsStyledLink();
 
     // Difficulty Options
     RegisterCustomBankRewardThresholds();
