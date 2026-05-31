@@ -165,6 +165,10 @@ static constexpr std::array<uint8_t, 10> sSongBits = {
     QUEST_SONG_SONATA, QUEST_SONG_LULLABY, QUEST_SONG_BOSSA_NOVA, QUEST_SONG_ELEGY,   QUEST_SONG_OATH,
 };
 
+static bool IsSaveLoaded() {
+    return gPlayState != nullptr && gSaveContext.gameMode == GAMEMODE_NORMAL;
+}
+
 bool ItemTrackerWindow::HasAmmoCount(int itemId) {
     switch (itemId) {
         case ITEM_BOW:
@@ -252,6 +256,7 @@ void ItemTrackerWindow::DrawAmmoCount(int itemId, const ImVec2& iconPos) {
 }
 
 int ItemTrackerWindow::DrawItems(int columns, int prevDrawnColumns) {
+    const bool isSaveLoaded = IsSaveLoaded();
     int topPadding = 0;
     size_t i = 0;
     // Draw items minus bottles
@@ -265,7 +270,7 @@ int ItemTrackerWindow::DrawItems(int columns, int prevDrawnColumns) {
 
         ImGui::SetCursorPos(pos);
 
-        if (gSaveContext.save.saveInfo.inventory.items[i] == ITEM_NONE) {
+        if (!isSaveLoaded || gSaveContext.save.saveInfo.inventory.items[i] == ITEM_NONE) {
             if (column == 5) {
                 // BENTODO these slots can hold multiple items. Something fun to do would be to draw the multitile
                 // design here instead of nothing DrawMultiItem(nullptr, false, row, column);
@@ -278,7 +283,9 @@ int ItemTrackerWindow::DrawItems(int columns, int prevDrawnColumns) {
         }
         ImGui::BeginGroup();
         DrawItem(texToDraw, drawFaded, mIconSize);
-        DrawAmmoCount((int)i, pos);
+        if (isSaveLoaded) {
+            DrawAmmoCount((int)i, pos);
+        }
         ImGui::EndGroup();
     }
 
@@ -289,7 +296,7 @@ int ItemTrackerWindow::DrawItems(int columns, int prevDrawnColumns) {
         ImGui::SetCursorPos(ImVec2((column * (mIconSize + mIconSpacing) + 8.0f),
                                    (row * (mIconSize + mIconSpacing)) + 8.0f + topPadding));
 
-        if (gSaveContext.save.saveInfo.inventory.items[i] == ITEM_NONE) {
+        if (!isSaveLoaded || gSaveContext.save.saveInfo.inventory.items[i] == ITEM_NONE) {
             DrawItem(const_cast<char*>(gItemIconEmptyBottleTex), true, mIconSize);
         } else {
             DrawItem((char*)gItemIcons[gSaveContext.save.saveInfo.inventory.items[i]], false, mIconSize);
@@ -299,6 +306,7 @@ int ItemTrackerWindow::DrawItems(int columns, int prevDrawnColumns) {
 }
 
 int ItemTrackerWindow::DrawMasks(int columns, int prevDrawnColumns) {
+    const bool isSaveLoaded = IsSaveLoaded();
     int topPadding = 0;
     // Masks
     for (size_t i = 0; i < 24; i++) {
@@ -307,8 +315,8 @@ int ItemTrackerWindow::DrawMasks(int columns, int prevDrawnColumns) {
         ImGui::SetCursorPos(ImVec2((column * (mIconSize + mIconSpacing) + 8.0f),
                                    (row * (mIconSize + mIconSpacing)) + 8.0f + topPadding));
 
-        DrawItem(const_cast<char*>(sMaskTextures[i]), gSaveContext.save.saveInfo.inventory.items[i + 24] == ITEM_NONE,
-                 mIconSize);
+        DrawItem(const_cast<char*>(sMaskTextures[i]),
+                 !isSaveLoaded || gSaveContext.save.saveInfo.inventory.items[i + 24] == ITEM_NONE, mIconSize);
     }
     return 4;
 }
@@ -319,6 +327,7 @@ static int RoundDown(int orig, int nearest) {
 }
 
 int ItemTrackerWindow::DrawSongs(int columns, int prevDrawnColumns) {
+    const bool isSaveLoaded = IsSaveLoaded();
     int topPadding = 0;
 
     for (size_t i = 0; i < sSongBits.size(); i++) {
@@ -327,12 +336,13 @@ int ItemTrackerWindow::DrawSongs(int columns, int prevDrawnColumns) {
         ImGui::SetCursorPos(ImVec2((column * (mIconSize + mIconSpacing) + 8.0f),
                                    (row * (mIconSize + mIconSpacing)) + 8.0f + topPadding));
 
-        DrawNote(i, !CHECK_QUEST_ITEM(sSongBits[i]));
+        DrawNote(i, !isSaveLoaded || !CHECK_QUEST_ITEM(sSongBits[i]));
     }
     return 2;
 }
 
 int ItemTrackerWindow::DrawDungeonItemsVert(int columns, int prevDrawnColumns) {
+    const bool isSaveLoaded = IsSaveLoaded();
     int topPadding = 0;
 
     // The icon size is based on 36x36.
@@ -346,7 +356,8 @@ int ItemTrackerWindow::DrawDungeonItemsVert(int columns, int prevDrawnColumns) {
         int column = i % columns;
         ImGui::SetCursorPos(ImVec2((column * (squareIconSize + mIconSpacing) + 8.0f),
                                    (row * (squareIconSize + mIconSpacing)) + 8.0f + topPadding));
-        DrawItem(static_cast<char*>(gItemIcons[i + ITEM_REMAINS_ODOLWA]), !CHECK_QUEST_ITEM(i), squareIconSize);
+        DrawItem(static_cast<char*>(gItemIcons[i + ITEM_REMAINS_ODOLWA]), !isSaveLoaded || !CHECK_QUEST_ITEM(i),
+                 squareIconSize);
     }
 
     prevDrawnColumns++;
@@ -356,7 +367,8 @@ int ItemTrackerWindow::DrawDungeonItemsVert(int columns, int prevDrawnColumns) {
         int column = i % columns;
         ImGui::SetCursorPos(ImVec2((column * (rectIconSize + mIconSpacing) + 8.0f),
                                    (row * (rectIconSize + mIconSpacing)) + 8.0f + topPadding));
-        DrawItem(const_cast<char*>(gQuestIconBossKeyTex), !CHECK_DUNGEON_ITEM(DUNGEON_BOSS_KEY, i), rectIconSize);
+        DrawItem(const_cast<char*>(gQuestIconBossKeyTex),
+                 !isSaveLoaded || !CHECK_DUNGEON_ITEM(DUNGEON_BOSS_KEY, i), rectIconSize);
     }
 
     prevDrawnColumns++;
@@ -366,7 +378,8 @@ int ItemTrackerWindow::DrawDungeonItemsVert(int columns, int prevDrawnColumns) {
         int column = i % columns;
         ImGui::SetCursorPos(ImVec2((column * (rectIconSize + mIconSpacing) + 8.0f),
                                    (row * (rectIconSize + mIconSpacing)) + 8.0f + topPadding));
-        DrawItem(const_cast<char*>(gQuestIconCompassTex), !CHECK_DUNGEON_ITEM(DUNGEON_COMPASS, i), rectIconSize);
+        DrawItem(const_cast<char*>(gQuestIconCompassTex),
+                 !isSaveLoaded || !CHECK_DUNGEON_ITEM(DUNGEON_COMPASS, i), rectIconSize);
     }
 
     prevDrawnColumns++;
@@ -376,7 +389,8 @@ int ItemTrackerWindow::DrawDungeonItemsVert(int columns, int prevDrawnColumns) {
         int column = i % columns;
         ImGui::SetCursorPos(ImVec2((column * (rectIconSize + mIconSpacing) + 8.0f),
                                    (row * (rectIconSize + mIconSpacing)) + 8.0f + topPadding));
-        DrawItem(const_cast<char*>(gQuestIconDungeonMapTex), !CHECK_DUNGEON_ITEM(DUNGEON_MAP, i), rectIconSize);
+        DrawItem(const_cast<char*>(gQuestIconDungeonMapTex),
+                 !isSaveLoaded || !CHECK_DUNGEON_ITEM(DUNGEON_MAP, i), rectIconSize);
     }
 
     return 4;
@@ -389,11 +403,7 @@ void ItemTrackerWindow::DrawItemsInRows(int columns) {
     int mainWindowPos = 0;
     int advancedBy = 0;
 
-    if (gPlayState == nullptr) {
-        ImGui::Text("Item tracker not available");
-        return;
-    }
-    if (mOnlyDrawPaused && gPlayState->pauseCtx.state == 0) {
+    if (mOnlyDrawPaused && gPlayState != nullptr && gPlayState->pauseCtx.state == 0) {
         return;
     }
     if (mItemDrawModes[SECTION_INVENTORY] != ItemTrackerDisplayType::Hidden) {

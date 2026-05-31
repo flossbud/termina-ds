@@ -108,6 +108,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Older rando logic/menu audit | Done locally | Low | Verified Spider House hint replacements, time/glitchless fixes, Gorman Track tree removal, Stone Tower Temple water logic, and rando menu metrics/trap text polish are already present. |
 | Clock Shuffle Granny story redirect | Done locally | Medium | Ports the missing source hook from upstream `#1479`; native compile check passes. |
 | Starting item and Pause Owl Warp rando audit | Done locally | Low | Verified Romani Mask Milk Bar logic, computed starting-item pool removal, and legacy/empty starting-items handling are already present; ported upstream `#1467` Pause Owl Warp gating for ocarina/buttons/song restrictions. |
+| Pre-playstate item tracker display (`#1477`) | Done locally | Low | Android's tracker is older than upstream's rewritten item tracker, so this ports the local equivalent: render faded tracker contents without a `PlayState` and avoid gameplay-only ammo/pause reads until a save is loaded. |
 
 ## Next Candidate Batch
 
