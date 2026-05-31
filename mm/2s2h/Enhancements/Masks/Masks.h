@@ -4,7 +4,6 @@
 void RegisterBlastMaskKeg();
 void RegisterFastTransformation();
 void RegisterFierceDeityAnywhere();
-void RegisterNoBlastMaskCooldown();
 void RegisterPersistentMasks();
 void UpdatePersistentMasksState();
 

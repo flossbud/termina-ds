@@ -1328,8 +1328,11 @@ void AddEnhancements() {
                 WIDGET_CVAR_CHECKBOX,
                 {},
                 [](widgetInfo& info) { UpdatePersistentMasksState(); } },
-              { "No Blast Mask Cooldown", "gEnhancements.Masks.NoBlastMaskCooldown",
-                "Eliminates the Cooldown between Blast Mask usage.", WIDGET_CVAR_CHECKBOX } },
+              { "Blast Mask Cooldown",
+                "gEnhancements.Masks.BlastMaskCooldown",
+                "Customize the Cooldown between Blast Mask usage. Default is 15.5 seconds.",
+                WIDGET_CVAR_SLIDER_FLOAT,
+                { .min = 0.0f, .max = 15.5f, .defaultVariant = 15.5f, .format = "%.1f seconds" } } },
             // Song Enhancements
             { { .widgetName = "Ocarina", .widgetType = WIDGET_SEPARATOR_TEXT },
               { "Enable Sun's Song", "gEnhancements.Songs.EnableSunsSong",

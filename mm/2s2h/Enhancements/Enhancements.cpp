@@ -64,7 +64,6 @@ void InitEnhancements() {
     RegisterFastTransformation();
     RegisterFierceDeityAnywhere();
     RegisterBlastMaskKeg();
-    RegisterNoBlastMaskCooldown();
     RegisterPersistentMasks();
 
     // Minigames

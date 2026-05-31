@@ -54,6 +54,9 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Flippers icon (`#1586`) | Verified present | Flippers texture and draw-item wiring are already present. |
 | Chu drops flagged-bomb fix (`#1587`) | Verified present | Chu drop replacement masks actor params before comparing bomb-drop IDs. |
 | Arrow buyback full-price fix (`#1555`) | Done locally | Arrows now ignore Half Price buyback mode and always sell at full value, matching upstream/MMR behavior. |
+| Red Potion and Gold Dust refill first-attempt fix (`#1565`) | Verified present | Rando actor behavior already grants refill item gets on first attempt when an empty bottle is available. |
+| Blast Mask cooldown slider (`#1559`) | Cleaned up locally | Slider hook/menu were present; removed stale hidden `NoBlastMaskCooldown` registration and updated search metadata. |
+| Rando seed file-select icons (`#1540`) | Verified present | File-select rando seed hash icon drawing is already present locally. |
 | Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
@@ -88,6 +91,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Extraction flow and Android menu-scale cleanup | Done locally | Medium | ROM archive compatibility now checks major version only, ROM picker cancel no longer shows an extra error, and Android menu scale applies widget spacing live. |
 | Rando/timesaver presence audit | Done locally | Low | Confirmed Transformation Mask Hints, NNL cow blacklist, RI_TRAP lesser type, Shrine feathers, Picto C-Up, Extra Powder Kegs, Better Owl Warp, Bank Reward Hint, Tycoon's Wallet, Gossip Stone weights, Flippers icon, and Chu drop fix are already present. |
 | Arrow buyback full-price fix | Done locally | Low | Small upstream gameplay fix; native compile check passes. |
+| Refill/file-select/mask polish audit | Done locally | Low | Red Potion/Gold Dust refill and file-select rando icons verified; stale Blast Mask cooldown search/runtime metadata cleaned up; native compile check passes. |
 
 ## Next Candidate Batch
 
