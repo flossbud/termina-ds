@@ -113,6 +113,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Older cutscene/grass logic audit (`#1387`, `#1384`, `#1377`, `#1374`, `#1369`) | Verified present | Low | Mayor's Office skip preserves Dotour's notebook entry, Hungry Goron forced dialogue skip, Woodfall repeat clear-cutscene skip, chest-grotto grass actor-list mapping, and Gorman Track alien gating are already present in Android. |
 | Actor reset and shuffled drop visibility audit (`#1371`, `#1350`, `#1363`, `#1356`) | Done locally | Low | Grass/crate shuffled-state checks and Day 2 rain bean logic were already present; wired Boss03 and Dinolfos reset callbacks and extended Invadepoh reset cleanup for static alien/event pointers. |
 | Older rendering/cutscene microfix audit (`#1316`, `#1315`, `#1280`, `#1288`, `#1265`) | Done locally | Low | Bomb Shop owner draw restriction, telescope BGM guard, and Rosa Sisters Item_Give skip were already present; ported lens actor visibility and Skulltula flag-mask fixes. |
+| Older POW/Toto/rando script audit (`#1273`, `#1277`, `#1286`, `dc9587914`) | Done locally | Low | Secret Shrine freestanding logic and rando message-script arg safety were already present; ported Pause Owl Warp pictograph-state cleanup and Toto Fierce Deity prompt guard. |
 
 ## Next Candidate Batch
 

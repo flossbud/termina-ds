@@ -34,6 +34,7 @@ void HandleConfirmingState(PauseContext* pauseCtx, Input* input) {
 
             Message_CloseTextbox(gPlayState);
 
+            CLEAR_EVENTINF(EVENTINF_41);
             gPlayState->nextEntrance = D_80AF343C[pauseCtx->cursorPoint[PAUSE_WORLD_MAP]];
             gPlayState->transitionTrigger = TRANS_TRIGGER_START;
             gPlayState->transitionType = TRANS_TYPE_FADE_WHITE;

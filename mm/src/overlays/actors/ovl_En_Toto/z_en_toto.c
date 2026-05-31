@@ -237,7 +237,7 @@ void func_80BA39C8(EnToto* this, PlayState* play) {
         } else {
             this->actor.flags &= ~ACTOR_FLAG_10000;
             Actor_OfferTalk(&this->actor, play, 50.0f);
-            if (play->sceneId == SCENE_SONCHONOIE) {
+            if (play->sceneId == SCENE_SONCHONOIE || player->transformation == PLAYER_FORM_FIERCE_DEITY) {
                 if (player->transformation == PLAYER_FORM_DEKU) {
                     if (!Flags_GetSwitch(play, ENTOTO_GET_SWITCH_FLAG_3(&this->actor))) {
                         this->text = &D_80BA502C[15];
