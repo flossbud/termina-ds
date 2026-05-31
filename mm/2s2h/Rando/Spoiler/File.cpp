@@ -1,6 +1,5 @@
 #include "Spoiler.h"
 #include <fstream>
-#include <filesystem>
 #include "BenPort.h"
 
 namespace Rando {
@@ -8,9 +7,7 @@ namespace Rando {
 namespace Spoiler {
 
 void SaveToFile(const std::string& fileName, nlohmann::json spoiler) {
-    std::filesystem::path filePath =
-        Ship::Context::GetPathRelativeToAppDirectory("randomizer/" + fileName, appShortName);
-    std::filesystem::create_directories(filePath.parent_path());
+    std::string filePath = Ship::Context::GetPathRelativeToAppDirectory("randomizer/" + fileName, appShortName);
     std::ofstream fileStream(filePath);
     if (!fileStream.is_open()) {
         throw std::runtime_error("Failed to open spoiler file");

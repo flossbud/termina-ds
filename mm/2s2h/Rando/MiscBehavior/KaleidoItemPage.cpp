@@ -26,17 +26,20 @@ static Vtx sCycleCircleVtx[] = {
 };
 
 static Vtx sCycleExtraItemVtx[] = {
-    // Left Item
     VTX(-48, 16, 0, 0 << 5, 0 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(-16, 16, 0, 32 << 5, 0 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(-48, -16, 0, 0 << 5, 32 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(-16, -16, 0, 32 << 5, 32 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
-    // Right Item
     VTX(16, 16, 0, 0 << 5, 0 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(48, 16, 0, 32 << 5, 0 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(16, -16, 0, 0 << 5, 32 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
     VTX(48, -16, 0, 32 << 5, 32 << 5, 0xFF, 0xFF, 0xFF, 0xFF),
 };
+
+static void Ship_DrawKaleidoCycleAButtonPrompt(PlayState* play, s16 alpha) {
+}
+
+#define aButtonDoActionDelayed aButtonDoAction
 
 static int sCycleActiveAnimTimer = 0;
 static int sCurrentItemCyclingSlot = SLOT_NONE;
@@ -49,7 +52,7 @@ enum CycleDirection {
     CYCLE_RIGHT,
 };
 
-static u8 GetPreviousListEntry(const std::vector<u8>& list, u8 current) {
+u8 GetPreviousListEntry(const std::vector<u8>& list, u8 current) {
     if (list.size() == 0) {
         return current;
     }
@@ -74,7 +77,7 @@ static u8 GetPreviousListEntry(const std::vector<u8>& list, u8 current) {
     return list.at(list.size() - 1);
 }
 
-static u8 GetNextListEntry(const std::vector<u8>& list, u8 current) {
+u8 GetNextListEntry(const std::vector<u8>& list, u8 current) {
     if (list.size() == 0) {
         return current;
     }
@@ -99,7 +102,7 @@ static u8 GetNextListEntry(const std::vector<u8>& list, u8 current) {
     return list.at(0);
 }
 
-static std::vector<u8> BuildAvailableItemsList(u8 slot) {
+std::vector<u8> BuildAvailableItemsList(u8 slot) {
     std::vector<u8> availableItems;
     switch (slot) {
         case SLOT_TRADE_DEED:
@@ -140,7 +143,7 @@ static std::vector<u8> BuildAvailableItemsList(u8 slot) {
     return availableItems;
 }
 
-static void DrawItemCycleExtras(PlayState* play, u8 slot, u8 canCycle, u8 leftItem, u8 rightItem) {
+void DrawItemCycleExtras(PlayState* play, u8 slot, u8 canCycle, u8 leftItem, u8 rightItem) {
     PauseContext* pauseCtx = &play->pauseCtx;
 
     u8 isCycling = sCurrentItemCyclingSlot == slot;
@@ -176,6 +179,12 @@ static void DrawItemCycleExtras(PlayState* play, u8 slot, u8 canCycle, u8 leftIt
         }
 
         MATRIX_FINALIZE_AND_LOAD(POLY_OPA_DISP++, play->state.gfxCtx);
+
+        // Render A button indicator when hovered and not cycling
+        if (!isCycling && sCycleActiveAnimTimer == 0 && pauseCtx->cursorSlot[PAUSE_ITEM] == slot &&
+            pauseCtx->cursorSpecialPos == 0) {
+            Ship_DrawKaleidoCycleAButtonPrompt(play, pauseCtx->alpha);
+        }
 
         // Render a dark circle behind the extra items when cycling
         if (isCycling) {
@@ -242,7 +251,7 @@ void Rando::MiscBehavior::InitKaleidoItemPage() {
             if (sPrevKaleidoCursorSlot == SLOT_TRADE_DEED || sPrevKaleidoCursorSlot == SLOT_TRADE_KEY_MAMA ||
                 sPrevKaleidoCursorSlot == SLOT_TRADE_COUPLE) {
                 // Reset A button back to Info when going away from a cycle-able item
-                if (interfaceCtx->aButtonDoAction != DO_ACTION_INFO) {
+                if (interfaceCtx->aButtonDoActionDelayed != DO_ACTION_INFO) {
                     Interface_SetAButtonDoAction(gPlayState, DO_ACTION_INFO);
                 }
             }
@@ -257,7 +266,7 @@ void Rando::MiscBehavior::InitKaleidoItemPage() {
 
         if (availableItems.size() == 0) {
             // Nothing to cycle, switch back to Info on A button
-            if (interfaceCtx->aButtonDoAction != DO_ACTION_INFO) {
+            if (interfaceCtx->aButtonDoActionDelayed != DO_ACTION_INFO) {
                 Interface_SetAButtonDoAction(gPlayState, DO_ACTION_INFO);
             }
 
@@ -291,7 +300,7 @@ void Rando::MiscBehavior::InitKaleidoItemPage() {
 
         if (sCurrentItemCyclingSlot != SLOT_NONE) {
             // Update HUD A button
-            if (interfaceCtx->aButtonDoAction != DO_ACTION_STOP) {
+            if (interfaceCtx->aButtonDoActionDelayed != DO_ACTION_STOP) {
                 Interface_SetAButtonDoAction(gPlayState, DO_ACTION_STOP);
             }
             if (gSaveContext.buttonStatus[EQUIP_SLOT_A] != BTN_ENABLED) {
@@ -318,7 +327,7 @@ void Rando::MiscBehavior::InitKaleidoItemPage() {
             }
         } else if (itemId == PAUSE_ITEM_NONE || availableItems.size() > 1) {
             // Update HUD A button
-            if (interfaceCtx->aButtonDoAction != DO_ACTION_DECIDE) {
+            if (interfaceCtx->aButtonDoActionDelayed != DO_ACTION_DECIDE) {
                 Interface_SetAButtonDoAction(gPlayState, DO_ACTION_DECIDE);
             }
             if (gSaveContext.buttonStatus[EQUIP_SLOT_A] != BTN_ENABLED) {
@@ -328,7 +337,7 @@ void Rando::MiscBehavior::InitKaleidoItemPage() {
             }
         } else {
             // Nothing to cycle, switch back to Info on A button
-            if (interfaceCtx->aButtonDoAction != DO_ACTION_INFO) {
+            if (interfaceCtx->aButtonDoActionDelayed != DO_ACTION_INFO) {
                 Interface_SetAButtonDoAction(gPlayState, DO_ACTION_INFO);
             }
         }

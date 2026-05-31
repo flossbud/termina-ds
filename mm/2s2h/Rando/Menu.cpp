@@ -8,7 +8,12 @@
 #include "2s2h/BenGui/BenGui.hpp"
 #include "2s2h/Rando/Logic/Logic.h"
 #include "2s2h/ShipInit.hpp"
+
 #include <sstream>
+
+#ifndef ImGuiChildFlags_Borders
+#define ImGuiChildFlags_Borders ImGuiChildFlags_Border
+#endif
 
 extern "C" {
 #include "overlays/actors/ovl_En_Sth/z_en_sth.h"
@@ -81,7 +86,6 @@ static const ImVec4 CLOCK_NIGHT_TINT = ImVec4(0.3f, 0.5f, 1.0f, 1.0f);
 static const float DISABLED_ITEM_ALPHA = 0.3f;
 static const char* CLOCK_PROGRESSIVE_TOOLTIP =
     "\n\nTime items are not compatible with Progressive Time modes.\nSwitch to Random mode to use starting time.";
-static constexpr const char* RANDO_MENU_LABEL = "Randomizer";
 
 // Apply clock-specific rendering (tint colors and tooltips) based on progressive mode
 static void ApplyClockItemRendering(RandoItemId item, ImVec4& tintColor, std::string& tooltipText,
@@ -226,7 +230,6 @@ void RefreshMetrics() {
 static RegisterShipInitFunc refreshMetricsInit(RefreshMetrics, {
                                                                    // I Don't love this, but it works...
                                                                    "gRando.ExcludedChecks",
-                                                                   "gRando.StartingItems",
                                                                    "gRando.Options.RO_ACCESS_DUNGEONS",
                                                                    "gRando.Options.RO_ACCESS_MAJORA_MASKS_COUNT",
                                                                    "gRando.Options.RO_ACCESS_MAJORA_REMAINS_COUNT",
@@ -660,7 +663,7 @@ static void DrawItemsTab() {
             .Min(1)
             .Max(100)
             .DefaultValue(5));
-    ImGui::TextWrapped("Trap behavior can be altered at Randomizer > General near the bottom of the page.");
+    ImGui::TextWrapped("Trap's fake item behavior can be altered at Rando > General > Near the bottom of the page");
     ImGui::SeparatorText("Toggle Trap Types");
     CVarCheckbox(
         "Freeze Traps", "gRando.Traps.Freeze",
@@ -783,8 +786,7 @@ static void DrawStartingItemsTab() {
                                ImVec4(0, 0, 0, 0), tintColor)) {
             setStartingItemsList.erase(setStartingItemsList.begin() + listIndex);
             Rando::SetStartingItemsInConfig(setStartingItemsList);
-            ImGui::PopID();
-            break;
+            RefreshMetrics();
         }
         UIWidgets::Tooltip(tooltipText.c_str());
         listIndex++;
@@ -812,7 +814,7 @@ static void DrawStartingItemsTab() {
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
         if (ImGui::BeginChild(std::to_string(category.first).c_str(), ImVec2(0, 0),
                               ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeX |
-                                  ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Border)) {
+                                  ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Borders)) {
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
@@ -866,6 +868,7 @@ static void DrawStartingItemsTab() {
 
                             setStartingItemsList.push_back(item);
                             Rando::SetStartingItemsInConfig(setStartingItemsList);
+                            RefreshMetrics();
                         }
                     }
                     UIWidgets::Tooltip(tooltipText.c_str());
@@ -1127,10 +1130,6 @@ static void DrawHintsTab() {
     CVarCheckbox("Oath to Order", Rando::StaticData::Options[RO_HINTS_OATH_TO_ORDER].cvar,
                  CheckboxOptions({ { .tooltip = "Once you have the Moon Access Requirements, talking to Skull Kid on "
                                                 "the Clock Tower Rooftop will hint the location of Oath to Order" } }));
-    CVarCheckbox("Transformation Masks", Rando::StaticData::Options[RO_HINTS_TRANSFORMATIONS].cvar,
-                 CheckboxOptions({ { .tooltip = "Checking the sign near the Business Scrub in South Clock Town "
-                                                "will reveal the location of Transformation Masks.\n"
-                                                "Note: This excludes Fierce Deity." } }));
     CVarCheckbox(
         "General Actor Hints", "gPlaceholderBool",
         CheckboxOptions({ { .disabled = true,
@@ -1152,44 +1151,44 @@ static void DrawHintsTab() {
 }
 
 void Rando::RegisterMenu() {
-    mBenMenu->AddMenuEntry(RANDO_MENU_LABEL, "gSettings.Menu.RandoSidebarSection");
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "General", 1);
-    WidgetPath path = { RANDO_MENU_LABEL, "General", SECTION_COLUMN_1 };
+    mBenMenu->AddMenuEntry("Rando", "gSettings.Menu.RandoSidebarSection");
+    mBenMenu->AddSidebarEntry("Rando", "General", 1);
+    WidgetPath path = { "Rando", "General", SECTION_COLUMN_1 };
     mBenMenu->AddWidget(path, "General", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { DrawGeneralTab(); });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Logic/Conditions", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Logic/Conditions", 1);
     path.sidebarName = "Logic/Conditions";
     mBenMenu->AddWidget(path, "Logic/Conditions", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         DrawLogicConditionsTab();
     });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Shuffle Options", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Shuffle Options", 1);
     path.sidebarName = "Shuffle Options";
     mBenMenu->AddWidget(path, "Shuffle Options", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         DrawShufflesTab();
     });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Check Filter", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Check Filter", 1);
     path.sidebarName = "Check Filter";
     mBenMenu->AddWidget(path, "Check Filter", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         DrawCheckFilterTab();
     });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Items", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Items", 1);
     path.sidebarName = "Items";
     mBenMenu->AddWidget(path, "Items", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { DrawItemsTab(); });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Starting Items", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Starting Items", 1);
     path.sidebarName = "Starting Items";
     mBenMenu->AddWidget(path, "Starting Items", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         DrawStartingItemsTab();
     });
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Hints", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Hints", 1);
     path.sidebarName = "Hints";
     mBenMenu->AddWidget(path, "Hints", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { DrawHintsTab(); });
 
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Item Tracker", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Item Tracker", 1);
     path.sidebarName = "Item Tracker";
     mBenMenu->AddWidget(path, "Popout Settings", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.ItemTrackerSettings")
         .WindowName("Item Tracker Settings");
 
-    mBenMenu->AddSidebarEntry(RANDO_MENU_LABEL, "Check Tracker", 1);
+    mBenMenu->AddSidebarEntry("Rando", "Check Tracker", 1);
     path.sidebarName = "Check Tracker";
     mBenMenu->AddWidget(path, "Popout Settings", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.CheckTrackerSettings")

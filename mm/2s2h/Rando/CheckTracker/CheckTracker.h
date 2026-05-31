@@ -2,7 +2,7 @@
 #define RANDO_CHECK_TRACKER_H
 
 #include "Rando/Rando.h"
-#include "window/gui/GuiWindow.h"
+#include <window/gui/GuiWindow.h>
 
 namespace Rando {
 

@@ -1,6 +1,6 @@
 #include "MiscBehavior.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
-#include <libultraship/bridge.h>
+#include <public/bridge/consolevariablebridge.h>
 
 #define BANK_SIGN_MESSAGE_ID 0x1C14
 

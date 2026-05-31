@@ -5,7 +5,6 @@
 #include <spdlog/spdlog.h>
 #include "BenPort.h"
 #include <public/bridge/consolevariablebridge.h>
-#include <Context.h>
 #include <window/Window.h>
 
 extern "C" {

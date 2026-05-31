@@ -10,12 +10,9 @@ extern "C" {
 void Rando::MiscBehavior::Init() {
     Rando::MiscBehavior::InitFileSelect();
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveInit>(Rando::MiscBehavior::OnFileCreate);
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>(
-        [](s16 sceneId, s8 spawnNum) { Rando::MiscBehavior::GrantPendingStartingItems(); });
 }
 
 void Rando::MiscBehavior::OnFileLoad() {
-    Rando::MiscBehavior::QueueStartingItemsGrantIfNeeded();
     Rando::MiscBehavior::CheckQueueReset();
     Rando::MiscBehavior::InitKaleidoItemPage();
     Rando::MiscBehavior::InitOfferGetItemBehavior();

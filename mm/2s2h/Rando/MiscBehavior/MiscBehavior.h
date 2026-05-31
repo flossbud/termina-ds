@@ -18,8 +18,6 @@ void InitOfferGetItemBehavior();
 void BeforeEndOfCycleSave();
 void AfterEndOfCycleSave();
 void OnFileCreate(s16 fileNum);
-void QueueStartingItemsGrantIfNeeded();
-void GrantPendingStartingItems();
 void OnFlagSet(FlagType flagType, u32 flag);
 void OnSceneFlagSet(s16 sceneId, FlagType flagType, u32 flag);
 void OnSceneInit(s16 sceneId, s8 spawnNum);

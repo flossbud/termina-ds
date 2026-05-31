@@ -6,10 +6,8 @@
 #include <libultraship/libultra/types.h>
 
 std::vector<std::string> Rando::Spoiler::spoilerOptions;
-
-static std::filesystem::path GetRandomizerFolderPath() {
-    return Ship::Context::GetPathRelativeToAppDirectory("randomizer", appShortName);
-}
+const std::filesystem::path randomizerFolderPath(Ship::Context::GetPathRelativeToAppDirectory("randomizer",
+                                                                                              appShortName));
 
 // This function refreshes the list of spoiler files in the randomizer folder, this list is used in the Randomizer UI,
 // and also includes an option to generate a new seed at the top of the list.
@@ -20,7 +18,6 @@ void Rando::Spoiler::RefreshOptions() {
     s32 spoilerFileIndex = -1;
 
     // ensure the randomizer folder exists
-    const std::filesystem::path randomizerFolderPath = GetRandomizerFolderPath();
     if (!std::filesystem::exists(randomizerFolderPath)) {
         std::filesystem::create_directory(randomizerFolderPath);
     }

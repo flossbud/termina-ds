@@ -6,6 +6,7 @@
 #include "Rando/Spoiler/Spoiler.h"
 #include "Rando/CheckTracker/CheckTracker.h"
 #include "2s2h/ShipInit.hpp"
+#include <Context.h>
 
 // When a save is loaded, we want to unregister all hooks and re-register them if it's a rando save
 void OnSaveLoadHandler(s16 fileNum) {
@@ -36,14 +37,4 @@ RandoCheckId Rando::FindItemPlacement(RandoItemId randoItemId) {
     }
 
     return RC_UNKNOWN;
-}
-
-std::vector<RandoCheckId> Rando::FindMultiItemPlacement(RandoItemId randoItemId) {
-    std::vector<RandoCheckId> itemPlacements;
-    for (auto& [randocheckId, check] : Rando::StaticData::Checks) {
-        if (RANDO_SAVE_CHECKS[randocheckId].randoItemId == randoItemId) {
-            itemPlacements.push_back(randocheckId);
-        }
-    }
-    return itemPlacements;
 }

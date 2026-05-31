@@ -9,62 +9,10 @@
 #include "2s2h/BenGui/Notification.h"
 
 extern "C" {
-#include "z64save.h"
 #include "functions.h"
 #include "variables.h"
 #include "ShipUtils.h"
 #include "overlays/actors/ovl_En_Sth/z_en_sth.h"
-}
-
-namespace {
-bool sPendingStartingItemsGrant = false;
-
-void GrantStartingItemsWhenReady() {
-    sPendingStartingItemsGrant = true;
-}
-
-bool ShouldGrantStartingItems() {
-    if (!IS_RANDO) {
-        return false;
-    }
-
-    std::vector<RandoItemId> startingItems = Rando::GetStartingItemsFromSave(gSaveContext.save.shipSaveInfo.rando);
-    std::vector<RandoItemId> computedStartingItems =
-        Rando::GetComputedStartingItems(gSaveContext.save.shipSaveInfo.rando);
-    startingItems.insert(startingItems.end(), computedStartingItems.begin(), computedStartingItems.end());
-
-    for (RandoItemId startingItem : startingItems) {
-        if (Rando::IsItemObtainable(startingItem)) {
-            return true;
-        }
-    }
-
-    if (RANDO_SAVE_OPTIONS[RO_STARTING_HEALTH] != 3 &&
-        gSaveContext.save.saveInfo.playerData.healthCapacity < RANDO_SAVE_OPTIONS[RO_STARTING_HEALTH] * 0x10) {
-        return true;
-    }
-
-    return false;
-}
-} // namespace
-
-void Rando::MiscBehavior::QueueStartingItemsGrantIfNeeded() {
-    if (ShouldGrantStartingItems()) {
-        GrantStartingItemsWhenReady();
-    }
-}
-
-void Rando::MiscBehavior::GrantPendingStartingItems() {
-    if (!sPendingStartingItemsGrant || !IS_RANDO || gPlayState == nullptr) {
-        return;
-    }
-
-    Rando::GrantStartingItems();
-    sPendingStartingItemsGrant = false;
-
-    if (gSaveContext.fileNum != 0xFF) {
-        Sram_SaveSpecialEnterClockTown(gPlayState);
-    }
 }
 
 // Very primitive randomizer implementation, when a save is created, if rando is enabled
@@ -184,6 +132,9 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     }
                 }
 
+                // Grant the starting stuff
+                Rando::GrantStartingItems();
+
                 // Run prelim compatibility/validation checks before attempting to place items
 
                 // Verify we have at least one time item if clock shuffle is enabled
@@ -194,6 +145,9 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                 }
 
                 if (RANDO_SAVE_OPTIONS[RO_LOGIC] == RO_LOGIC_VANILLA) {
+                    GiveItem(RI_SWORD_KOKIRI);
+                    GiveItem(RI_SHIELD_HERO);
+
                     for (auto& [randoCheckId, randoStaticCheck] : Rando::StaticData::Checks) {
                         if (randoStaticCheck.randoCheckId != RC_UNKNOWN) {
                             RANDO_SAVE_CHECKS[randoCheckId].randoItemId = randoStaticCheck.randoItemId;
@@ -224,17 +178,14 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                     Rando::Spoiler::RefreshOptions();
                 }
 
-                // Grant starting inventory after the seed has been written and an actual scene is active.
-                GrantStartingItemsWhenReady();
-
                 Audio_PlaySfx(NA_SE_SY_ATTENTION_SOUND);
             } else {
                 std::string fileName = CVarGetString("gRando.SpoilerFile", "");
                 nlohmann::json spoiler = Rando::Spoiler::LoadFromFile(fileName);
 
                 Rando::Spoiler::ApplyToSaveContext(spoiler);
-                // Grant the starting stuff once a live play state exists.
-                GrantStartingItemsWhenReady();
+                // Grant the starting stuff
+                Rando::GrantStartingItems();
 
                 Audio_PlaySfx(NA_SE_SY_ATTENTION_SOUND);
             }

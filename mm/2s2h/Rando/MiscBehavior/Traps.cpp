@@ -14,6 +14,10 @@ void func_80833B18(PlayState* play, Player* thisx, s32 arg2, f32 speed, f32 velo
 void EnTimeTag_KickOut_Transition(EnTimeTag* enTimeTag, PlayState* play);
 }
 
+#define bodyFlameTimers flameTimers
+#define speedXZ linearVelocity
+#define yaw currentYaw
+
 extern void UpdateGameTime(u16 gameTime);
 
 int roll = TRAP_FREEZE;
@@ -171,9 +175,8 @@ void Rando::MiscBehavior::OfferTrapItem() {
             GameInteractor::Instance->events.emplace_back(GIEventTrap{ .action = []() {
                 Player* player = GET_PLAYER(gPlayState);
                 for (int i = 0; i < 18; i++) {
-                    player->flameTimers[i] = static_cast<uint8_t>(Rand_S16Offset(0, 200));
+                    player->bodyFlameTimers[i] = static_cast<uint8_t>(Rand_S16Offset(0, 200));
                 }
-                player->isBurning = true;
                 func_80833B18(gPlayState, player, 0, 0, 0, 0, 0);
             } });
             break;
@@ -189,9 +192,8 @@ void Rando::MiscBehavior::OfferTrapItem() {
                 knockbackBounceHook = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::OnActorUpdate>(
                     ACTOR_PLAYER, [](Actor* actor) {
                         Player* player = (Player*)actor;
-                        if (player->actor.bgCheckFlags & 0x08 && abs(player->actor.speed) > 15.0f) {
-                            player->currentYaw =
-                                ((player->actor.wallYaw - player->currentYaw) + player->actor.wallYaw) - 0x8000;
+                        if (player->actor.bgCheckFlags & 0x08 && abs(player->speedXZ) > 15.0f) {
+                            player->yaw = ((player->actor.wallYaw - player->yaw) + player->actor.wallYaw) - 0x8000;
                             Player_PlaySfx(player, NA_SE_PL_BODY_HIT);
                         }
 
@@ -260,7 +262,7 @@ void Rando::MiscBehavior::OfferTrapItem() {
                         UpdateGameTime(new_time);
                         Interface_NewDay(gPlayState, CURRENT_DAY);
                         // Load environment values for new day
-                        Environment_UpdateSkybox(gPlayState->skyboxId, &gPlayState->envCtx, &gPlayState->skyboxCtx);
+                        func_800FEAF4(&gPlayState->envCtx);
                         // Clear weather from day 2
                         gWeatherMode = WEATHER_MODE_CLEAR;
                         gPlayState->envCtx.lightningState = LIGHTNING_OFF;

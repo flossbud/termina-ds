@@ -83,21 +83,29 @@ Gfx* EnKnight_BuildEmptyDL(GraphicsContext* gfxCtx);
 void ObjTokeidai_RotateOnMinuteChange(ObjTokeidai* thisx, s32 playSfx);
 void ObjTokeidai_RotateOnHourChange(ObjTokeidai* thisx, PlayState* play);
 // clang-format on
+}
 
+// Android generated asset headers still use older object-file names for a few
+// models that upstream references by descriptive names.
+#ifndef DEXIHAND_LIMB_MAX
 #define DEXIHAND_LIMB_MAX OBJECT_WDHAND_LIMB_MAX
 #define gDexihandSkel object_wdhand_Skel_001E20
 #define gDexihandIdleAnim object_wdhand_Anim_000854
 #define gDexihandBaseDL object_wdhand_DL_0014C0
 #define gDexihandArmSegmentDL object_wdhand_DL_0015B0
+#endif
 
+#ifndef IGOS_LIMB_MAX
 #define IGOS_LIMB_MAX OBJECT_KNIGHT_1_LIMB_MAX
 #define gIgosSkel object_knight_Skel_0201A8
 #define gKnightIdleAnim object_knight_Anim_0040E0
+#endif
 
+#ifndef gFighterPirateEyeOpenTex
 #define gFighterPirateEyeOpenTex gKaizokuEyeOpenTex
 #define gFighterPirateSkel gKaizokuSkel
-#define gFighterPirateFightingIdleAnim object_kz_Anim_00F8E4
-}
+#define gFighterPirateFightingIdleAnim object_kz_Anim_0058B8
+#endif
 
 #define SETUP_DRAW(LIMB_MAX)           \
     static bool initialized = false;   \
