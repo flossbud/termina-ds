@@ -1,5 +1,6 @@
 #include <libultraship/libultraship.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/Rando/Logic/Logic.h"
 
 extern "C" {
 #include "variables.h"
@@ -14,8 +15,11 @@ extern s16 sInDungeonScene;
 
 extern "C" bool PauseOwlWarp_IsOwlWarpEnabled() {
     return CVarGetInteger("gEnhancements.Songs.PauseOwlWarp", 0) && CHECK_QUEST_ITEM(QUEST_SONG_SOARING) &&
+           INV_CONTENT(ITEM_OCARINA_OF_TIME) == ITEM_OCARINA_OF_TIME &&
            gSaveContext.save.saveInfo.playerData.owlActivationFlags != 0 &&
-           gPlayState->pauseCtx.debugEditor == DEBUG_EDITOR_NONE;
+           gPlayState->pauseCtx.debugEditor == DEBUG_EDITOR_NONE &&
+           gPlayState->interfaceCtx.restrictions.songOfSoaring == 0 &&
+           (!IS_RANDO || Rando::Logic::canPlaySong(OCARINA_SONG_SOARING));
 }
 
 void HandleConfirmingState(PauseContext* pauseCtx, Input* input) {

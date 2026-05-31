@@ -107,6 +107,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Rando logic microfix audit | Done locally | Low | Curiosity Shop Seahorse requirements, Soaring hint, Smithy day gate, Progressive Time obtainability, and Giant Bee soul logic verified; Bad Bat tree heart-piece logic adjusted locally; native compile check passes. |
 | Older rando logic/menu audit | Done locally | Low | Verified Spider House hint replacements, time/glitchless fixes, Gorman Track tree removal, Stone Tower Temple water logic, and rando menu metrics/trap text polish are already present. |
 | Clock Shuffle Granny story redirect | Done locally | Medium | Ports the missing source hook from upstream `#1479`; native compile check passes. |
+| Starting item and Pause Owl Warp rando audit | Done locally | Low | Verified Romani Mask Milk Bar logic, computed starting-item pool removal, and legacy/empty starting-items handling are already present; ported upstream `#1467` Pause Owl Warp gating for ocarina/buttons/song restrictions. |
 
 ## Next Candidate Batch
 
