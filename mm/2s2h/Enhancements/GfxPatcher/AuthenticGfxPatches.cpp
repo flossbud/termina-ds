@@ -6,6 +6,7 @@ extern "C" {
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_fz/object_fz.h"
 #include "objects/object_ik/object_ik.h"
+#include "objects/object_yukimura_obj/object_yukimura_obj.h"
 #include "overlays/ovl_En_Syateki_Okuta/ovl_En_Syateki_Okuta.h"
 #include "overlays/ovl_Obj_Jgame_Light/ovl_Obj_Jgame_Light.h"
 
@@ -342,6 +343,11 @@ void GfxPatcher_ApplyGeometryIssuePatches() {
     PatchGeometrySeams();
 }
 
+void GfxPatcher_ApplySmithyChimneyFirePatch() {
+    // object_yukimura_obj_DL_000F98 has an extraneous modelview pop that can underflow the matrix stack.
+    ResourceMgr_PatchGfxByName(object_yukimura_obj_DL_000F98, "smithyChimneyFireFix", 31, gsSPNoOp());
+}
+
 // Applies required patches for authentic bugs to allow the game to play and render properly
 void GfxPatcher_ApplyNecessaryAuthenticPatches() {
     PatchMiniGameCrossAndCircleSymbols();
@@ -349,4 +355,6 @@ void GfxPatcher_ApplyNecessaryAuthenticPatches() {
     GfxPatcher_ApplyOverflowTexturePatches();
 
     GfxPatcher_ApplyGeometryIssuePatches();
+
+    GfxPatcher_ApplySmithyChimneyFirePatch();
 }
