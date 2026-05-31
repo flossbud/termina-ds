@@ -54,6 +54,7 @@ public class MainActivity extends SDLActivity{
     private static final CountDownLatch setupLatch = new CountDownLatch(1);
     private static String currentDataRootPath = "/storage/emulated/0/2S2H";
     private static final String PREF_DATA_ROOT_PATH = "dataRootPath";
+    private static final String PREF_LEGACY_DATA_MIGRATION_COMPLETE = "legacyDataMigrationComplete";
     private static final String PREF_TOUCH_CONTROLS_DISABLED = "touchControlsDisabled";
     // Legacy key name: true means the touch controls are hidden, not visible.
     private static final String PREF_TOUCH_CONTROLS_HIDDEN = "controlsVisible";
@@ -407,7 +408,7 @@ public class MainActivity extends SDLActivity{
         }
 
         try {
-            AssetCopyUtil.copyDirectoryContents(sourceRoot, targetRoot);
+            AssetCopyUtil.copyDirectoryContentsNoOverwrite(sourceRoot, targetRoot);
             Log.i("setupFiles", "Copied existing data from: " + sourceRoot.getAbsolutePath());
         } catch (IOException e) {
             Log.e("setupFiles", "Failed to copy existing data from: " + sourceRoot.getAbsolutePath(), e);
@@ -546,37 +547,7 @@ public class MainActivity extends SDLActivity{
             return;
         }
 
-        File sourceOldRoot = getExternalFilesDir(null);
-        File sourceSavesDir = sourceOldRoot == null ? null : new File(sourceOldRoot, "saves"); // how to tell if there's anything to migrate
-
-        // === Migration from old Android/data/.../files/ directory ===
-        if (sourceOldRoot != null && sourceSavesDir != null && sourceSavesDir.isDirectory()) {
-            Log.i("setupFiles", "Migrating old data from: " + sourceOldRoot.getAbsolutePath());
-
-            File[] sourceFiles = sourceOldRoot.listFiles();
-            if (sourceFiles != null) {
-                for (File file : sourceFiles) {
-                    String name = file.getName();
-                    if (name.equals("assets") || name.equals("2ship.o2r") || name.equals("mm.o2r")) {
-                        continue; // Skip these
-                    }
-
-                    File dest = new File(targetRootFolder, name);
-                    try {
-                        if (file.isDirectory()) {
-                            AssetCopyUtil.copyDirectory(file, dest);
-                        } else {
-                            AssetCopyUtil.copyFile(file, dest);
-                        }
-                        Log.i("setupFiles", "Migrated: " + name);
-                    } catch (IOException e) {
-                        Log.e("setupFiles", "Failed to migrate: " + name, e);
-                    }
-                }
-            }
-
-            runOnUiThread(() -> Toast.makeText(this, "Save data migrated", Toast.LENGTH_SHORT).show());
-        }
+        migrateLegacyAppDataIfNeeded(targetRootFolder);
 
         // Ensure root folder exists
         if (!targetRootFolder.exists()) {
@@ -633,6 +604,46 @@ public class MainActivity extends SDLActivity{
         }
 
         setupLatch.countDown();
+    }
+
+    private void migrateLegacyAppDataIfNeeded(File targetRootFolder) {
+        if (preferences.getBoolean(PREF_LEGACY_DATA_MIGRATION_COMPLETE, false)) {
+            return;
+        }
+
+        File sourceOldRoot = getExternalFilesDir(null);
+        File sourceSavesDir = sourceOldRoot == null ? null : new File(sourceOldRoot, "saves");
+        if (sourceOldRoot == null || sourceSavesDir == null || !sourceSavesDir.isDirectory()) {
+            preferences.edit().putBoolean(PREF_LEGACY_DATA_MIGRATION_COMPLETE, true).apply();
+            return;
+        }
+
+        Log.i("setupFiles", "Migrating old data without overwriting current files: " + sourceOldRoot.getAbsolutePath());
+
+        File[] sourceFiles = sourceOldRoot.listFiles();
+        if (sourceFiles != null) {
+            for (File file : sourceFiles) {
+                String name = file.getName();
+                if (name.equals("assets") || name.equals("2ship.o2r") || name.equals("mm.o2r")) {
+                    continue;
+                }
+
+                File dest = new File(targetRootFolder, name);
+                try {
+                    if (file.isDirectory()) {
+                        AssetCopyUtil.copyDirectoryNoOverwrite(file, dest);
+                    } else {
+                        AssetCopyUtil.copyFileNoOverwrite(file, dest);
+                    }
+                    Log.i("setupFiles", "Migrated missing legacy data: " + name);
+                } catch (IOException e) {
+                    Log.e("setupFiles", "Failed to migrate legacy data: " + name, e);
+                }
+            }
+        }
+
+        preferences.edit().putBoolean(PREF_LEGACY_DATA_MIGRATION_COMPLETE, true).apply();
+        runOnUiThread(() -> Toast.makeText(this, "Existing save data checked", Toast.LENGTH_SHORT).show());
     }
 
     private void showSetupFailure(String message) {

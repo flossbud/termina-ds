@@ -131,15 +131,33 @@ void SaveManager_WriteSaveFile(std::filesystem::path fileName, nlohmann::json j)
     const std::filesystem::path savesFolderPath = SaveManager_GetSavesFolderPath();
     const std::filesystem::path filePath = savesFolderPath / fileName;
 
-    if (!std::filesystem::exists(savesFolderPath)) {
-        std::filesystem::create_directory(savesFolderPath);
-    }
-
     try {
+        if (!std::filesystem::exists(savesFolderPath)) {
+            std::filesystem::create_directories(savesFolderPath);
+        }
+
         std::ofstream o(filePath);
+        if (!o.is_open()) {
+            SPDLOG_ERROR("Failed to open save file for writing: {}", filePath.string());
+            return;
+        }
+
         o << std::setw(4) << j << std::endl;
+        o.flush();
+        if (!o.good()) {
+            SPDLOG_ERROR("Failed to write save file: {}", filePath.string());
+            return;
+        }
+
         o.close();
-    } catch (...) { SPDLOG_ERROR("Failed to write save file"); }
+        if (!o.good()) {
+            SPDLOG_ERROR("Failed to close save file after writing: {}", filePath.string());
+        }
+    } catch (const std::exception& e) {
+        SPDLOG_ERROR("Failed to write save file {}: {}", filePath.string(), e.what());
+    } catch (...) {
+        SPDLOG_ERROR("Failed to write save file: {}", filePath.string());
+    }
 }
 
 void SaveManager_DeleteSaveFile(std::filesystem::path fileName) {
