@@ -276,23 +276,23 @@ void HudEditorWindow::DrawElement() {
                 break;
             }
             case HudEditor::Presets::OCARINA_OF_TIME: {
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 231, 16,
-                                           0.78f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 254, 16,
-                                           0.78f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 277, 16,
-                                           0.68f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 299, 16,
-                                           0.68f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 288, 43,
-                                           0.68f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 222, 17,
+                                           0.72f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 245, 18,
+                                           0.72f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 282, 16,
+                                           0.6f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 303, 16,
+                                           0.6f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 293, 42,
+                                           0.6f);
                 HudEditor_SetElementHidden(HUD_EDITOR_ELEMENT_C_UP);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 296, 98,
-                                           0.7f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 300, 98,
+                                           0.65f);
                 HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIMAP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 294, 220,
                                            1.0f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_START, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 294, 63,
-                                           0.75f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_START, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 299, 62,
+                                           0.68f);
                 HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_CARROT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 64,
                                            1.0f);
                 HudEditor_SetElementHidden(HUD_EDITOR_ELEMENT_CLOCK);
@@ -315,20 +315,20 @@ void HudEditorWindow::DrawElement() {
                 break;
             }
             case HudEditor::Presets::PRO_CONTROLLER: {
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_UP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 268, 15,
-                                           0.7f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 254, 42,
-                                           0.7f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 292, 18,
-                                           0.7f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 286, 48,
-                                           0.7f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 288, 75,
-                                           0.76f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 264, 76,
-                                           0.76f);
-                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 296, 108,
-                                           0.7f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_UP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 269, 18,
+                                           0.66f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 256, 44,
+                                           0.66f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 293, 20,
+                                           0.66f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 287, 48,
+                                           0.66f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 286, 76,
+                                           0.72f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 252, 76,
+                                           0.72f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 298, 108,
+                                           0.66f);
                 HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIMAP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 294, 220,
                                            1.0f);
                 HudEditor_SetElementHidden(HUD_EDITOR_ELEMENT_START);
