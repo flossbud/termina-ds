@@ -17,6 +17,7 @@ void EnRailSkb_Init(Actor* thisx, PlayState* play);
 void EnRailSkb_Destroy(Actor* thisx, PlayState* play);
 void EnRailSkb_Update(Actor* thisx, PlayState* play);
 void EnRailSkb_Draw(Actor* thisx, PlayState* play);
+void EnRailSkb_Reset(void);
 
 void func_80B70FA0(EnRailSkb* this);
 void func_80B70FF8(EnRailSkb* this, PlayState* play);
@@ -61,6 +62,7 @@ ActorInit En_Rail_Skb_InitVars = {
     /**/ EnRailSkb_Destroy,
     /**/ EnRailSkb_Update,
     /**/ EnRailSkb_Draw,
+    /**/ EnRailSkb_Reset,
 };
 
 static AnimationInfo sAnimationInfo[] = {
@@ -154,8 +156,9 @@ static DamageTable sDamageTable = {
     /* Powder Keg     */ DMG_ENTRY(1, 0xF),
 };
 
+static s32 D_80B7348C = 0;
+
 void func_80B708C0(EnRailSkb* this, PlayState* play) {
-    static s32 D_80B7348C = 0;
     Path* path = &play->setupPathList[ENRAILSKB_GET_FF00(&this->actor)];
     Vec3f sp70;
     s32 phi_a3;
@@ -1155,4 +1158,8 @@ void EnRailSkb_Draw(Actor* thisx, PlayState* play) {
     if ((this->unk_402 & 0x40) && !(this->unk_402 & 0x80)) {
         this->unk_402 |= 0x80;
     }
+}
+
+void EnRailSkb_Reset(void) {
+    D_80B7348C = 0;
 }

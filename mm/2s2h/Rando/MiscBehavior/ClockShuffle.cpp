@@ -373,6 +373,7 @@ static bool CheckAndSkipUnownedTime(Actor* timeActor) {
     } else {
         enTest4->csIdIndex = (time == DUSK_TIME) ? 1 : (IsNight(time) ? 0 : 1);
         Interface_NewDay(gPlayState, gSaveContext.save.day);
+        func_800FEAF4(&gPlayState->envCtx);
         gPlayState->numSetupActors = -gPlayState->numSetupActors;
 
         enTest4->lastBellTime = time;
