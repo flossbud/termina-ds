@@ -63,6 +63,7 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/ShipUtils.h"
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/config/ConfigUpdaters.h"
+#include "2s2h/BenGui/Notification.h"
 
 // Resource Types/Factories
 #include "resource/type/Blob.h"
@@ -1865,4 +1866,23 @@ extern "C" int Controller_ShouldRumble(size_t slot) {
     }
 
     return 0;
+}
+
+// Redirect known console crash scenarios to a soft reset when source-level fixes are disabled.
+extern "C" bool Ship_HandleConsoleCrashAsReset() {
+    if (CVarGetInteger("gEnhancements.Fixes.ConsoleCrashes", 1)) {
+        return false;
+    }
+
+    std::reinterpret_pointer_cast<Ship::ConsoleWindow>(
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGuiWindow("Console"))
+        ->Dispatch("reset");
+
+    Notification::Emit({
+        .itemIcon = "__OTR__icon_item_24_static_yar/gQuestIconGoldSkulltulaTex",
+        .message = "Crash prevented!",
+        .remainingTime = 10.0f,
+    });
+
+    return true;
 }

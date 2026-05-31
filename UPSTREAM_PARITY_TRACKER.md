@@ -34,6 +34,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Sun's Song/Faster Song Playback ocarina end fix (`#1542`) | Done locally | Ported guard so Sun's Song does not force ocarina end while faster playback is active. |
 | Hyrule Warriors Styled Link | Done locally | Ported missing source hook for an already-visible Android menu option. |
 | Third save file slot toggle | Done locally | Ported missing reload hook and File 3 navigation gating for the existing Android menu option. |
+| Fix Console Crashes | Done locally | Ported the missing reset helper and source crash guards for HESS/Weirdshot, Action Swap with no arrows, owl warp cursor loops, and remote hookshot floor-null handling. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
 | Disable SFX replacement (`#1679`) | Verified Android-handled | No SFX replacement lookup is active locally; no source change needed. |
@@ -53,6 +54,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Sun's Song/Faster Song Playback ocarina end fix | Done locally | Low | Small upstream gameplay guard ported; native compile check passes. |
 | Hyrule Warriors Styled Link source hook | Done locally | Low | Menu entry was already visible; missing source registration is now ported; native compile check passes. |
 | Third save file slot toggle | Done locally | Medium | Menu entry was already visible; file-select/copy/erase CVar handling is ported; native compile check passes. |
+| Fix Console Crashes source hooks | Done locally | Medium | Menu entry was visible; Android was missing the upstream reset helper and several source guard callsites; native compile check passes. |
 
 ## Next Candidate Batch
 

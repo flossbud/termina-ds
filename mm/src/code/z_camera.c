@@ -65,6 +65,7 @@ Vec3f D_801EDDF0;
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/Enhancements/Camera/Camera.h"
+#include "2s2h/BenPort.h"
 
 // Camera will reload its paramData. Usually that means setting the read-only data from what is stored in
 // CameraModeValue arrays. Although sometimes some read-write data is reset as well
@@ -566,6 +567,11 @@ s32 func_800CBC84(Camera* camera, Vec3f* from, CameraCollision* to, s32 arg3) {
 
         toNewPos.y += 5.0f;
         if ((arg3 != 0) && func_800CB7CC(camera)) {
+            // 2S2H [Port] Remote hookshot hookslide in Great Bay Temple can leave the player without a floor poly.
+            if (camera->focalActor->floorPoly == NULL) {
+                Ship_HandleConsoleCrashAsReset();
+                goto SkipFocalActorFloorPoly;
+            }
             to->poly = camera->focalActor->floorPoly;
             floorBgId = camera->focalActor->floorBgId;
             to->norm.x = COLPOLY_GET_NORMAL(to->poly->normal.x);
@@ -580,6 +586,7 @@ s32 func_800CBC84(Camera* camera, Vec3f* from, CameraCollision* to, s32 arg3) {
                 floorPolyY = to->pos.y;
             }
         } else {
+        SkipFocalActorFloorPoly:
             floorPolyY = BgCheck_CameraRaycastFloor2(colCtx, floorPoly, &floorBgId, &toNewPos);
         }
 

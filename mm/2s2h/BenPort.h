@@ -132,6 +132,7 @@ int AudioPlayer_GetDesiredBuffered(void);
 void AudioPlayer_Play(const uint8_t* buf, uint32_t len);
 void AudioMgr_CreateNextAudioBuffer(s16* samples, u32 num_samples);
 int Controller_ShouldRumble(size_t slot);
+bool Ship_HandleConsoleCrashAsReset();
 void Controller_BlockGameInput();
 void Controller_UnblockGameInput();
 void Overlay_DisplayText(float duration, const char* text);

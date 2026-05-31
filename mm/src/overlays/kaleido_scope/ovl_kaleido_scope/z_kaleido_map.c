@@ -19,6 +19,22 @@
 // 2S2H [Port] (and line 26) don't do pointer math and access the list of digits directly.
 extern const char* sCounterTextures[];
 
+// 2S2H [Port] Avoid owl warp cursor infinite loops when index warp leaves no world map points registered.
+#define SHIP_HANDLE_OWL_CURSOR_INF_LOOP()                 \
+    {                                                     \
+        bool hasPoint = false;                            \
+        for (int i = 0; i <= OWL_WARP_STONE_TOWER; i++) { \
+            if (pauseCtx->worldMapPoints[i]) {            \
+                hasPoint = true;                          \
+                break;                                    \
+            }                                             \
+        }                                                 \
+        if (!hasPoint) {                                  \
+            Ship_HandleConsoleCrashAsReset();             \
+            break;                                        \
+        }                                                 \
+    }
+
 void KaleidoScope_DrawDungeonStrayFairyCount(PlayState* play) {
     s16 counterDigits[2];
     s16 rectLeft;
@@ -980,6 +996,7 @@ void Ship_UpdateWorldMapCursorMirrorWorld(PlayState* play) {
 
         if (goingRight) {
             do {
+                SHIP_HANDLE_OWL_CURSOR_INF_LOOP();
                 pauseCtx->cursorPoint[PAUSE_WORLD_MAP]++;
                 if (pauseCtx->cursorPoint[PAUSE_WORLD_MAP] > OWL_WARP_STONE_TOWER) {
                     pauseCtx->cursorPoint[PAUSE_WORLD_MAP] = OWL_WARP_GREAT_BAY_COAST;
@@ -987,6 +1004,7 @@ void Ship_UpdateWorldMapCursorMirrorWorld(PlayState* play) {
             } while (!pauseCtx->worldMapPoints[pauseCtx->cursorPoint[PAUSE_WORLD_MAP]]);
         } else if (goingLeft) {
             do {
+                SHIP_HANDLE_OWL_CURSOR_INF_LOOP();
                 pauseCtx->cursorPoint[PAUSE_WORLD_MAP]--;
                 if (pauseCtx->cursorPoint[PAUSE_WORLD_MAP] < OWL_WARP_GREAT_BAY_COAST) {
                     pauseCtx->cursorPoint[PAUSE_WORLD_MAP] = OWL_WARP_STONE_TOWER;
@@ -1137,6 +1155,7 @@ void KaleidoScope_UpdateWorldMapCursor(PlayState* play) {
             pauseCtx->cursorShrinkRate = 4.0f;
             sStickAdjTimer = 0;
             do {
+                SHIP_HANDLE_OWL_CURSOR_INF_LOOP();
                 pauseCtx->cursorPoint[PAUSE_WORLD_MAP]++;
                 if (pauseCtx->cursorPoint[PAUSE_WORLD_MAP] > OWL_WARP_STONE_TOWER) {
                     pauseCtx->cursorPoint[PAUSE_WORLD_MAP] = OWL_WARP_GREAT_BAY_COAST;
@@ -1146,6 +1165,7 @@ void KaleidoScope_UpdateWorldMapCursor(PlayState* play) {
             pauseCtx->cursorShrinkRate = 4.0f;
             sStickAdjTimer = 0;
             do {
+                SHIP_HANDLE_OWL_CURSOR_INF_LOOP();
                 pauseCtx->cursorPoint[PAUSE_WORLD_MAP]--;
                 if (pauseCtx->cursorPoint[PAUSE_WORLD_MAP] < OWL_WARP_GREAT_BAY_COAST) {
                     pauseCtx->cursorPoint[PAUSE_WORLD_MAP] = OWL_WARP_STONE_TOWER;

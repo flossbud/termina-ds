@@ -10,6 +10,7 @@
 #include "z64quake.h"
 #include "z64rumble.h"
 #include "z64shrink_window.h"
+#include "2s2h/BenPort.h"
 #include <string.h>
 
 #include "overlays/actors/ovl_Arms_Hook/z_arms_hook.h"
@@ -13797,7 +13798,13 @@ s32 Player_UpperAction_7(Player* this, PlayState* play) {
         if (this->unk_B28 >= 0) {
             if (index != 0) {
                 if (!func_80831194(play, this)) {
-                    Player_PlaySfx(this, D_8085D5FC[this->unk_B28 - 1]);
+                    // 2S2H [Port] Action Swap without arrows can index D_8085D5FC with -1.
+                    if (this->unk_B28 - 1 < 0) {
+                        Ship_HandleConsoleCrashAsReset();
+                        Player_PlaySfx(this, NA_SE_NONE);
+                    } else {
+                        Player_PlaySfx(this, D_8085D5FC[this->unk_B28 - 1]);
+                    }
                 }
 
                 if (this->transformation == PLAYER_FORM_DEKU) {
