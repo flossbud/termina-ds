@@ -57,6 +57,12 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Red Potion and Gold Dust refill first-attempt fix (`#1565`) | Verified present | Rando actor behavior already grants refill item gets on first attempt when an empty bottle is available. |
 | Blast Mask cooldown slider (`#1559`) | Cleaned up locally | Slider hook/menu were present; removed stale hidden `NoBlastMaskCooldown` registration and updated search metadata. |
 | Rando seed file-select icons (`#1540`) | Verified present | File-select rando seed hash icon drawing is already present locally. |
+| Curiosity Shop Seahorse refill requirements (`#1518`) | Verified present | Seahorse availability uses Great Bay/Zora/Pictograph/Swim requirements and Ammo Buyback handles Seahorse sale correctly. |
+| Soaring hint item fix (`#1530`) | Verified present | Song of Soaring stone hint already looks up `RI_SONG_SOARING` instead of Hookshot. |
+| Smithy day logic and progressive time obtainability (`#1528`, `#1529`) | Verified present | Smithy access is day-gated through `RE_ACCESS_SMITHY`; Progressive Time cannot be obtained from already-obtained checks or after all half-days are owned. |
+| Giant Bee enemy-drop soul logic (`#1515`) | Verified present | Beehive Giant Bee checks already require both projectile access and `CanKillEnemy(ACTOR_EN_BEE)`. |
+| Bad Bat tree heart-piece soul logic (`#1503`) | Done locally | Road to Southern Swamp heart piece now uses `CanKillEnemy(ACTOR_EN_BAT)` directly, matching upstream soul-aware logic. |
+| Triforce Hunt tracker count guard (`#1520`) | Not applicable locally | Upstream patch targets the newer item-count tracker path; Android's current item tracker does not draw rando item counts through that code path. |
 | Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
@@ -92,6 +98,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Rando/timesaver presence audit | Done locally | Low | Confirmed Transformation Mask Hints, NNL cow blacklist, RI_TRAP lesser type, Shrine feathers, Picto C-Up, Extra Powder Kegs, Better Owl Warp, Bank Reward Hint, Tycoon's Wallet, Gossip Stone weights, Flippers icon, and Chu drop fix are already present. |
 | Arrow buyback full-price fix | Done locally | Low | Small upstream gameplay fix; native compile check passes. |
 | Refill/file-select/mask polish audit | Done locally | Low | Red Potion/Gold Dust refill and file-select rando icons verified; stale Blast Mask cooldown search/runtime metadata cleaned up; native compile check passes. |
+| Rando logic microfix audit | Done locally | Low | Curiosity Shop Seahorse requirements, Soaring hint, Smithy day gate, Progressive Time obtainability, and Giant Bee soul logic verified; Bad Bat tree heart-piece logic adjusted locally; native compile check passes. |
 
 ## Next Candidate Batch
 
