@@ -34,7 +34,7 @@ static bool SaveManager_CanCopyFromFlashBuffer(const u8* saveBuffer, u32 pageCou
         return false;
     }
 
-    if (pageCount > std::numeric_limits<size_t>::max() / FLASH_BLOCK_SIZE) {
+    if (pageCount > std::numeric_limits<u32>::max() / FLASH_BLOCK_SIZE) {
         SPDLOG_ERROR("Skipping {} save write: page count overflow", saveType);
         return false;
     }

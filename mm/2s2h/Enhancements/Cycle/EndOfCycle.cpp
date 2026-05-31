@@ -20,6 +20,7 @@ void RegisterEndOfCycleSaveHooks() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::AfterEndOfCycleSave>([]() {
         if (CVarGetInteger("gEnhancements.Cycle.DoNotResetRupees", 0)) {
             gSaveContext.save.saveInfo.playerData.rupees = saveInfoCopy.playerData.rupees;
+            CLEAR_EVENTINF(EVENTINF_THREEDAYRESET_LOST_RUPEES);
         }
 
         if (CVarGetInteger("gEnhancements.Cycle.DoNotResetConsumables", 0)) {
@@ -51,6 +52,11 @@ void RegisterEndOfCycleSaveHooks() {
                     }
                 }
             }
+
+            CLEAR_EVENTINF(EVENTINF_THREEDAYRESET_LOST_BOMB_AMMO);
+            CLEAR_EVENTINF(EVENTINF_THREEDAYRESET_LOST_NUT_AMMO);
+            CLEAR_EVENTINF(EVENTINF_THREEDAYRESET_LOST_STICK_AMMO);
+            CLEAR_EVENTINF(EVENTINF_THREEDAYRESET_LOST_ARROW_AMMO);
         }
 
         if (CVarGetInteger("gEnhancements.Cycle.DoNotResetBottleContent", 0)) {
