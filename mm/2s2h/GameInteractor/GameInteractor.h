@@ -334,6 +334,7 @@ class GameInteractor {
     DEFINE_HOOK(OnActorDestroy, (Actor * actor));
     DEFINE_HOOK(OnPlayerPostLimbDraw, (Player * player, s32 limbIndex));
     DEFINE_HOOK(OnPlayerReleaseHeldActor, (PlayState * play, Player* player, Actor* heldActor));
+    DEFINE_HOOK(OnBossDefeated, (s16 actorId));
 
     DEFINE_HOOK(OnSceneFlagSet, (s16 sceneId, FlagType flagType, u32 flag));
     DEFINE_HOOK(OnSceneFlagUnset, (s16 sceneId, FlagType flagType, u32 flag));
@@ -350,6 +351,7 @@ class GameInteractor {
 
     DEFINE_HOOK(ShouldItemGive, (u8 item, bool* should));
     DEFINE_HOOK(OnItemGive, (u8 item));
+    DEFINE_HOOK(OnBottleContentsUpdate, (u8 item));
     DEFINE_HOOK(OnRandoSeedGeneration, ());
 
     DEFINE_HOOK(ShouldVanillaBehavior, (GIVanillaBehavior flag, bool* should, va_list originalArgs));
@@ -393,6 +395,7 @@ void GameInteractor_ExecuteOnActorKill(Actor* actor);
 void GameInteractor_ExecuteOnActorDestroy(Actor* actor);
 void GameInteractor_ExecuteOnPlayerPostLimbDraw(Player* player, s32 limbIndex);
 void GameInteractor_ExecuteOnPlayerReleaseHeldActor(PlayState* play, Player* player, Actor* heldActor);
+void GameInteractor_ExecuteOnBossDefeated(s16 actorId);
 
 void GameInteractor_ExecuteOnSceneFlagSet(s16 sceneId, FlagType flagType, u32 flag);
 void GameInteractor_ExecuteOnSceneFlagUnset(s16 sceneId, FlagType flagType, u32 flag);
@@ -409,6 +412,8 @@ void GameInteractor_ExecuteOnOpenText(u16* textId, bool* loadFromMessageTable);
 
 bool GameInteractor_ShouldItemGive(u8 item);
 void GameInteractor_ExecuteOnItemGive(u8 item);
+
+void GameInteractor_ExecuteOnBottleContentsUpdate(u8 item);
 
 bool GameInteractor_Should(GIVanillaBehavior flag, uint32_t result, ...);
 #define REGISTER_VB_SHOULD(flag, body)                                                      \

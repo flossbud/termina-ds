@@ -1,12 +1,20 @@
 #include "ShipUtils.h"
 #include <libultraship/libultraship.h>
 #include "assets/2s2h_assets.h"
+#include "assets/archives/icon_item_24_static/icon_item_24_static_yar.h"
+#include "assets/archives/icon_item_static/icon_item_static_yar.h"
+#include "assets/interface/icon_item_dungeon_static/icon_item_dungeon_static.h"
+#include "assets/interface/icon_item_field_static/icon_item_field_static.h"
+#include "assets/interface/parameter_static/parameter_static.h"
+#include "assets/objects/gameplay_keep/gameplay_keep.h"
 
 #include <cassert>
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cctype>
 #include <cstdint>
+#include <map>
 #include <random>
 #include <sstream>
 #include <unordered_map>
@@ -39,6 +47,53 @@ static std::unordered_map<s16, const char*> sceneNames = {
 
 #undef DEFINE_SCENE
 #undef DEFINE_SCENE_UNSET
+
+// These textures are not in existing lists that we iterate over.
+std::array<const char*, 21> miscellaneousTextures = {
+    gArcheryScoreIconTex,
+    gBarrelTrackerIcon,
+    gChestTrackerIcon,
+    gCrateTrackerIcon,
+    gDungeonStrayFairyGreatBayIconTex,
+    gDungeonStrayFairySnowheadIconTex,
+    gDungeonStrayFairyStoneTowerIconTex,
+    gDungeonStrayFairyWoodfallIconTex,
+    gPotTrackerIcon,
+    gQuestIconGoldSkulltulaTex,
+    gMagicArrowEquipEffectTex,
+    gRupeeCounterIconTex,
+    gStrayFairyGreatBayIconTex,
+    gStrayFairySnowheadIconTex,
+    gStrayFairyStoneTowerIconTex,
+    gStrayFairyWoodfallIconTex,
+    gTimerClockIconTex,
+    gWorldMapOwlFaceTex,
+    gameplay_keep_Tex_053140,
+    gDungeonMapSkullTex,
+    gPauseUnusedCursorTex,
+};
+
+std::array<const char*, 11> digitList = { gCounterDigit0Tex, gCounterDigit1Tex, gCounterDigit2Tex, gCounterDigit3Tex,
+                                          gCounterDigit4Tex, gCounterDigit5Tex, gCounterDigit6Tex, gCounterDigit7Tex,
+                                          gCounterDigit8Tex, gCounterDigit9Tex, gCounterColonTex };
+
+std::map<uint32_t, ImVec4> itemColorMap = {
+    { ITEM_SONG_SONATA, ImVec4(0.588f, 1.0f, 0.392f, 1.0f) },
+    { ITEM_SONG_LULLABY, ImVec4(1.0f, 0.313f, 0.156f, 1.0f) },
+    { ITEM_SONG_NOVA, ImVec4(0.392f, 0.588f, 1.0f, 1.0f) },
+    { ITEM_SONG_ELEGY, ImVec4(1.0f, 0.627f, 0.0f, 1.0f) },
+    { ITEM_SONG_OATH, ImVec4(1.0f, 0.392f, 1.0f, 1.0f) },
+    { ITEM_SONG_LULLABY_INTRO, ImVec4(1.0f, 0.313f, 0.156f, 1.0f) },
+};
+
+std::string Ship_FormatTimeDisplay(uint32_t value) {
+    uint32_t sec = value / 10;
+    uint32_t hh = sec / 3600;
+    uint32_t mm = (sec - hh * 3600) / 60;
+    uint32_t ss = sec - hh * 3600 - mm * 60;
+    uint32_t ds = value % 10;
+    return fmt::format("{}:{:0>2}:{:0>2}.{}", hh, mm, ss, ds);
+}
 
 // Gets the additional ratio of the screen compared to the original 4:3 ratio, clamping to 1 if smaller
 extern "C" f32 Ship_GetExtendedAspectRatioMultiplier() {
@@ -82,21 +137,8 @@ extern "C" const char* Ship_GetSceneName(s16 sceneId) {
 }
 
 ImVec4 Ship_GetItemColorTint(uint32_t itemId) {
-    switch (itemId) {
-        case ITEM_SONG_SONATA:
-            return ImVec4(0.588f, 1.0f, 0.392f, 1.0f);
-        case ITEM_SONG_LULLABY:
-        case ITEM_SONG_LULLABY_INTRO:
-            return ImVec4(1.0f, 0.313f, 0.156f, 1.0f);
-        case ITEM_SONG_NOVA:
-            return ImVec4(0.392f, 0.588f, 1.0f, 1.0f);
-        case ITEM_SONG_ELEGY:
-            return ImVec4(1.0f, 0.627f, 0.0f, 1.0f);
-        case ITEM_SONG_OATH:
-            return ImVec4(1.0f, 0.392f, 1.0f, 1.0f);
-        default:
-            return ImVec4(1, 1, 1, 1);
-    }
+    auto findColor = itemColorMap.find(itemId);
+    return findColor != itemColorMap.end() ? findColor->second : ImVec4(1, 1, 1, 1);
 }
 
 std::string convertEnumToReadableName(const std::string& input) {
@@ -250,5 +292,11 @@ void LoadGuiTextures() {
     for (TexturePtr entry : gBombersNotebookPhotos) {
         const char* path = static_cast<const char*>(entry);
         Ship::Context::GetInstance()->GetWindow()->GetGui()->LoadGuiTexture(path, path, ImVec4(1, 1, 1, 1));
+    }
+    for (const auto entry : miscellaneousTextures) {
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->LoadGuiTexture(entry, entry, ImVec4(1, 1, 1, 1));
+    }
+    for (const auto entry : digitList) {
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->LoadGuiTexture(entry, entry, ImVec4(1, 1, 1, 1));
     }
 }

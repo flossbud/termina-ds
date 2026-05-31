@@ -9,7 +9,9 @@
 #define ZERO_DAY_START(time) (((u16)((time)-MORNING_TIME) % DAY_LENGTH))
 
 #ifdef __cplusplus
+#include <array>
 #include <imgui.h>
+#include <map>
 #include <string>
 
 void LoadGuiTextures();
@@ -17,6 +19,9 @@ ImVec4 Ship_GetItemColorTint(uint32_t itemId);
 std::string convertEnumToReadableName(const std::string& input);
 std::string Ship_RemoveSpecialCharacters(const std::string& str);
 uint32_t Ship_Hash(std::string str);
+extern std::array<const char*, 11> digitList;
+extern std::string Ship_FormatTimeDisplay(uint32_t value);
+extern std::map<uint32_t, ImVec4> itemColorMap;
 
 extern "C" {
 #endif

@@ -13,6 +13,7 @@
 #include "overlays/actors/ovl_Item_B_Heart/z_item_b_heart.h"
 #include "overlays/effects/ovl_Effect_Ss_Fhg_Flash/z_eff_ss_fhg_flash.h"
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #include "objects/gameplay_keep/gameplay_keep.h"
 
@@ -1886,6 +1887,7 @@ void func_80B09EDC(BossHakugin* this, PlayState* play) {
         CutsceneManager_StartWithPlayerCs(this->actor.csId, &this->actor);
         if (this->actor.colChkInfo.health == 0) {
             func_80B09F7C(this);
+            GameInteractor_ExecuteOnBossDefeated(this->actor.id); // 2S2H Time Splits
         } else if (this->unk_019C == 1) {
             func_80B0825C(this);
         } else {

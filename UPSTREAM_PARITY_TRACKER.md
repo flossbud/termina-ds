@@ -30,6 +30,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Ported source and enabled Android menu entry in the current local batch. |
 | Song Items (`#1566`, `#1696`) | Done locally | Ported upstream source, enabled Android menu entry, and added gossip-stone softlock vanilla-behavior hooks. |
 | Skip Enemy Cutscenes (`#1038`) | Verified present | Source is already ported and self-registering; Android menu entry is enabled in the current local batch. |
+| Time Splits (`#1266`) | Done locally | Ported Time Splits windows/settings/actions and adapted Android hook callsites for item, bottle, boss, and file-completion splits. |
 | Skip Soaring cutscene (`#1383`) | Done locally | Ported actor-init shortcut with Android/local EnTest7 names and enabled Android menu entry. |
 | Sun's Song/Faster Song Playback ocarina end fix (`#1542`) | Done locally | Ported guard so Sun's Song does not force ocarina end while faster playback is active. |
 | Hyrule Warriors Styled Link | Done locally | Ported missing source hook for an already-visible Android menu option. |
@@ -116,6 +117,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Older POW/Toto/rando script audit (`#1273`, `#1277`, `#1286`, `dc9587914`) | Done locally | Low | Secret Shrine freestanding logic and rando message-script arg safety were already present; ported Pause Owl Warp pictograph-state cleanup and Toto Fierce Deity prompt guard. |
 | Older seed/cutscene/authentic patch audit (`#1291`, `72ae14553`, `#970`, `#1285`) | Done locally | Low | Seed special-character cleanup, Epona skip talk-flag constant, and Moon Crash skip were already present; ported the missing Smithy chimney fire matrix-stack patch. |
 | Mask disable / Toto polish audit (`#1268`, `#1276`, `#1277`) | Done locally | Low | Underwater item hooks, Giant's Mask soul restriction, Multi-Window default, and Toto FD guard were already present; ported the missing Fierce Deity Anywhere underwater-use hooks. |
+| Time Splits (`#1266`) | Done locally | Medium | Ported the Time Splits tracker UI/settings/actions, Display Overlay timer updates, and Android-compatible hook callsites; native compile check passes. |
 
 ## Next Candidate Batch
 

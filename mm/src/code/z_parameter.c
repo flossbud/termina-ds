@@ -4313,6 +4313,8 @@ void Inventory_Dpad_UpdateBottleItem(PlayState* play, u8 item, u8 btn) {
     if (item == ITEM_HOT_SPRING_WATER) {
         Interface_StartBottleTimer(60, DPAD_GET_CUR_FORM_BTN_SLOT(btn) - SLOT_BOTTLE_1);
     }
+
+    GameInteractor_ExecuteOnBottleContentsUpdate(item);
 }
 // #endregion
 
@@ -4328,6 +4330,8 @@ void Inventory_UpdateBottleItem(PlayState* play, u8 item, u8 btn) {
     if (item == ITEM_HOT_SPRING_WATER) {
         Interface_StartBottleTimer(60, GET_CUR_FORM_BTN_SLOT(btn) - SLOT_BOTTLE_1);
     }
+
+    GameInteractor_ExecuteOnBottleContentsUpdate(item);
 }
 
 s32 Inventory_ConsumeFairy(PlayState* play) {

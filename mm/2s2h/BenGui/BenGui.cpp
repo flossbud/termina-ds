@@ -26,6 +26,8 @@
 #include "Enhancements/Trackers/ItemTracker.h"
 #include "Enhancements/Trackers/ItemTrackerSettings.h"
 #include "Enhancements/Trackers/DisplayOverlay.h"
+#include "Enhancements/Trackers/TimeSplits/Timesplits.h"
+#include "Enhancements/Trackers/TimeSplits/TimesplitsSettings.h"
 
 namespace BenGui {
 // MARK: - Delegates
@@ -48,6 +50,8 @@ std::shared_ptr<Notification::Window> mNotificationWindow;
 std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
 std::shared_ptr<ItemTrackerSettingsWindow> mItemTrackerSettingsWindow;
 std::shared_ptr<DisplayOverlayWindow> mDisplayOverlayWindow;
+std::shared_ptr<TimesplitsWindow> mTimesplitsWindow;
+std::shared_ptr<TimesplitsSettingsWindow> mTimesplitsSettingsWindow;
 std::shared_ptr<Rando::CheckTracker::CheckTrackerWindow> mRandoCheckTrackerWindow;
 std::shared_ptr<Rando::CheckTracker::SettingsWindow> mRandoCheckTrackerSettingsWindow;
 
@@ -124,6 +128,13 @@ void SetupGuiElements() {
     mDisplayOverlayWindow = std::make_shared<DisplayOverlayWindow>("gWindows.DisplayOverlay", "Display Overlay");
     gui->AddGuiWindow(mDisplayOverlayWindow);
 
+    mTimesplitsWindow = std::make_shared<TimesplitsWindow>("gWindows.Timesplits", "Time Splits Window");
+    gui->AddGuiWindow(mTimesplitsWindow);
+
+    mTimesplitsSettingsWindow = std::make_shared<TimesplitsSettingsWindow>(
+        "gWindows.Timesplits.Settings", "Time Splits Settings Window", ImVec2(567, 97));
+    gui->AddGuiWindow(mTimesplitsSettingsWindow);
+
     mModalWindow = std::make_shared<BenModalWindow>("gWindows.Modals", "Modals");
     gui->AddGuiWindow(mModalWindow);
     mModalWindow->Show();
@@ -162,6 +173,8 @@ void Destroy() {
     mItemTrackerWindow = nullptr;
     mItemTrackerSettingsWindow = nullptr;
     mDisplayOverlayWindow = nullptr;
+    mTimesplitsWindow = nullptr;
+    mTimesplitsSettingsWindow = nullptr;
     mModalWindow = nullptr;
     mRandoCheckTrackerWindow = nullptr;
     mRandoCheckTrackerSettingsWindow = nullptr;
