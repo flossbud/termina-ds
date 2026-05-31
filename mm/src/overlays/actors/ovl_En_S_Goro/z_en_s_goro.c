@@ -35,6 +35,7 @@ Week Event Flags:
 #include "overlays/actors/ovl_En_Gk/z_en_gk.h" // Goron Elder's Son
 #include "overlays/actors/ovl_En_Jg/z_en_jg.h" // Goron Elder
 #include "objects/object_taisou/object_taisou.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_10)
 #define THIS ((EnSGoro*)thisx)
@@ -695,7 +696,7 @@ u16 EnSGoro_BombshopGoron_NextTextId(EnSGoro* this, PlayState* play) {
 
         case 0x670:
             if (this->bombbuyFlags & EN_S_GORO_BOMBBUYFLAG_YESBUY) {
-                if (AMMO(ITEM_POWDER_KEG) != 0) {
+                if (GameInteractor_Should(VB_POWDER_KEG_CHECK_HAS, AMMO(ITEM_POWDER_KEG) != 0)) {
                     this->actionFlags |= EN_S_GORO_ACTIONFLAG_LASTMESSAGE;
                     Audio_PlaySfx(NA_SE_SY_ERROR);
                     return 0x673;

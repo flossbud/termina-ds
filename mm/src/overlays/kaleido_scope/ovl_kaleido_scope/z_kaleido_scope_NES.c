@@ -541,6 +541,9 @@ void KaleidoScope_HandlePageToggles(PlayState* play, Input* input) {
     }
 
     if (CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT) || CHECK_BTN_ALL(input->press.button, BTN_R)) {
+        if (!GameInteractor_Should(VB_KALEIDO_SWITCH_PAGE_WITH_DPAD, true, BTN_DRIGHT)) {
+            return;
+        }
         // Switch the page to the right regardless of where the cursor is
         if (interfaceCtx->aButtonHorseDoAction == DO_ACTION_DECIDE) {
             Interface_SetAButtonDoAction(play, DO_ACTION_INFO);
@@ -550,6 +553,9 @@ void KaleidoScope_HandlePageToggles(PlayState* play, Input* input) {
     }
 
     if (CHECK_BTN_ALL(input->cur.button, BTN_DLEFT) || CHECK_BTN_ALL(input->press.button, BTN_Z)) {
+        if (!GameInteractor_Should(VB_KALEIDO_SWITCH_PAGE_WITH_DPAD, true, BTN_DLEFT)) {
+            return;
+        }
         // Switch the page to the left regardless of where the cursor is
         if (interfaceCtx->aButtonHorseDoAction == DO_ACTION_DECIDE) {
             Interface_SetAButtonDoAction(play, DO_ACTION_INFO);
@@ -4118,6 +4124,9 @@ void KaleidoScope_Update(PlayState* play) {
             break;
 
         case PAUSE_STATE_UNPAUSE_CLOSE:
+            if (!GameInteractor_Should(VB_KALEIDO_UNPAUSE_CLOSE, true)) {
+                break;
+            }
             pauseCtx->state = PAUSE_STATE_OFF;
             GameState_SetFramerateDivisor(&play->state, 3);
             R_PAUSE_BG_PRERENDER_STATE = PAUSE_BG_PRERENDER_UNK4;

@@ -860,7 +860,8 @@ s32 MsgEvent_Cmd41(Actor* actor, PlayState* play, u8** scriptPtr, MsgEventCallba
     u8* script = *scriptPtr;
     s16 skip = MSCRIPT_GET_16(script, 1);
 
-    if (AMMO(ITEM_POWDER_KEG) != 0 || (play->actorCtx.flags & ACTORCTX_FLAG_0)) {
+    if (GameInteractor_Should(VB_POWDER_KEG_CHECK_HAS,
+                              (AMMO(ITEM_POWDER_KEG) != 0) || (play->actorCtx.flags & ACTORCTX_FLAG_0))) {
         *scriptPtr += skip;
     }
     return MSCRIPT_CONTINUE;
@@ -1145,7 +1146,8 @@ s32 MsgEvent_RunScript(Actor* actor, PlayState* play, MsgScript* script, MsgEven
         }
 
         // Run command handler
-    } while (sMsgEventCmdHandlers[cmdId](actor, play, &script, callback, &scriptDone) == MSCRIPT_CONTINUE);
+    } while (GameInteractor_Should(VB_EXEC_MSG_EVENT, true, cmdId, actor, script, &callback) &&
+             (sMsgEventCmdHandlers[cmdId](actor, play, &script, callback, &scriptDone) == MSCRIPT_CONTINUE));
 
     cur = script;
     if (!scriptDone) {

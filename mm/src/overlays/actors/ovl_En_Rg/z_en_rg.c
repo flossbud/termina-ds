@@ -7,6 +7,7 @@
 #include "z_en_rg.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_oF1d_map/object_oF1d_map.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_10 | ACTOR_FLAG_80000000)
 
@@ -486,7 +487,7 @@ s32 func_80BF47AC(EnRg* this, PlayState* play) {
         phi_f0 = 2.0f * phi_f2;
     }
 
-    if (phi_f0 > 0.0f) {
+    if (GameInteractor_Should(VB_GORON_RACE_RUBBERBANDING, phi_f0 > 0.0f, &phi_f0, &phi_f2)) {
         if (this->unk_320 != 0) {
             this->unk_320--;
         }

@@ -2,6 +2,7 @@
 #include "message_data_static.h"
 #include "overlays/kaleido_scope/ovl_kaleido_scope/z_kaleido_scope.h"
 #include "assets/interface/message_texture_static/message_texture_static.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include <stdio.h>
 
 f32 sNESFontWidths[160] = {
@@ -1239,7 +1240,9 @@ void Message_DecodeNES(PlayState* play) {
                 Message_LoadCharNES(play, digits[i] + '0', &charTexIndex, &spA4, decodedBufPos);
                 decodedBufPos++;
             }
-            Message_LoadLocalizedRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            if (GameInteractor_Should(VB_MSG_LOAD_RUPEES_TEXT, true)) {
+                Message_LoadLocalizedRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            }
         } else if (curChar == 0xCD) {
             digits[0] = digits[1] = 0;
             digits[2] = msgCtx->bankRupeesSelected;
@@ -1264,7 +1267,9 @@ void Message_DecodeNES(PlayState* play) {
                     decodedBufPos++;
                 }
             }
-            Message_LoadRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4, msgCtx->bankRupeesSelected);
+            if (GameInteractor_Should(VB_MSG_LOAD_RUPEES_TEXT, true)) {
+                Message_LoadRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4, msgCtx->bankRupeesSelected);
+            }
         } else if (curChar == 0xCE) {
             digits[0] = digits[1] = digits[2] = 0;
             digits[3] = msgCtx->bankRupees;
@@ -1292,7 +1297,9 @@ void Message_DecodeNES(PlayState* play) {
                     decodedBufPos++;
                 }
             }
-            Message_LoadRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4, msgCtx->bankRupees);
+            if (GameInteractor_Should(VB_MSG_LOAD_RUPEES_TEXT, true)) {
+                Message_LoadRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4, msgCtx->bankRupees);
+            }
         } else if (curChar == 0xCF) {
             Message_LoadTimeNES(play, curChar, &charTexIndex, &spA4, &decodedBufPos);
         } else if (curChar == 0xC) {
@@ -1440,7 +1447,9 @@ void Message_DecodeNES(PlayState* play) {
                 Message_LoadCharNES(play, digits[i] + '0', &charTexIndex, &spA4, decodedBufPos);
                 decodedBufPos++;
             }
-            Message_LoadPluralRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            if (GameInteractor_Should(VB_MSG_LOAD_RUPEES_TEXT, true)) {
+                Message_LoadPluralRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            }
         } else if (curChar == 0xD1) {
             decodedBufPos++;
             msgCtx->unk120BE = spC6;
@@ -1612,7 +1621,9 @@ void Message_DecodeNES(PlayState* play) {
                     spA4 += 16.0f * msgCtx->textCharScale;
                 }
             }
-            Message_LoadPluralRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            if (GameInteractor_Should(VB_MSG_LOAD_RUPEES_TEXT, true)) {
+                Message_LoadPluralRupeesNES(play, &decodedBufPos, &charTexIndex, &spA4);
+            }
         } else if (curChar == 0xDF) {
             for (i = 0; i < 5; i++) {
                 digits[i] = gSaveContext.save.saveInfo.bomberCode[i];

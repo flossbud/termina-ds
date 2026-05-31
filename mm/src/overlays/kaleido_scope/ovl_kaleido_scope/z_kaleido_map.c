@@ -13,6 +13,7 @@
 
 #include "BenPort.h"
 
+#include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/Enhancements/Songs/Songs.h"
 
 // 2S2H [Port] (and line 26) don't do pointer math and access the list of digits directly.
@@ -966,7 +967,8 @@ void Ship_UpdateWorldMapCursorMirrorWorld(PlayState* play) {
         if (oldCursorPoint != pauseCtx->cursorPoint[PAUSE_WORLD_MAP]) {
             Audio_PlaySfx(NA_SE_SY_CURSOR);
         }
-    } else if (pauseCtx->state == PAUSE_STATE_OWLWARP_SELECT) {
+    } else if (GameInteractor_Should(VB_OWL_WARP_MENU_USE_LINEAR_CURSOR,
+                                     pauseCtx->state == PAUSE_STATE_OWLWARP_SELECT)) {
         pauseCtx->cursorColorSet = PAUSE_CURSOR_COLOR_SET_BLUE;
         oldCursorPoint = pauseCtx->cursorPoint[PAUSE_WORLD_MAP];
 
@@ -1126,7 +1128,8 @@ void KaleidoScope_UpdateWorldMapCursor(PlayState* play) {
         if (oldCursorPoint != pauseCtx->cursorPoint[PAUSE_WORLD_MAP]) {
             Audio_PlaySfx(NA_SE_SY_CURSOR);
         }
-    } else if (pauseCtx->state == PAUSE_STATE_OWLWARP_SELECT) {
+    } else if (GameInteractor_Should(VB_OWL_WARP_MENU_USE_LINEAR_CURSOR,
+                                     pauseCtx->state == PAUSE_STATE_OWLWARP_SELECT)) {
         pauseCtx->cursorColorSet = PAUSE_CURSOR_COLOR_SET_BLUE;
         oldCursorPoint = pauseCtx->cursorPoint[PAUSE_WORLD_MAP];
 

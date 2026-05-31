@@ -685,7 +685,9 @@ void func_80148D64(PlayState* play) {
         }
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if (msgCtx->stickAdjY >= 30) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2]++;
         if (msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] > '9') {
@@ -693,7 +695,9 @@ void func_80148D64(PlayState* play) {
         }
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if ((msgCtx->stickAdjX >= 30) && !sAnalogStickHeld) {
         sAnalogStickHeld = true;
         msgCtx->unk120C2++;
@@ -729,7 +733,9 @@ void func_80149048(PlayState* play) {
         }
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if (msgCtx->stickAdjY >= 30) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2]++;
         if (msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] > '9') {
@@ -737,7 +743,9 @@ void func_80149048(PlayState* play) {
         }
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     }
 
     msgCtx->bankRupeesSelected = (msgCtx->decodedBuffer.schar[msgCtx->unk120C0] - '0') * 10;
@@ -755,7 +763,9 @@ void func_801491DC(PlayState* play) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + '0';
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if (msgCtx->stickAdjY >= 30) {
         msgCtx->unk12054[msgCtx->unk120C2]++;
         if (msgCtx->unk12054[msgCtx->unk120C2] > 5) {
@@ -764,7 +774,9 @@ void func_801491DC(PlayState* play) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + '0';
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if ((msgCtx->stickAdjX >= 30) && !sAnalogStickHeld) {
         sAnalogStickHeld = true;
         msgCtx->unk120C2++;
@@ -798,7 +810,9 @@ void func_80149454(PlayState* play) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + '0';
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if (msgCtx->stickAdjY >= 30) {
         msgCtx->unk12054[msgCtx->unk120C2]++;
         if (msgCtx->unk12054[msgCtx->unk120C2] > 9) {
@@ -807,7 +821,9 @@ void func_80149454(PlayState* play) {
         msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + '0';
         Font_LoadCharNES(play, msgCtx->decodedBuffer.schar[msgCtx->unk120C0 + msgCtx->unk120C2],
                          msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if ((msgCtx->stickAdjX >= 30) && !sAnalogStickHeld) {
         sAnalogStickHeld = true;
         msgCtx->unk120C2++;
@@ -841,7 +857,9 @@ void func_801496C8(PlayState* play) {
         msgCtx->decodedBuffer.wchar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + 0x824F;
         Font_LoadChar(play, msgCtx->decodedBuffer.wchar[msgCtx->unk120C0 + msgCtx->unk120C2],
                       msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if (msgCtx->stickAdjY >= 30) {
         msgCtx->unk12054[msgCtx->unk120C2]++;
         if (msgCtx->unk12054[msgCtx->unk120C2] >= 4) {
@@ -850,7 +868,9 @@ void func_801496C8(PlayState* play) {
         msgCtx->decodedBuffer.wchar[msgCtx->unk120C0 + msgCtx->unk120C2] = msgCtx->unk12054[msgCtx->unk120C2] + 0x824F;
         Font_LoadChar(play, msgCtx->decodedBuffer.wchar[msgCtx->unk120C0 + msgCtx->unk120C2],
                       msgCtx->unk120C4 + (msgCtx->unk120C2 << 7));
-        Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        if (GameInteractor_Should(VB_MSG_PLAY_INPUT_COUNT_SOUND, true)) {
+            Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
+        }
     } else if ((msgCtx->stickAdjX >= 30) && !sAnalogStickHeld) {
         sAnalogStickHeld = true;
         msgCtx->unk120C2++;

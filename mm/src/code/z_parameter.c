@@ -2580,7 +2580,8 @@ void Interface_UpdateButtonsPart2(PlayState* play) {
         }
 
         for (i = EQUIP_SLOT_C_LEFT; i <= EQUIP_SLOT_C_RIGHT; i++) {
-            if (GET_CUR_FORM_BTN_ITEM(i) != ITEM_MASK_ZORA) {
+            if (GameInteractor_Should(VB_DISABLE_ITEM_UNDERWATER, GET_CUR_FORM_BTN_ITEM(i) != ITEM_MASK_ZORA,
+                                      (s32)GET_CUR_FORM_BTN_ITEM(i))) {
                 if (Player_GetEnvironmentalHazard(play) == PLAYER_ENV_HAZARD_UNDERWATER_FLOOR) {
                     if (!((GET_CUR_FORM_BTN_ITEM(i) >= ITEM_BOTTLE) &&
                           (GET_CUR_FORM_BTN_ITEM(i) <= ITEM_OBABA_DRINK))) {
@@ -2607,7 +2608,8 @@ void Interface_UpdateButtonsPart2(PlayState* play) {
         }
         // #region 2S2H [Dpad]
         for (s16 j = EQUIP_SLOT_D_RIGHT; j <= EQUIP_SLOT_D_UP; j++) {
-            if (DPAD_GET_CUR_FORM_BTN_ITEM(j) != ITEM_MASK_ZORA) {
+            if (GameInteractor_Should(VB_DISABLE_ITEM_UNDERWATER, DPAD_GET_CUR_FORM_BTN_ITEM(j) != ITEM_MASK_ZORA,
+                                      (s32)DPAD_GET_CUR_FORM_BTN_ITEM(j))) {
                 if (Player_GetEnvironmentalHazard(play) == PLAYER_ENV_HAZARD_UNDERWATER_FLOOR) {
                     if (!((DPAD_GET_CUR_FORM_BTN_ITEM(j) >= ITEM_BOTTLE) &&
                           (DPAD_GET_CUR_FORM_BTN_ITEM(j) <= ITEM_OBABA_DRINK))) {
@@ -3170,7 +3172,9 @@ void Interface_UpdateButtonsPart1(PlayState* play) {
 
                             if (play->bButtonAmmoPlusOne >= 2) {
                                 Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
-                            } else if (gSaveContext.save.saveInfo.inventory.items[SLOT_BOW] == ITEM_NONE) {
+                            } else if (GameInteractor_Should(
+                                           VB_CLEAR_B_BUTTON_FOR_NO_BOW,
+                                           gSaveContext.save.saveInfo.inventory.items[SLOT_BOW] == ITEM_NONE)) {
                                 BUTTON_ITEM_EQUIP(CUR_FORM, EQUIP_SLOT_B) = ITEM_NONE;
                             } else {
                                 Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
@@ -3245,7 +3249,8 @@ void Interface_UpdateButtonsPart1(PlayState* play) {
 
                 if (play->bButtonAmmoPlusOne >= 2) {
                     Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
-                } else if (gSaveContext.save.saveInfo.inventory.items[SLOT_BOW] == ITEM_NONE) {
+                } else if (GameInteractor_Should(VB_CLEAR_B_BUTTON_FOR_NO_BOW,
+                                                 gSaveContext.save.saveInfo.inventory.items[SLOT_BOW] == ITEM_NONE)) {
                     BUTTON_ITEM_EQUIP(CUR_FORM, EQUIP_SLOT_B) = ITEM_NONE;
                 } else {
                     Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
@@ -3766,7 +3771,9 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
             INV_CONTENT(ITEM_POWDER_KEG) = ITEM_POWDER_KEG;
         }
 
-        AMMO(ITEM_POWDER_KEG) = 1;
+        if (GameInteractor_Should(VB_POWDER_KEG_SET_AMMO_ON_GIVE, true)) {
+            AMMO(ITEM_POWDER_KEG) = 1;
+        }
         return ITEM_NONE;
 
     } else if (item == ITEM_BOMB) {
@@ -4594,10 +4601,12 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
 
     } else if (item == ITEM_POWDER_KEG) {
         AMMO(ITEM_POWDER_KEG) += ammoChange;
-        if (AMMO(ITEM_POWDER_KEG) >= 1) {
-            AMMO(ITEM_POWDER_KEG) = 1;
-        } else if (AMMO(ITEM_POWDER_KEG) < 0) {
-            AMMO(ITEM_POWDER_KEG) = 0;
+        if (GameInteractor_Should(VB_POWDER_KEG_CAP_AMMO, true)) {
+            if (AMMO(ITEM_POWDER_KEG) >= 1) {
+                AMMO(ITEM_POWDER_KEG) = 1;
+            } else if (AMMO(ITEM_POWDER_KEG) < 0) {
+                AMMO(ITEM_POWDER_KEG) = 0;
+            }
         }
     }
 }
@@ -5545,7 +5554,8 @@ void Interface_Dpad_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
             ((i == ITEM_DEKU_STICK) && (AMMO(i) == CUR_CAPACITY(UPG_DEKU_STICKS))) ||
             ((i == ITEM_DEKU_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_DEKU_NUTS))) ||
             ((i == ITEM_BOMBCHU) && (AMMO(i) == CUR_CAPACITY(UPG_BOMB_BAG))) ||
-            ((i == ITEM_POWDER_KEG) && (ammo == 1)) || ((i == ITEM_PICTOGRAPH_BOX) && (ammo == 1)) ||
+            ((i == ITEM_POWDER_KEG) && GameInteractor_Should(VB_POWDER_KEG_AMMO_AT_CAPACITY, ammo == 1)) ||
+            ((i == ITEM_PICTOGRAPH_BOX) && (ammo == 1)) ||
             ((i == ITEM_MAGIC_BEANS) && (ammo == 20))) {
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
         }
@@ -5666,7 +5676,8 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
                    ((i == ITEM_DEKU_STICK) && (AMMO(i) == CUR_CAPACITY(UPG_DEKU_STICKS))) ||
                    ((i == ITEM_DEKU_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_DEKU_NUTS))) ||
                    ((i == ITEM_BOMBCHU) && (AMMO(i) == CUR_CAPACITY(UPG_BOMB_BAG))) ||
-                   ((i == ITEM_POWDER_KEG) && (ammo == 1)) || ((i == ITEM_PICTOGRAPH_BOX) && (ammo == 1)) ||
+                   ((i == ITEM_POWDER_KEG) && GameInteractor_Should(VB_POWDER_KEG_AMMO_AT_CAPACITY, ammo == 1)) ||
+                   ((i == ITEM_PICTOGRAPH_BOX) && (ammo == 1)) ||
                    ((i == ITEM_MAGIC_BEANS) && (ammo == 20))) {
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
         }
@@ -9043,8 +9054,10 @@ void Interface_Update(PlayState* play) {
                 Audio_PlaySfx(NA_SE_SY_RUPY_COUNT);
             } else {
                 // Max rupees
-                gSaveContext.save.saveInfo.playerData.rupees = CUR_CAPACITY(UPG_WALLET);
-                gSaveContext.rupeeAccumulator = 0;
+                if (!GameInteractor_Should(VB_DISCARD_EXCESS_RUPEES, false)) {
+                    gSaveContext.save.saveInfo.playerData.rupees = CUR_CAPACITY(UPG_WALLET);
+                    gSaveContext.rupeeAccumulator = 0;
+                }
             }
         } else if (gSaveContext.save.saveInfo.playerData.rupees != 0) {
             if (gSaveContext.rupeeAccumulator <= -50) {

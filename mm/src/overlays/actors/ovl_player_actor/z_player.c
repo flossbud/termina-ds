@@ -2779,7 +2779,9 @@ void Player_SetCylinderForAttack(Player* this, u32 dmgFlags, s32 damage, s32 rad
     if (radius > 30) {
         this->cylinder.base.ocFlags1 = OC1_NONE;
     } else {
-        this->cylinder.base.ocFlags1 = OC1_ON | OC1_TYPE_ALL;
+        if (GameInteractor_Should(VB_SET_PLAYER_CYLINDER_OC_FLAGS, true, this, dmgFlags)) {
+            this->cylinder.base.ocFlags1 = OC1_ON | OC1_TYPE_ALL;
+        }
     }
 
     this->cylinder.info.elemType = ELEMTYPE_UNK2;
@@ -4470,7 +4472,7 @@ void Player_UseItem(PlayState* play, Player* this, ItemId item) {
          ((this->itemAction <= PLAYER_IA_MINUS1) &&
           ((Player_MeleeWeaponFromIA(itemAction) != PLAYER_MELEEWEAPON_NONE) || (itemAction == PLAYER_IA_NONE)))) &&
         ((itemAction == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_8000000) ||
-         (itemAction == PLAYER_IA_MASK_ZORA) ||
+         (GameInteractor_Should(VB_USE_ITEM_CONSIDER_ITEM_ACTION, itemAction == PLAYER_IA_MASK_ZORA, &itemAction)) ||
          ((this->currentBoots >= PLAYER_BOOTS_ZORA_UNDERWATER) && (this->actor.bgCheckFlags & BGCHECKFLAG_GROUND)))) {
         s32 var_v1 = ((itemAction >= PLAYER_IA_MASK_MIN) && (itemAction <= PLAYER_IA_MASK_MAX) &&
                       (!GameInteractor_Should(VB_USE_ITEM_CONSIDER_LINK_HUMAN,
@@ -5515,7 +5517,7 @@ s32 func_808339D4(PlayState* play, Player* this, s32 damage) {
         return Actor_ApplyDamage(&this->actor);
     }
 
-    if (this->currentMask == PLAYER_MASK_GIANT) {
+    if (GameInteractor_Should(VB_MULTIPLY_INFLICTED_DMG, this->currentMask == PLAYER_MASK_GIANT, &damage)) {
         damage >>= 2;
     }
 
@@ -13250,7 +13252,9 @@ void func_808477D0(PlayState* play, Player* this, Input* input, f32 arg3) {
     }
 
     var_fv0 = var_fv0 * arg3;
-    var_fv0 = CLAMP(var_fv0, 1.0f, 2.5f);
+    if (GameInteractor_Should(VB_CLAMP_ANIMATION_SPEED, true, &var_fv0)) {
+        var_fv0 = CLAMP(var_fv0, 1.0f, 2.5f);
+    }
     this->skelAnime.playSpeed = var_fv0;
 
     PlayerAnimation_Update(play, &this->skelAnime);
@@ -19337,10 +19341,11 @@ void Player_Action_96(Player* this, PlayState* play) {
             speedTarget = 18.0f;
             Math_StepToC(&this->av1.actionVar1, 4, 1);
 
-            if ((this->stateFlags3 & PLAYER_STATE3_80000) &&
-                (!CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_A) ||
-                 (gSaveContext.save.saveInfo.playerData.magic == 0) ||
-                 ((this->av1.actionVar1 == 4) && (this->unk_B08 < 12.0f)))) {
+            uint8_t vanillaSpikeModeCondition =
+                (this->stateFlags3 & PLAYER_STATE3_80000) && (!CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_A) ||
+                                                              (gSaveContext.save.saveInfo.playerData.magic == 0) ||
+                                                              ((this->av1.actionVar1 == 4) && (this->unk_B08 < 12.0f)));
+            if (GameInteractor_Should(VB_GORON_ROLL_DISABLE_SPIKE_MODE, vanillaSpikeModeCondition)) {
                 if (Math_StepToS(&this->unk_B86[1], 0, 1)) {
                     this->stateFlags3 &= ~PLAYER_STATE3_80000;
                     Magic_Reset(play);
@@ -19394,7 +19399,9 @@ void Player_Action_96(Player* this, PlayState* play) {
                 if (this->unk_B86[1] == 0) {
                     this->unk_B0C = 0.0f;
                     if (this->av1.actionVar1 >= 0x36) {
-                        Magic_Consume(play, 2, MAGIC_CONSUME_GORON_ZORA);
+                        if (GameInteractor_Should(VB_GORON_ROLL_CONSUME_MAGIC, true)) {
+                            Magic_Consume(play, 2, MAGIC_CONSUME_GORON_ZORA);
+                        }
                         this->unk_B08 = 18.0f;
                         this->unk_B86[1] = 1;
                         this->stateFlags3 |= PLAYER_STATE3_80000;
@@ -19456,8 +19463,10 @@ void Player_Action_96(Player* this, PlayState* play) {
                     f32 var_fa1;
 
                     if (this->unk_B86[1] == 0) {
-                        if ((gSaveContext.magicState == MAGIC_STATE_IDLE) &&
-                            (gSaveContext.save.saveInfo.playerData.magic >= 2) && (this->av2.actionVar2 >= 0x36B0)) {
+                        if (GameInteractor_Should(VB_GORON_ROLL_INCREASE_SPIKE_LEVEL,
+                                                  (gSaveContext.magicState == MAGIC_STATE_IDLE) &&
+                                                      (gSaveContext.save.saveInfo.playerData.magic >= 2) &&
+                                                      (this->av2.actionVar2 >= 0x36B0))) {
                             this->av1.actionVar1++;
                             Actor_PlaySfx_FlaggedCentered1(&this->actor, NA_SE_PL_GORON_BALL_CHARGE - SFX_FLAG);
                         } else {
