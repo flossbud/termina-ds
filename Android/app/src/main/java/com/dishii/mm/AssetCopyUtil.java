@@ -82,6 +82,26 @@ public class AssetCopyUtil {
         }
     }
 
+    public static void copyDirectoryContents(File sourceDir, File targetDir) throws IOException {
+        if (!targetDir.exists() && !targetDir.mkdirs()) {
+            throw new IOException("Failed to create target directory: " + targetDir.getAbsolutePath());
+        }
+
+        File[] files = sourceDir.listFiles();
+        if (files == null) {
+            throw new IOException("Failed to list source directory: " + sourceDir.getAbsolutePath());
+        }
+
+        for (File file : files) {
+            File dest = new File(targetDir, file.getName());
+            if (file.isDirectory()) {
+                copyDirectory(file, dest);
+            } else {
+                copyFile(file, dest);
+            }
+        }
+    }
+
     public static void copyFile(File source, File dest) throws IOException {
         File parentDir = dest.getParentFile();
         if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {

@@ -17,6 +17,10 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -40,14 +44,18 @@ public class MainActivity extends SDLActivity{
 
     SharedPreferences preferences;
     private static final CountDownLatch setupLatch = new CountDownLatch(1);
+    private static String currentDataRootPath = "/storage/emulated/0/2S2H";
+    private static final String PREF_DATA_ROOT_PATH = "dataRootPath";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         preferences = getSharedPreferences("com.dishii.mm.prefs",Context.MODE_PRIVATE);
 
+        updateCurrentDataRootPath();
+
         if (hasStoragePermission()) {
-            beginSetupIfStorageReady();
+            beginSetupOrChooseDataRoot();
         } else {
             requestStoragePermission();
         }
@@ -66,6 +74,10 @@ public class MainActivity extends SDLActivity{
         }
     }
 
+    public static String getDataRootPathFromNative() {
+        return currentDataRootPath;
+    }
+
     private void doVersionCheck(){
         int currentVersion = BuildConfig.VERSION_CODE;
         int storedVersion = preferences.getInt("appVersion", 1);
@@ -77,7 +89,7 @@ public class MainActivity extends SDLActivity{
     }
 
     private void deleteOutdatedAssets() {
-        File targetRootFolder = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        File targetRootFolder = getTargetRootFolder();
 
         File sohFile = new File(targetRootFolder, "2ship.o2r");
         File assetsFolder = new File(targetRootFolder, "assets");
@@ -120,10 +132,152 @@ public class MainActivity extends SDLActivity{
     }
 
     private File getTargetRootFolder() {
+        String configuredPath = preferences.getString(PREF_DATA_ROOT_PATH, null);
+        if (configuredPath == null || configuredPath.isEmpty()) {
+            return getDefaultDataRootFolder();
+        }
+
+        return new File(configuredPath);
+    }
+
+    private File getDefaultDataRootFolder() {
         return new File(Environment.getExternalStorageDirectory(), "2S2H");
     }
 
+    private void updateCurrentDataRootPath() {
+        currentDataRootPath = getTargetRootFolder().getAbsolutePath();
+    }
+
+    private void beginSetupOrChooseDataRoot() {
+        if (!preferences.contains(PREF_DATA_ROOT_PATH)) {
+            preferences.edit().putString(PREF_DATA_ROOT_PATH, getDefaultDataRootFolder().getAbsolutePath()).apply();
+            updateCurrentDataRootPath();
+        }
+
+        beginSetupIfStorageReady();
+    }
+
+    private static class DataRootOption {
+        final String label;
+        final File folder;
+
+        DataRootOption(String label, File folder) {
+            this.label = label;
+            this.folder = folder;
+        }
+    }
+
+    private List<DataRootOption> getDataRootOptions() {
+        Map<String, DataRootOption> options = new LinkedHashMap<>();
+        File defaultFolder = getDefaultDataRootFolder();
+        options.put(defaultFolder.getAbsolutePath(),
+                new DataRootOption("Internal storage: " + defaultFolder.getAbsolutePath(), defaultFolder));
+
+        File[] externalDirs = getExternalFilesDirs(null);
+        if (externalDirs != null) {
+            for (File externalDir : externalDirs) {
+                if (externalDir == null || !Environment.isExternalStorageRemovable(externalDir)) {
+                    continue;
+                }
+
+                File volumeRoot = getVolumeRootFromExternalFilesDir(externalDir);
+                if (volumeRoot == null) {
+                    continue;
+                }
+
+                File sdFolder = new File(volumeRoot, "2S2H");
+                options.put(sdFolder.getAbsolutePath(),
+                        new DataRootOption("SD card: " + sdFolder.getAbsolutePath(), sdFolder));
+            }
+        }
+
+        return new ArrayList<>(options.values());
+    }
+
+    private File getVolumeRootFromExternalFilesDir(File externalDir) {
+        String path = externalDir.getAbsolutePath();
+        String suffix = "/Android/data/" + getPackageName() + "/files";
+        int suffixIndex = path.indexOf(suffix);
+        if (suffixIndex > 0) {
+            return new File(path.substring(0, suffixIndex));
+        }
+
+        File parent = externalDir;
+        for (int i = 0; i < 4 && parent != null; i++) {
+            parent = parent.getParentFile();
+        }
+        return parent;
+    }
+
+    private void showDataRootChooser(boolean restartRequired) {
+        List<DataRootOption> options = getDataRootOptions();
+        String[] labels = new String[options.size()];
+        for (int i = 0; i < options.size(); i++) {
+            labels[i] = options.get(i).label;
+        }
+
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle("Choose Data Folder")
+                .setMessage("Choose where 2S2H stores saves, mods, settings, and support files.")
+                .setItems(labels, (dialog, which) -> {
+                    DataRootOption selected = options.get(which);
+                    Executors.newSingleThreadExecutor().execute(() -> applyDataRootSelection(selected.folder, restartRequired));
+                })
+                .setCancelable(false)
+                .show());
+    }
+
+    private void applyDataRootSelection(File targetRootFolder, boolean restartRequired) {
+        File previousRoot = getTargetRootFolder();
+        preferences.edit().putString(PREF_DATA_ROOT_PATH, targetRootFolder.getAbsolutePath()).apply();
+        updateCurrentDataRootPath();
+
+        if (!ensureTargetRootFolderReady(targetRootFolder)) {
+            preferences.edit().putString(PREF_DATA_ROOT_PATH, previousRoot.getAbsolutePath()).apply();
+            updateCurrentDataRootPath();
+            showSetupFailure("The selected data folder is not writable.");
+            return;
+        }
+
+        migrateExistingRootIfNeeded(previousRoot, targetRootFolder);
+        migrateExistingRootIfNeeded(getDefaultDataRootFolder(), targetRootFolder);
+
+        if (restartRequired) {
+            runOnUiThread(() -> new AlertDialog.Builder(this)
+                    .setTitle("Restart Required")
+                    .setMessage("2S2H will use the new data folder after restarting. Existing data was copied when needed; the old folder was left in place.")
+                    .setCancelable(false)
+                    .setPositiveButton("Close App", (dialog, which) -> finish())
+                    .show());
+            return;
+        }
+
+        beginSetupIfStorageReady();
+    }
+
+    private void migrateExistingRootIfNeeded(File sourceRoot, File targetRoot) {
+        if (sourceRoot == null || targetRoot == null ||
+                sourceRoot.getAbsolutePath().equals(targetRoot.getAbsolutePath()) ||
+                !sourceRoot.isDirectory() || !isDirectoryEmpty(targetRoot)) {
+            return;
+        }
+
+        try {
+            AssetCopyUtil.copyDirectoryContents(sourceRoot, targetRoot);
+            Log.i("setupFiles", "Copied existing data from: " + sourceRoot.getAbsolutePath());
+        } catch (IOException e) {
+            Log.e("setupFiles", "Failed to copy existing data from: " + sourceRoot.getAbsolutePath(), e);
+            runOnUiThread(() -> Toast.makeText(this, "Could not copy existing data", Toast.LENGTH_LONG).show());
+        }
+    }
+
+    private boolean isDirectoryEmpty(File directory) {
+        File[] files = directory.listFiles();
+        return files == null || files.length == 0;
+    }
+
     private void beginSetupIfStorageReady() {
+        updateCurrentDataRootPath();
         File targetRootFolder = getTargetRootFolder();
         if (!ensureTargetRootFolderReady(targetRootFolder)) {
             showStorageAccessFailure();
@@ -191,7 +345,7 @@ public class MainActivity extends SDLActivity{
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
             } else {
-                beginSetupIfStorageReady();
+                beginSetupOrChooseDataRoot();
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android 6–10 → request READ/WRITE at runtime
@@ -203,7 +357,7 @@ public class MainActivity extends SDLActivity{
                     STORAGE_PERMISSION_REQUEST_CODE);
         } else {
             // Below Android 6 → permissions granted at install time
-            beginSetupIfStorageReady();
+            beginSetupOrChooseDataRoot();
         }
     }
 
@@ -387,7 +541,7 @@ public class MainActivity extends SDLActivity{
             // Handle MANAGE_EXTERNAL_STORAGE result
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (Environment.isExternalStorageManager()) {
-                    beginSetupIfStorageReady();
+                    beginSetupOrChooseDataRoot();
                 } else {
                     Toast.makeText(this, "Storage permission is required to access files.", Toast.LENGTH_LONG).show();
                 }
@@ -401,7 +555,7 @@ public class MainActivity extends SDLActivity{
 
         if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
             if (hasStoragePermission()) {
-                beginSetupIfStorageReady();
+                beginSetupOrChooseDataRoot();
             } else {
                 showStorageAccessFailure();
             }
@@ -426,6 +580,15 @@ public class MainActivity extends SDLActivity{
 
         // Start the file picker dialog
         startActivityForResult(intent, 0);
+    }
+
+    public void changeDataFolderFromNative() {
+        if (getDataRootOptions().size() < 2) {
+            runOnUiThread(() -> Toast.makeText(this, "No alternate data folder is available.", Toast.LENGTH_LONG).show());
+            return;
+        }
+
+        showDataRootChooser(true);
     }
 
     // Check if external storage is available and writable

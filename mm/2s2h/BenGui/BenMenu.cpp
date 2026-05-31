@@ -20,6 +20,10 @@
 #include "ResolutionEditor.h"
 #include "2s2h/Rando/Rando.h"
 #include "build.h"
+#if defined(__ANDROID__)
+#include <jni.h>
+#include <SDL.h>
+#endif
 
 extern "C" {
 #include "z64.h"
@@ -46,6 +50,27 @@ static void ApplyAndroidMenuScale(float scale) {
     ImGui::GetStyle().ScaleAllSizes(scale / previousScale);
     ImGui::GetIO().FontGlobalScale = scale;
 }
+
+#if defined(__ANDROID__)
+static void OpenAndroidDataFolderChooser() {
+    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    jobject activity = (jobject)SDL_AndroidGetActivity();
+    if (env == nullptr || activity == nullptr) {
+        return;
+    }
+
+    jclass activityClass = env->GetObjectClass(activity);
+    if (activityClass == nullptr) {
+        return;
+    }
+
+    jmethodID changeDataFolderMethod = env->GetMethodID(activityClass, "changeDataFolderFromNative", "()V");
+    if (changeDataFolderMethod != nullptr) {
+        env->CallVoidMethod(activity, changeDataFolderMethod);
+    }
+    env->DeleteLocalRef(activityClass);
+}
+#endif
 
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
     { UIWidgets::Colors::Red, "Red" },
@@ -413,7 +438,11 @@ void BenMenu::AddSettings() {
     AddWidget(path, "Reset Button Combination:", WIDGET_CVAR_BTN_SELECTOR)
         .CVar("gSettings.ResetBtn")
         .Options(BtnSelectorOptions().DefaultValue(BTN_CUSTOM_MODIFIER2));
-#if !defined(__ANDROID__)
+#if defined(__ANDROID__)
+    AddWidget(path, "Change Data Folder", WIDGET_BUTTON)
+        .Callback([](WidgetInfo& info) { OpenAndroidDataFolderChooser(); })
+        .Options(ButtonOptions().Tooltip("Choose where Android stores saves, mods, settings, and support files."));
+#else
     AddWidget(path, "Open App Files Folder", WIDGET_BUTTON)
         .Callback([](WidgetInfo& info) {
             std::string filesPath = Ship::Context::GetInstance()->GetAppDirectoryPath();

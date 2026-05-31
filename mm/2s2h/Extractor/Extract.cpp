@@ -8,6 +8,7 @@
 #include "portable-file-dialogs.h"
 #include <utils/binarytools/BitConverter.h>
 #include "build.h"
+#include <Context.h>
 
 #ifdef unix
 #include <dirent.h>
@@ -556,7 +557,7 @@ std::string Extractor::Mkdtemp() {
 #ifndef __ANDROID__
     std::string temp_dir = std::filesystem::temp_directory_path().string();
 #else
-    std::string temp_dir = SDL_AndroidGetExternalStoragePath();
+    std::string temp_dir = Ship::Context::GetAppDirectoryPath();
 #endif
 
     // create 6 random alphanumeric characters
