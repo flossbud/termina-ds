@@ -20,8 +20,7 @@ void RegisterPictoBoxOnCUp() {
         Player* player = GET_PLAYER(gPlayState);
         PlayerUnkAA5 firstPersonMode = PLAYER_UNKAA5_1;
 
-        if (gSaveContext.save.saveInfo.inventory.items[SLOT_PICTOGRAPH_BOX] == ITEM_PICTOGRAPH_BOX &&
-            !CHECK_QUEST_ITEM(QUEST_PICTOGRAPH)) {
+        if (gSaveContext.save.saveInfo.inventory.items[SLOT_PICTOGRAPH_BOX] == ITEM_PICTOGRAPH_BOX) {
             firstPersonMode = PLAYER_UNKAA5_2;
         }
 
