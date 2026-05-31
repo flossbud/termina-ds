@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -53,6 +54,7 @@ public class MainActivity extends SDLActivity{
     private static final CountDownLatch setupLatch = new CountDownLatch(1);
     private static String currentDataRootPath = "/storage/emulated/0/2S2H";
     private static final String PREF_DATA_ROOT_PATH = "dataRootPath";
+    private AlertDialog dataRootMigrationDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -334,8 +336,16 @@ public class MainActivity extends SDLActivity{
             return;
         }
 
+        boolean willMigrateData = shouldMigrateExistingRoot(previousRoot, targetRootFolder) ||
+                shouldMigrateExistingRoot(getDefaultDataRootFolder(), targetRootFolder);
+        if (willMigrateData) {
+            showDataRootMigrationDialog();
+        }
         migrateExistingRootIfNeeded(previousRoot, targetRootFolder);
         migrateExistingRootIfNeeded(getDefaultDataRootFolder(), targetRootFolder);
+        if (willMigrateData) {
+            dismissDataRootMigrationDialog();
+        }
 
         if (restartRequired) {
             runOnUiThread(() -> new AlertDialog.Builder(this)
@@ -350,10 +360,46 @@ public class MainActivity extends SDLActivity{
         beginSetupIfStorageReady();
     }
 
+    private void showDataRootMigrationDialog() {
+        runOnUiThread(() -> {
+            if (dataRootMigrationDialog != null && dataRootMigrationDialog.isShowing()) {
+                return;
+            }
+
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            int padding = (int) (20 * getResources().getDisplayMetrics().density);
+            layout.setPadding(padding, padding, padding, padding);
+
+            ProgressBar progressBar = new ProgressBar(this);
+            progressBar.setIndeterminate(true);
+            layout.addView(progressBar);
+
+            TextView message = new TextView(this);
+            message.setText("Copying saves, mods, settings, and support files. This may take a few minutes.");
+            message.setTextColor(Color.BLACK);
+            layout.addView(message);
+
+            dataRootMigrationDialog = new AlertDialog.Builder(this)
+                    .setTitle("Moving Data Folder")
+                    .setView(layout)
+                    .setCancelable(false)
+                    .create();
+            dataRootMigrationDialog.show();
+        });
+    }
+
+    private void dismissDataRootMigrationDialog() {
+        runOnUiThread(() -> {
+            if (dataRootMigrationDialog != null && dataRootMigrationDialog.isShowing()) {
+                dataRootMigrationDialog.dismiss();
+            }
+            dataRootMigrationDialog = null;
+        });
+    }
+
     private void migrateExistingRootIfNeeded(File sourceRoot, File targetRoot) {
-        if (sourceRoot == null || targetRoot == null ||
-                sourceRoot.getAbsolutePath().equals(targetRoot.getAbsolutePath()) ||
-                !sourceRoot.isDirectory() || !isDirectoryEmpty(targetRoot)) {
+        if (!shouldMigrateExistingRoot(sourceRoot, targetRoot)) {
             return;
         }
 
@@ -364,6 +410,12 @@ public class MainActivity extends SDLActivity{
             Log.e("setupFiles", "Failed to copy existing data from: " + sourceRoot.getAbsolutePath(), e);
             runOnUiThread(() -> Toast.makeText(this, "Could not copy existing data", Toast.LENGTH_LONG).show());
         }
+    }
+
+    private boolean shouldMigrateExistingRoot(File sourceRoot, File targetRoot) {
+        return sourceRoot != null && targetRoot != null &&
+                !sourceRoot.getAbsolutePath().equals(targetRoot.getAbsolutePath()) &&
+                sourceRoot.isDirectory() && isDirectoryEmpty(targetRoot);
     }
 
     private boolean isDirectoryEmpty(File directory) {
