@@ -109,6 +109,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Clock Shuffle Granny story redirect | Done locally | Medium | Ports the missing source hook from upstream `#1479`; native compile check passes. |
 | Starting item and Pause Owl Warp rando audit | Done locally | Low | Verified Romani Mask Milk Bar logic, computed starting-item pool removal, and legacy/empty starting-items handling are already present; ported upstream `#1467` Pause Owl Warp gating for ocarina/buttons/song restrictions. |
 | Pre-playstate item tracker display (`#1477`) | Done locally | Low | Android's tracker is older than upstream's rewritten item tracker, so this ports the local equivalent: render faded tracker contents without a `PlayState` and avoid gameplay-only ammo/pause reads until a save is loaded. |
+| Older gameplay/rando microfix audit (`#1450`, `#1457`, `#1461`, `#1436`, `#1416`, `#1418`, `#1409`, `#1396`, `#1394`) | Done locally | Low | Auto Bank notification throttling, enemy soul draw segment fixes, swim grant, Deku Search Ball labels, skateblock push-only speed, Beaver race skip, cow softlock, and Swordsman pot logic were already present; ported the missing EnOt reset callback. |
 
 ## Next Candidate Batch
 
