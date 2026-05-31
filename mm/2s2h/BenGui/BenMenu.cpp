@@ -31,6 +31,22 @@ extern SaveContext gSaveContext;
 extern std::unordered_map<s16, const char*> warpPointSceneList;
 extern void Warp();
 
+static void ApplyAndroidMenuScale(float scale) {
+    if (scale < 1.0f) {
+        scale = 1.0f;
+    } else if (scale > 3.0f) {
+        scale = 3.0f;
+    }
+
+    float previousScale = ImGui::GetIO().FontGlobalScale;
+    if (previousScale <= 0.0f) {
+        previousScale = 1.0f;
+    }
+
+    ImGui::GetStyle().ScaleAllSizes(scale / previousScale);
+    ImGui::GetIO().FontGlobalScale = scale;
+}
+
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
     { UIWidgets::Colors::Red, "Red" },
     { UIWidgets::Colors::DarkRed, "Dark Red" },
@@ -350,7 +366,7 @@ void BenMenu::AddSettings() {
     AddWidget(path, "Menu Scale: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
         .CVar("gSettings.Menu.AndroidScale")
         .Callback([](WidgetInfo& info) {
-            ImGui::GetIO().FontGlobalScale = CVarGetFloat("gSettings.Menu.AndroidScale", 1.45f);
+            ApplyAndroidMenuScale(CVarGetFloat("gSettings.Menu.AndroidScale", 1.45f));
         })
         .Options(FloatSliderOptions()
                      .DefaultValue(1.45f)
@@ -358,7 +374,7 @@ void BenMenu::AddSettings() {
                      .Max(3.0f)
                      .Step(0.05f)
                      .Format("%.2f")
-                     .Tooltip("Adjusts the Android menu size. Restart the app to fully apply widget spacing."));
+                     .Tooltip("Adjusts the Android menu size."));
 #endif
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     AddWidget(path, "Menu Controller Navigation", WIDGET_CVAR_CHECKBOX)

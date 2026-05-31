@@ -583,8 +583,8 @@ void Check2ShipArchiveVersion(std::string archivePath) {
     }
 }
 
-// Checks the program version stored in the o2r and compares the major/minor value to 2ship
-// For Windows/Mac/Linux if the version doesn't match, offer to regenerate it
+// Checks the program version stored in the o2r and compares the major value to 2ship.
+// Minor/patch app updates should not force Android users to regenerate their ROM archive.
 void DetectArchiveVersion(std::string fileName, bool isO2rType) {
     bool isArchiveOld = false;
     std::string archivePath = Ship::Context::LocateFileAcrossAppDirs(fileName, appShortName);
@@ -596,8 +596,7 @@ void DetectArchiveVersion(std::string fileName, bool isO2rType) {
 
     ArchiveVersion archiveVer = ReadPortVersionFromArchive(archivePath, isO2rType);
 
-    // Check both major and minor for game archives
-    if (archiveVer.major != gBuildVersionMajor || archiveVer.minor != gBuildVersionMinor) {
+    if (archiveVer.major != gBuildVersionMajor) {
         isArchiveOld = true;
     }
 

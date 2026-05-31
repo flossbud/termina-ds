@@ -37,6 +37,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Fix Console Crashes | Done locally | Ported the missing reset helper and source crash guards for HESS/Weirdshot, Action Swap with no arrows, owl warp cursor loops, and remote hookshot floor-null handling. |
 | Fierce Deity Sheaths (`#1606`) | Done locally | Ported custom-model sheath display-list hook for Fierce Deity form. |
 | Custom Ocarina Controls (`#1598`) | Done locally | Ported menu/runtime hook and widened Android/libultraship controller masks to `uint32_t`; Android uses upper custom bits to avoid virtual-stick mask conflicts. |
+| Port Extraction Flow / ImGui scaling / file permission check (`#1709`) | Partially ported | Android already had storage-permission checks and modal helpers; current batch ports the major-version-only ROM archive regeneration behavior plus live Android menu-scale sizing. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
 | Tingle Always in Clock Town (`#1690`) | Verified present | Source/menu hook already exists in `Enhancements/Cycle`. |
@@ -67,6 +68,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Fix Console Crashes source hooks | Done locally | Medium | Menu entry was visible; Android was missing the upstream reset helper and several source guard callsites; native compile check passes. |
 | Fierce Deity Sheaths | Done locally | Low | Self-registering custom-model hook ported from upstream; native compile check passes. |
 | Custom Ocarina Controls | Done locally | Medium | Upstream feature ported with Android-specific `uint32_t` button masks above the virtual-stick range; native compile check passes. |
+| Extraction flow and Android menu-scale cleanup | Done locally | Medium | ROM archive compatibility now checks major version only, ROM picker cancel no longer shows an extra error, and Android menu scale applies widget spacing live. |
 
 ## Next Candidate Batch
 
@@ -78,7 +80,7 @@ These are good 3-4 item batches for the next GitHub build.
 | 2 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Android already exposed the menu item but hid it as unsupported; source is now ported and adapted for local collider/actor field names. |
 | 3 | Disable SFX replacement (`#1679`) | Verified Android-handled | Local SFX path does not call SFX replacement, and sequence-player replacement lookup is already commented out. No audio-editor dependency needed. |
 | 4 | Custom Ocarina Controls (`#1598`) | Done locally | Ported with widened libultraship button masks and Android-safe custom bit assignments; validate mappings through the next GitHub APK. |
-| 5 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Android-specific review | Large, high-value, but overlaps Android setup/extraction and should be adapted carefully rather than cherry-picked. |
+| 5 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Partially ported | Keep deeper extraction-progress/window-bootstrap pieces under review; Android now has the low-risk archive-version and menu-scale portions. |
 
 ## Larger Backlog
 
