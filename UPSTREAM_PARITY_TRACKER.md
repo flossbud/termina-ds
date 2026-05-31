@@ -63,6 +63,11 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Giant Bee enemy-drop soul logic (`#1515`) | Verified present | Beehive Giant Bee checks already require both projectile access and `CanKillEnemy(ACTOR_EN_BEE)`. |
 | Bad Bat tree heart-piece soul logic (`#1503`) | Done locally | Road to Southern Swamp heart piece now uses `CanKillEnemy(ACTOR_EN_BAT)` directly, matching upstream soul-aware logic. |
 | Triforce Hunt tracker count guard (`#1520`) | Not applicable locally | Upstream patch targets the newer item-count tracker path; Android's current item tracker does not draw rando item counts through that code path. |
+| Spider House hint replacements (`#1501`) | Verified present | Swamp/Ocean Spider House hints already use the correct `{{item}}` replacement and item article formatting. |
+| Time logic and glitchless generator fixes (`#1500`, `#1506`) | Verified present | Glitchless junk replacement handling/logging, excluded-check refresh, and Milk Road/Romani Ranch time gates are already present. |
+| Gorman Track tree shuffle removal (`#1511`) | Verified present | Gorman Track trees are already absent from tree actor mapping, region checks, static check data, and rando check IDs. |
+| Stone Tower Temple water logic (`#1512`) | Verified present | Water-room checks are split into underwater region logic and require Swim/Light/Ice arrow conditions as upstream. |
+| Rando menu metrics/trap text polish (`#1508`) | Verified present | Balance status, non-junk item pool display, excluded-check refresh, and trap tooltip text are already present; Triforce tracker portion is not applicable to Android's current tracker. |
 | Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
@@ -99,6 +104,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Arrow buyback full-price fix | Done locally | Low | Small upstream gameplay fix; native compile check passes. |
 | Refill/file-select/mask polish audit | Done locally | Low | Red Potion/Gold Dust refill and file-select rando icons verified; stale Blast Mask cooldown search/runtime metadata cleaned up; native compile check passes. |
 | Rando logic microfix audit | Done locally | Low | Curiosity Shop Seahorse requirements, Soaring hint, Smithy day gate, Progressive Time obtainability, and Giant Bee soul logic verified; Bad Bat tree heart-piece logic adjusted locally; native compile check passes. |
+| Older rando logic/menu audit | Done locally | Low | Verified Spider House hint replacements, time/glitchless fixes, Gorman Track tree removal, Stone Tower Temple water logic, and rando menu metrics/trap text polish are already present. |
 
 ## Next Candidate Batch
 
