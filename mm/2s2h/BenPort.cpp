@@ -64,6 +64,7 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/config/ConfigUpdaters.h"
 #include "2s2h/BenGui/Notification.h"
+#include "2s2h/Enhancements/Audio/AudioCollection.h"
 
 // Resource Types/Factories
 #include "resource/type/Blob.h"
@@ -110,6 +111,7 @@ CrowdControl* CrowdControl::Instance;
 
 OTRGlobals* OTRGlobals::Instance;
 GameInteractor* GameInteractor::Instance;
+AudioCollection* AudioCollection::Instance;
 
 extern "C" char** cameraStrings;
 bool prevAltAssets = false;
@@ -716,6 +718,7 @@ extern "C" void InitOTR() {
     Ship::Context::GetInstance()->GetConsoleVariables()->Save();
 
     GameInteractor::Instance = new GameInteractor();
+    AudioCollection::Instance = new AudioCollection();
     LoadGuiTextures();
     BenGui::SetupGuiElements();
     InitEnhancements();
@@ -774,6 +777,9 @@ extern "C" void DeinitOTR() {
     // Destroying gui here because we have shared ptrs to LUS objects which output to SPDLOG which is destroyed before
     // these shared ptrs.
     BenGui::Destroy();
+
+    delete AudioCollection::Instance;
+    AudioCollection::Instance = nullptr;
 
     OTRGlobals::Instance->context = nullptr;
 }

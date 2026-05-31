@@ -32,6 +32,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Skip Enemy Cutscenes (`#1038`) | Verified present | Source is already ported and self-registering; Android menu entry is enabled in the current local batch. |
 | Time Splits (`#1266`) | Done locally | Ported Time Splits windows/settings/actions and adapted Android hook callsites for item, bottle, boss, and file-completion splits. |
 | Cosmetics Editor (`#886`, `#1010`, `#1143`, `#1198`, `#1491`, `#1519`, `#1562`, `#1592`, `#1633`, `#1617`) | Done locally | Ported the modern editor UI, built-in color hooks, rando randomize-on-seed option, and dynamic custom-model cosmetic support with Android/libultraship adaptations. |
+| Audio editor / custom audio support (`#778`, `#999`, `#1325`) | Done locally | Ported Audio Editor UI, replacement/randomization logic, custom sequence registration, sequence-init notification hook, and audio SFX mute/pitch/proximity options with Android/libultraship adaptations. |
 | Skip Soaring cutscene (`#1383`) | Done locally | Ported actor-init shortcut with Android/local EnTest7 names and enabled Android menu entry. |
 | Sun's Song/Faster Song Playback ocarina end fix (`#1542`) | Done locally | Ported guard so Sun's Song does not force ocarina end while faster playback is active. |
 | Hyrule Warriors Styled Link | Done locally | Ported missing source hook for an already-visible Android menu option. |
@@ -120,6 +121,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Mask disable / Toto polish audit (`#1268`, `#1276`, `#1277`) | Done locally | Low | Underwater item hooks, Giant's Mask soul restriction, Multi-Window default, and Toto FD guard were already present; ported the missing Fierce Deity Anywhere underwater-use hooks. |
 | Time Splits (`#1266`) | Done locally | Medium | Ported the Time Splits tracker UI/settings/actions, Display Overlay timer updates, and Android-compatible hook callsites; native compile check passes. |
 | Cosmetics Editor stack (`#886`, `#1010`, `#1143`, `#1198`, `#1491`, `#1519`, `#1562`, `#1592`, `#1633`, `#1617`) | Done locally | High | Ported the modern cosmetic editor, built-in cosmetic draw hooks, rando seed randomization option, and dynamic custom-model cosmetic scanning/patching; adapted to Android's older libultraship archive/display-list APIs and native compile check passes. |
+| Audio Editor / custom audio stack (`#778`, `#999`, `#1325`) | Done locally | High | Ported editor window/menu, audio collection, replacement/randomization hooks, custom sequence/font archive registration, sequence-init notification hook, and SFX mute/pitch/proximity options; native compile check passes. |
 
 ## Next Candidate Batch
 
@@ -129,15 +131,14 @@ These are good 3-4 item batches for the next GitHub build.
 | --- | --- | --- | --- |
 | 1 | Basic surround sound support (`#1516`) | Needs libultraship audio review | Upstream depends on newer LUS audio-channel plumbing; Android currently opens SDL audio as stereo and needs a careful libultraship adaptation. |
 | 2 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Partially ported | Keep deeper extraction-progress/window-bootstrap pieces under review; Android now has the low-risk archive-version and menu-scale portions. |
-| 3 | Audio editor / custom audio support (`#778`, `#999`, `#1325`) | Needs libultraship audio review | Next large feature stack; likely needs Android-specific audio backend and file-path adaptation. |
-| 4 | ClockShuffle cleanup / Keiichi rando drift (`#1546`, `develop-keiichi`) | Needs review | Large rando logic diff; audit separately from gameplay enhancement batches. |
-| 5 | Surround/cosmetics/rando tracker cleanup | In progress | Continue narrowing remaining upstream-only deltas before choosing the next GitHub build batch. |
+| 3 | ClockShuffle cleanup / Keiichi rando drift (`#1546`, `develop-keiichi`) | Needs review | Large rando logic diff; audit separately from gameplay enhancement batches. |
+| 4 | Surround/cosmetics/rando tracker cleanup | In progress | Continue narrowing remaining upstream-only deltas before choosing the next GitHub build batch. |
 
 ## Larger Backlog
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Audio editor / custom sequences | Deferred | Many upstream files are absent locally. Needs libultraship compatibility review next. |
+| Audio editor / custom sequences | Done locally | Audio Editor UI, custom sequence registration, replacement hooks, and SFX audio options are ported; verify custom audio packs through GitHub APK/device testing. |
 | Basic surround sound support | Needs review | Game-side setting changes are straightforward, but Android/libultraship needs channel negotiation/conversion before enabling 5.1 output safely. |
 | Cosmetics editor UI | Done locally | Modern editor UI, dynamic custom-model support, and built-in cosmetic hooks are ported; verify through GitHub APK/device testing. |
 | Song Items | Done locally | Ported source, D-pad behavior, menu exposure, and softlock fix together. |

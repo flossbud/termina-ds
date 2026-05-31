@@ -31,6 +31,7 @@ s32 AudioScript_SeqLayerProcessScriptStep3(SequenceLayer* layer, s32 cmd);
 u8 AudioScript_GetInstrument(SequenceChannel* channel, u8 instId, Instrument** instOut, AdsrSettings* adsr);
 
 SequenceData ResourceMgr_LoadSeqByName(const char* path);
+u16 AudioEditor_GetReplacementSeq(u16 seqId);
 extern char** gSequenceToResource;
 
 /**
@@ -1424,7 +1425,7 @@ void AudioScript_SequenceChannelProcessScript(SequenceChannel* channel) {
                             seqPlayer->seqId = gAudioCtx.seqToPlay[seqPlayer->playerIndex];
                             gAudioCtx.seqReplaced[seqPlayer->playerIndex] = 0;
                         }
-                        u16 seqId = seqPlayer->seqId; // AudioEditor_GetReplacementSeq(seqPlayer->seqId);
+                        u16 seqId = AudioEditor_GetReplacementSeq(seqPlayer->seqId);
                         SequenceData sDat = ResourceMgr_LoadSeqByName(gSequenceToResource[seqId]);
 
                         // The game apparantely would sometimes do negative array lookups, the result of which would get

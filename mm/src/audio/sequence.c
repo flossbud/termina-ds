@@ -18,6 +18,7 @@
  * the graph thread to the audio thread.
  */
 #include "global.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 // Direct audio command (skips the queueing system)
 #define SEQCMD_SET_SEQPLAYER_VOLUME_NOW(seqPlayerIndex, duration, volume)                          \
@@ -534,6 +535,7 @@ void AudioSeq_UpdateActiveSequences(void) {
         // The seqPlayer has finished initializing and is currently playing the active sequences
         if (gActiveSeqs[seqPlayerIndex].isSeqPlayerInit && gAudioCtx.seqPlayers[seqPlayerIndex].enabled) {
             gActiveSeqs[seqPlayerIndex].isSeqPlayerInit = false;
+            GameInteractor_ExecuteOnSeqPlayerInit(seqPlayerIndex, AudioSeq_GetActiveSeqId(seqPlayerIndex));
         }
 
         // The seqPlayer is no longer playing the active sequences

@@ -9,6 +9,7 @@
 #include "UIWidgets.hpp"
 #include "HudEditor.h"
 #include "CosmeticEditor.h"
+#include "2s2h/Enhancements/Audio/AudioEditor.h"
 #include "Notification.h"
 #include "BenModals.h"
 #include "Rando/CheckTracker/CheckTracker.h"
@@ -42,6 +43,7 @@ std::shared_ptr<Ship::GuiWindow> mGfxDebuggerWindow;
 std::shared_ptr<SaveEditorWindow> mSaveEditorWindow;
 std::shared_ptr<HudEditorWindow> mHudEditorWindow;
 std::shared_ptr<CosmeticEditorWindow> mCosmeticEditorWindow;
+std::shared_ptr<AudioEditor> mAudioEditorWindow;
 std::shared_ptr<ActorViewerWindow> mActorViewerWindow;
 std::shared_ptr<CollisionViewerWindow> mCollisionViewerWindow;
 std::shared_ptr<EventLogWindow> mEventLogWindow;
@@ -114,6 +116,9 @@ void SetupGuiElements() {
         std::make_shared<CosmeticEditorWindow>("gWindows.CosmeticEditor", "Cosmetic Editor", ImVec2(480, 600));
     gui->AddGuiWindow(mCosmeticEditorWindow);
 
+    mAudioEditorWindow = std::make_shared<AudioEditor>("gWindows.AudioEditor", "Audio Editor", ImVec2(520, 600));
+    gui->AddGuiWindow(mAudioEditorWindow);
+
     mActorViewerWindow = std::make_shared<ActorViewerWindow>("gWindows.ActorViewer", "Actor Viewer", ImVec2(520, 600));
     gui->AddGuiWindow(mActorViewerWindow);
 
@@ -176,6 +181,7 @@ void Destroy() {
     mSaveEditorWindow = nullptr;
     mHudEditorWindow = nullptr;
     mCosmeticEditorWindow = nullptr;
+    mAudioEditorWindow = nullptr;
     mActorViewerWindow = nullptr;
     mItemTrackerWindow = nullptr;
     mItemTrackerSettingsWindow = nullptr;

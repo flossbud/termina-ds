@@ -12,10 +12,15 @@
 
 #include "global.h"
 #include "buffers.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+#include "2s2h/Enhancements/Audio/AudioCollection.h"
+#include "2s2h/Enhancements/Audio/AudioEditor.h"
 #include "BenPort.h"
+#include <bridge/resourcebridge.h>
+#include <libultraship/luslog.h>
 
 /**
  * SoundFont Notes:
@@ -355,7 +360,8 @@ void AudioLoad_SetFontLoadStatus(s32 fontId, s32 loadStatus) {
 }
 
 void AudioLoad_SetSeqLoadStatus(s32 seqId, s32 loadStatus) {
-    if ((seqId != 0xFF) && (gAudioCtx.seqLoadStatus[seqId] != LOAD_STATUS_PERMANENT)) {
+    seqId = AudioEditor_GetOriginalSeq(seqId);
+    if ((seqId != NA_BGM_DISABLED) && (gAudioCtx.seqLoadStatus[seqId] != LOAD_STATUS_PERMANENT)) {
         gAudioCtx.seqLoadStatus[seqId] = loadStatus;
     }
 }
@@ -504,13 +510,11 @@ void AudioLoad_AsyncLoadFont(s32 fontId, s32 arg1, s32 retData, OSMesgQueue* ret
 }
 
 u8* AudioLoad_GetFontsForSequence(s32 seqId, u32* outNumFonts, u8* buff) {
-    if (seqId == NA_BGM_DISABLED || seqId == 0xFF) {
+    if (seqId == NA_BGM_DISABLED) {
         return NULL;
     }
 
-    // TODO: Sequence Remplacements
-
-    if (seqId > gSequenceToResourceSize || !gSequenceToResource[seqId]) {
+    if (seqId >= gSequenceToResourceSize || !gSequenceToResource[seqId]) {
         return NULL;
     }
 
@@ -607,6 +611,11 @@ s32 AudioLoad_SyncInitSeqPlayerInternal(s32 playerIndex, s32 seqId, s32 arg2) {
     AudioScript_SequencePlayerDisable(seqPlayer);
 
     fontId = 0xFF;
+    // Resetting all sounds in a state where there is silence, IE map select will crash. This feels like a band-aid fix
+    // but it works.
+    if (seqId == 0x7FF) {
+        return 0;
+    }
     if (gAudioCtx.seqReplaced[playerIndex]) {
         authCachePolicy = seqCachePolicyMap[seqId];
         seqId = gAudioCtx.seqToPlay[playerIndex];
@@ -1116,6 +1125,12 @@ void AudioLoad_InitSoundFont(s32 fontId) {
     font->numSfx = entry->shortData3;
 }
 
+int strcmp_sort(const void* str1, const void* str2) {
+    char* const* pp1 = str1;
+    char* const* pp2 = str2;
+    return strcmp(*pp1, *pp2);
+}
+
 void AudioLoad_Init(void* heap, size_t heapSize) {
     s32 pad1[9];
     s32 numFonts;
@@ -1218,11 +1233,16 @@ void AudioLoad_Init(void* heap, size_t heapSize) {
     // AudioLoad_InitTable(gAudioCtx.soundFontTable, SEGMENT_ROM_START(Audiobank), 0);
     // AudioLoad_InitTable(gAudioCtx.sampleBankTable, SEGMENT_ROM_START(Audiotable), 0);
 
+    // Only load the original sequences right now because custom songs may require data from sound fonts and samples.
     int seqListSize = 0;
+    int customSeqListSize = 0;
     char** seqList = ResourceMgr_ListFiles("audio/sequences*", &seqListSize);
-    gSequenceToResourceSize = seqListSize;
-    gSequenceToResource = malloc(gSequenceToResourceSize * sizeof(*gSequenceToResource));
-    gAudioCtx.seqLoadStatus = malloc(gSequenceToResourceSize * sizeof(*gAudioCtx.seqLoadStatus));
+    char** customSeqList = ResourceMgr_ListFiles("custom/music/*", &customSeqListSize);
+    gSequenceToResourceSize = (size_t)(seqListSize + customSeqListSize);
+    gSequenceToResource = calloc(gSequenceToResourceSize, sizeof(*gSequenceToResource));
+    gAudioCtx.seqLoadStatus = calloc(gSequenceToResourceSize, sizeof(*gAudioCtx.seqLoadStatus));
+
+    memset(&gAudioCtx.seqLoadStatus[seqListSize], LOAD_STATUS_PERMANENT, customSeqListSize);
 
     for (size_t i = 0; i < seqListSize; i++) {
         SequenceData sDat = ResourceMgr_LoadSeqByName(seqList[i]);
@@ -1233,8 +1253,11 @@ void AudioLoad_Init(void* heap, size_t heapSize) {
 
     free(seqList);
 
+    // Custom streamed songs can reference custom fonts, so load those fonts before assigning custom sequence IDs.
     int fntListSize = 0;
+    int customFntListSize = 0;
     char** fntList = ResourceMgr_ListFiles("audio/fonts*", &fntListSize);
+    char** customFntList = ResourceMgr_ListFiles("custom/fonts/*", &customFntListSize);
 
     for (int i = 0; i < fntListSize; i++) {
         SoundFont* sf = ResourceMgr_LoadAudioSoundFont(fntList[i]);
@@ -1242,6 +1265,52 @@ void AudioLoad_Init(void* heap, size_t heapSize) {
     }
 
     free(fntList);
+
+    for (int i = fntListSize; i < customFntListSize + fntListSize; i++) {
+        SoundFont* sf = ResourceMgr_LoadAudioSoundFont(customFntList[i - fntListSize]);
+        sf->fntIndex = i;
+        gFontToResource[i] = strdup(customFntList[i - fntListSize]);
+    }
+    free(customFntList);
+
+    // Entry 0x7A is missing in Android's sequence archive, so start from the loaded vanilla list size.
+    int startingSeqNum = seqListSize;
+    qsort(customSeqList, customSeqListSize, sizeof(char*), strcmp_sort);
+
+    int seqNum = startingSeqNum;
+    for (size_t i = startingSeqNum; i < startingSeqNum + customSeqListSize; i++) {
+        int j = i - startingSeqNum;
+        SequenceData* sDat = (SequenceData*)ResourceGetDataByName(customSeqList[j]);
+
+        if (sDat->numFonts == -1) {
+            uint64_t crc;
+
+            memcpy(&crc, sDat->fonts, sizeof(uint64_t));
+            const char* res = ResourceGetNameByCrc(crc);
+            if (res == NULL) {
+                LUSLOG_ERROR("Could not find sound font for sequence %s. It will not be in the audio editor.",
+                             customSeqList[j]);
+                continue;
+            }
+
+            SoundFont* sf = ResourceMgr_LoadAudioSoundFont(res);
+            memset(&sDat->fonts[0], 0, sizeof(sDat->fonts));
+            sDat->fonts[0] = sf->fntIndex;
+            sDat->numFonts = 1;
+        }
+
+        while (AudioCollection_HasSequenceNum(seqNum)) {
+            seqNum++;
+        }
+
+        AudioCollection_AddToCollection(customSeqList[j], seqNum);
+
+        sDat->seqNumber = seqNum;
+        gSequenceToResource[sDat->seqNumber] = strdup(customSeqList[j]);
+        seqNum++;
+    }
+
+    free(customSeqList);
 
     numFonts = fntListSize;
     gAudioCtx.soundFontList = AudioHeap_Alloc(&gAudioCtx.initPool, numFonts * sizeof(SoundFont));
@@ -1434,6 +1503,14 @@ s32 AudioLoad_SlowLoadSeq(s32 seqId, u8* ramAddr, s8* isDone) {
     }
 
     seqId = AudioLoad_GetRealTableIndex(SEQUENCE_TABLE, seqId);
+    u16 newSeqId = AudioEditor_GetReplacementSeq(seqId);
+    if (seqId != newSeqId) {
+        gAudioCtx.seqToPlay[SEQ_PLAYER_BGM_MAIN] = newSeqId;
+        gAudioCtx.seqReplaced[SEQ_PLAYER_BGM_MAIN] = 1;
+        AudioSeq_QueueSeqCmd(0x00000000 | ((u8)SEQ_PLAYER_BGM_MAIN << 24) | ((u8)(0) << 16) | (u16)seqId);
+        return 0;
+    }
+
     seqTable = AudioLoad_GetLoadTable(SEQUENCE_TABLE);
     slowLoad = &gAudioCtx.slowLoads[gAudioCtx.slowLoadPos];
     if (slowLoad->status == LOAD_STATUS_DONE) {

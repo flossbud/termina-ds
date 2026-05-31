@@ -1901,14 +1901,12 @@ void BenMenu::AddEnhancements() {
         .CVar("gWindows.Timesplits.Settings")
         .WindowName("Time Splits Settings Window");
 
-#if !defined(__ANDROID__)
     // Audio Editor
     path = { "Enhancements", "Audio Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "Audio Editor", 1);
     AddWidget(path, "Popout Audio Editor", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.AudioEditor")
         .WindowName("Audio Editor");
-#endif
 }
 
 void BenMenu::AddDevTools() {
