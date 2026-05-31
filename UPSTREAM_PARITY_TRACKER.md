@@ -27,6 +27,8 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Scarecrow song through cycle reset (`#1692`, `#1707`) | Mostly ported | Local commit `945a47024`; current batch adds missing event-warning cleanup. |
 | Bomb-arrow cycle ammo fix (`#1697`) | Verified present | Local code already has `OnPlayerReleaseHeldActor`, delayed bomb consumption, and held-expiry handling. |
 | Color Pictograph (`#1484`) | Ported | Local release `v1.3.1`; verify against current upstream later for minor deltas. |
+| Extended Projectile Interaction Distance (`#1681`) | Done locally | Ported source and enabled Android menu entry in the current local batch. |
+| Disable SFX replacement (`#1679`) | Verified Android-handled | No SFX replacement lookup is active locally; no source change needed. |
 | Android release Node/action updates | Ported | Workflow currently passes with action versions used in release `26700931957`. |
 
 ## Active Batch
@@ -34,6 +36,8 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Item | Status | Risk | Notes |
 | --- | --- | --- | --- |
 | Clear lost rupee/ammo warnings when end-of-cycle preservation options restore those values | Done locally | Low | Upstream split this into per-CVar hooks; Android keeps old grouped registration, so port only behavior. |
+| Extended Projectile Interaction Distance | Done locally | Medium | Source ported from upstream and adapted for Android branch collider names/EnIshi fields. |
+| Disable SFX replacement | Verified | Low | Android already avoids the replacement lookup this upstream fix disabled. |
 | Write parity tracker | Done locally | Low | This file. |
 | Run native compile check | Passed | Medium | `:app:externalNativeBuildDebug` passes; use GitHub release workflow for final APK confidence. |
 
@@ -44,8 +48,8 @@ These are good 3-4 item batches for the next GitHub build.
 | Priority | Upstream area | Status | Why next |
 | --- | --- | --- | --- |
 | 1 | Song Items (`#1566`) plus softlock fix (`#1696`) | Deferred larger port | Android menu entry exists but is hidden with `HideUnsupportedAndroidOption`; upstream source is absent locally. Port as a full feature, not a small hook fix. |
-| 2 | Extended Projectile Interaction Distance (`#1681`) | Needs audit | Upstream adds a dedicated enhancement source file and menu entries. Confirm whether Android exposes it and whether source exists before porting. |
-| 3 | Disable SFX replacement (`#1679`) | Needs Android/libultraship review | Small code diff, but it touches audio replacement behavior and upstream custom audio editor pieces that Android may not fully carry. |
+| 2 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Android already exposed the menu item but hid it as unsupported; source is now ported and adapted for local collider/actor field names. |
+| 3 | Disable SFX replacement (`#1679`) | Verified Android-handled | Local SFX path does not call SFX replacement, and sequence-player replacement lookup is already commented out. No audio-editor dependency needed. |
 | 4 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Android-specific review | Large, high-value, but overlaps Android setup/extraction and should be adapted carefully rather than cherry-picked. |
 
 ## Larger Backlog

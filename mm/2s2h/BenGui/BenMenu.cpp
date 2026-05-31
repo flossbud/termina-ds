@@ -1122,7 +1122,6 @@ void BenMenu::AddEnhancements() {
             "Allows carrying up to 3 Powder Kegs at once instead of the vanilla limit of 1."));
     AddWidget(path, "Extended Projectile Interaction Distance", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Gameplay.ExtendedProjectileInteractionDistance")
-        .PreFunc(HideUnsupportedAndroidOption)
         .Options(CheckboxOptions().Tooltip(
             "Allows projectiles and explosions to hit breakable objects at a distance matching your "
             "Increase Actor Draw Distance setting.\n\n"

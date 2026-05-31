@@ -1,6 +1,7 @@
 #include "Enhancements.h"
 
 void RegisterPictoBoxOnCUp();
+void RegisterExtendedProjectileInteractionDistance();
 
 void InitEnhancements() {
     // Camera
@@ -47,6 +48,9 @@ void InitEnhancements() {
     RegisterBombArrows();
     RegisterArrowCycle();
     RegisterPictoBoxOnCUp();
+
+    // Gameplay
+    RegisterExtendedProjectileInteractionDistance();
 
     // Fixes
     RegisterFierceDeityZTargetMovement();
