@@ -10,6 +10,7 @@
 #include "overlays/actors/ovl_En_Elf/z_en_elf.h"
 #include "objects/object_gs/object_gs.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
+#include "2s2h/GameInteractor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_10 | ACTOR_FLAG_2000000)
 
@@ -177,6 +178,7 @@ void EnGs_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void func_80997D14(EnGs* this, PlayState* play) {
+    GameInteractor_Should(VB_EN_GS_FINISH_OCARINA_ON_RESET, true, this, play);
     this->unk_19A &= ~0x200;
     this->actionFunc = func_80997D38;
 }
@@ -375,6 +377,7 @@ f32 func_80998334(EnGs* this, PlayState* play, f32* arg2, f32* arg3, s16* arg4, 
 }
 
 void func_809984F4(EnGs* this, PlayState* play) {
+    GameInteractor_Should(VB_EN_GS_BEFORE_GOSSIP_GROTTO_SEQUENCE, true, this, play);
     EnGs* gossipStone = NULL;
 
     do {

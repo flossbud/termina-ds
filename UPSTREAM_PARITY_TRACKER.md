@@ -28,6 +28,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Bomb-arrow cycle ammo fix (`#1697`) | Verified present | Local code already has `OnPlayerReleaseHeldActor`, delayed bomb consumption, and held-expiry handling. |
 | Color Pictograph (`#1484`) | Ported | Local release `v1.3.1`; verify against current upstream later for minor deltas. |
 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Ported source and enabled Android menu entry in the current local batch. |
+| Song Items (`#1566`, `#1696`) | Done locally | Ported upstream source, enabled Android menu entry, and added gossip-stone softlock vanilla-behavior hooks. |
 | Disable SFX replacement (`#1679`) | Verified Android-handled | No SFX replacement lookup is active locally; no source change needed. |
 | Android release Node/action updates | Ported | Workflow currently passes with action versions used in release `26700931957`. |
 
@@ -40,6 +41,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Disable SFX replacement | Verified | Low | Android already avoids the replacement lookup this upstream fix disabled. |
 | Write parity tracker | Done locally | Low | This file. |
 | Run native compile check | Passed | Medium | `:app:externalNativeBuildDebug` passes; use GitHub release workflow for final APK confidence. |
+| Song Items plus softlock fix | Done locally | Medium | Source/menu/actor hooks ported; native compile check passes. |
 
 ## Next Candidate Batch
 
@@ -47,7 +49,7 @@ These are good 3-4 item batches for the next GitHub build.
 
 | Priority | Upstream area | Status | Why next |
 | --- | --- | --- | --- |
-| 1 | Song Items (`#1566`) plus softlock fix (`#1696`) | Deferred larger port | Android menu entry exists but is hidden with `HideUnsupportedAndroidOption`; upstream source is absent locally. Port as a full feature, not a small hook fix. |
+| 1 | Song Items (`#1566`) plus softlock fix (`#1696`) | Done locally | Android menu entry is now visible; upstream source and gossip-stone cleanup hooks are ported pending GitHub build validation. |
 | 2 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Android already exposed the menu item but hid it as unsupported; source is now ported and adapted for local collider/actor field names. |
 | 3 | Disable SFX replacement (`#1679`) | Verified Android-handled | Local SFX path does not call SFX replacement, and sequence-player replacement lookup is already commented out. No audio-editor dependency needed. |
 | 4 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Android-specific review | Large, high-value, but overlaps Android setup/extraction and should be adapted carefully rather than cherry-picked. |
@@ -58,7 +60,7 @@ These are good 3-4 item batches for the next GitHub build.
 | --- | --- | --- |
 | Audio editor / custom sequences | Deferred | Many upstream files are absent locally. Needs libultraship compatibility review. |
 | Cosmetics editor UI | Deferred | Large UI addition; likely desktop-oriented. Needs Android menu/layout review. |
-| Song Items | Deferred | Hidden unsupported on Android today. Port source, registration, D-pad behavior, and softlock fix together. |
+| Song Items | Done locally | Ported source, D-pad behavior, menu exposure, and softlock fix together. |
 | Upstream BenGui modernization | Deferred | Broad changes; avoid mixing with gameplay fixes. |
 | Randomizer feature drift | Deferred | Large surface area. Keep separate from small enhancement parity batches. |
 
