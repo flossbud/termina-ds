@@ -6,6 +6,8 @@
 extern "C" int16_t OTRGetRectDimensionFromLeftEdge(float v);
 extern "C" int16_t OTRGetRectDimensionFromRightEdge(float v);
 
+#define HUD_EDITOR_GLOBAL_SCALE_CVAR "gHudEditor.GlobalScale"
+
 HudEditorElementID hudEditorActiveElement = HUD_EDITOR_ELEMENT_NONE;
 
 // clang-format off
@@ -49,28 +51,37 @@ extern "C" bool HudEditor_IsActiveElementHidden() {
                : false;
 }
 
+static f32 HudEditor_GetGlobalScale() {
+    f32 scale = CVarGetFloat(HUD_EDITOR_GLOBAL_SCALE_CVAR, 1.0f);
+    return scale > 0.0f ? scale : 1.0f;
+}
+
 extern "C" f32 HudEditor_GetActiveElementScale() {
     return hudEditorActiveElement != HUD_EDITOR_ELEMENT_NONE
-               ? CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f)
+               ? CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f) * HudEditor_GetGlobalScale()
                : 1.0f;
 }
 
 extern "C" void HudEditor_ModifyRectPosValuesFromBase(s16 baseX, s16 baseY, s16* rectLeft, s16* rectTop) {
     s16 offsetFromBaseX = *rectLeft - baseX;
     s16 offsetFromBaseY = *rectTop - baseY;
-    *rectLeft = baseX + (offsetFromBaseX * CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f));
-    *rectTop = baseY + (offsetFromBaseY * CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f));
+    f32 scale = HudEditor_GetActiveElementScale();
+
+    *rectLeft = baseX + (offsetFromBaseX * scale);
+    *rectTop = baseY + (offsetFromBaseY * scale);
 }
 
 void HudEditor_ModifyRectPosValuesFloat(f32* rectLeft, f32* rectTop) {
     f32 offsetFromBaseX = *rectLeft - hudEditorElements[hudEditorActiveElement].defaultX;
     f32 offsetFromBaseY = *rectTop - hudEditorElements[hudEditorActiveElement].defaultY;
+    f32 scale = HudEditor_GetActiveElementScale();
+
     *rectLeft = CVarGetInteger(hudEditorElements[hudEditorActiveElement].xCvar,
                                hudEditorElements[hudEditorActiveElement].defaultX) +
-                (offsetFromBaseX * CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f));
+                (offsetFromBaseX * scale);
     *rectTop = CVarGetInteger(hudEditorElements[hudEditorActiveElement].yCvar,
                               hudEditorElements[hudEditorActiveElement].defaultY) +
-               (offsetFromBaseY * CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f));
+               (offsetFromBaseY * scale);
 
     if (CVarGetInteger(hudEditorElements[hudEditorActiveElement].modeCvar, HUD_EDITOR_ELEMENT_MODE_VANILLA) ==
         HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT) {
@@ -92,13 +103,17 @@ extern "C" void HudEditor_ModifyRectPosValues(s16* rectLeft, s16* rectTop) {
 }
 
 extern "C" void HudEditor_ModifyRectSizeValues(s16* rectWidth, s16* rectHeight) {
-    *rectWidth *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *rectHeight *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
+    f32 scale = HudEditor_GetActiveElementScale();
+
+    *rectWidth *= scale;
+    *rectHeight *= scale;
 }
 
 extern "C" void HudEditor_ModifyTextureStepValues(s16* dsdx, s16* dtdy) {
-    *dsdx /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *dtdy /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
+    f32 scale = HudEditor_GetActiveElementScale();
+
+    *dsdx /= scale;
+    *dtdy /= scale;
 }
 
 // Modify matrix values based on the identity matrix (0,0) centered on the screen
@@ -123,7 +138,7 @@ extern "C" void HudEditor_ModifyKaleidoEquipAnimValues(s16* ulx, s16* uly, s16* 
     *ulx = transX * 10;
     *uly = transY * 10;
 
-    float scale = CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
+    f32 scale = HudEditor_GetActiveElementScale();
     // 320 is the vanilla start size, and 280 is the vanilla end size (or 160 for dpad)
     // So we apply the scale to 280 and subtract to get the shrink rate
     int16_t endAnimSize = hudEditorActiveElement == HUD_EDITOR_ELEMENT_D_PAD ? 160 : 280;
@@ -134,20 +149,24 @@ extern "C" void HudEditor_ModifyDrawValuesFromBase(s16 baseX, s16 baseY, s16* re
                                                    s16* rectHeight, s16* dsdx, s16* dtdy) {
     HudEditor_ModifyRectPosValuesFromBase(baseX, baseY, rectLeft, rectTop);
 
-    *rectWidth *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *rectHeight *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *dsdx /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *dtdy /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
+    f32 scale = HudEditor_GetActiveElementScale();
+
+    *rectWidth *= scale;
+    *rectHeight *= scale;
+    *dsdx /= scale;
+    *dtdy /= scale;
 }
 
 extern "C" void HudEditor_ModifyDrawValues(s16* rectLeft, s16* rectTop, s16* rectWidth, s16* rectHeight, s16* dsdx,
                                            s16* dtdy) {
     HudEditor_ModifyRectPosValues(rectLeft, rectTop);
 
-    *rectWidth *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *rectHeight *= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *dsdx /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
-    *dtdy /= CVarGetFloat(hudEditorElements[hudEditorActiveElement].scaleCvar, 1.0f);
+    f32 scale = HudEditor_GetActiveElementScale();
+
+    *rectWidth *= scale;
+    *rectHeight *= scale;
+    *dsdx /= scale;
+    *dtdy /= scale;
 }
 
 const char* modeNames[] = {
@@ -158,10 +177,24 @@ const char* presetNames[] = {
     "Vanilla (4:3)",
     "Hidden",
     "Widescreen",
+    "OoT Layout",
+    "Pro Controller Layout",
 };
 
 static CosmeticOption& HudEditor_GetCosmeticOption(const char* cosmeticOptionId) {
     return cosmeticOptions.at(cosmeticOptionId);
+}
+
+static void HudEditor_SetElementLayout(HudEditorElementID id, HudEditorElementMode mode, int32_t x, int32_t y,
+                                       f32 scale) {
+    CVarSetInteger(hudEditorElements[id].modeCvar, mode);
+    CVarSetInteger(hudEditorElements[id].xCvar, x);
+    CVarSetInteger(hudEditorElements[id].yCvar, y);
+    CVarSetFloat(hudEditorElements[id].scaleCvar, scale);
+}
+
+static void HudEditor_SetElementHidden(HudEditorElementID id) {
+    CVarSetInteger(hudEditorElements[id].modeCvar, HUD_EDITOR_ELEMENT_MODE_HIDDEN);
 }
 
 namespace HudEditor {
@@ -169,12 +202,15 @@ enum Presets {
     VANILLA,
     HIDDEN,
     WIDESCREEN,
+    OCARINA_OF_TIME,
+    PRO_CONTROLLER,
 };
 };
 
 void HudEditorWindow::DrawElement() {
     static HudEditor::Presets preset = HudEditor::Presets::VANILLA;
     if (UIWidgets::Combobox("Preset", &preset, presetNames)) {
+        CVarClear(HUD_EDITOR_GLOBAL_SCALE_CVAR);
         for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
             CVarClear(hudEditorElements[i].xCvar);
             CVarClear(hudEditorElements[i].yCvar);
@@ -191,6 +227,9 @@ void HudEditorWindow::DrawElement() {
         }
 
         switch (preset) {
+            case HudEditor::Presets::VANILLA: {
+                break;
+            }
             case HudEditor::Presets::HIDDEN: {
                 for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
                     CVarSetInteger(hudEditorElements[i].modeCvar, HUD_EDITOR_ELEMENT_MODE_HIDDEN);
@@ -236,9 +275,98 @@ void HudEditorWindow::DrawElement() {
                                HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT);
                 break;
             }
+            case HudEditor::Presets::OCARINA_OF_TIME: {
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 218, 18,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 252, 18,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 281, 18,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 307, 18,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 293, 54,
+                                           0.85f);
+                HudEditor_SetElementHidden(HUD_EDITOR_ELEMENT_C_UP);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 304, 86,
+                                           0.8f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIMAP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 295, 220,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_START, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 17,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_CARROT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 64,
+                                           1.0f);
+                HudEditor_SetElementHidden(HUD_EDITOR_ELEMENT_CLOCK);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_HEARTS, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 30, 26,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MAGIC_METER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 18,
+                                           42, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_TIMERS, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26, 56,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_TIMERS_MOON_CRASH, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43,
+                                           115, 200, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIGAME_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT,
+                                           20, 67, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_RUPEE_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26,
+                                           206, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_KEY_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26,
+                                           190, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_SKULLTULA_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT,
+                                           26, 190, 1.0f);
+                break;
+            }
+            case HudEditor::Presets::PRO_CONTROLLER: {
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_UP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 276, 16,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_LEFT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 252, 40,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_RIGHT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 300, 40,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_C_DOWN, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 276, 64,
+                                           0.85f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_A, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 284, 82,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_B, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 252, 86,
+                                           0.95f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_D_PAD, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 294, 128,
+                                           0.8f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIMAP, HUD_EDITOR_ELEMENT_MODE_MOVABLE_RIGHT, 295, 220,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_START, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 17,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_CARROT, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 64,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_CLOCK, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43, 160, 206,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_HEARTS, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 30, 26,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MAGIC_METER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 18,
+                                           34, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_TIMERS, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26, 46,
+                                           1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_TIMERS_MOON_CRASH, HUD_EDITOR_ELEMENT_MODE_MOVABLE_43,
+                                           115, 200, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_MINIGAME_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT,
+                                           20, 67, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_RUPEE_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26,
+                                           206, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_KEY_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT, 26,
+                                           190, 1.0f);
+                HudEditor_SetElementLayout(HUD_EDITOR_ELEMENT_SKULLTULA_COUNTER, HUD_EDITOR_ELEMENT_MODE_MOVABLE_LEFT,
+                                           26, 190, 1.0f);
+                break;
+            }
         }
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
     }
+
+    UIWidgets::CVarSliderFloat("Global Scale", HUD_EDITOR_GLOBAL_SCALE_CVAR,
+                               UIWidgets::FloatSliderOptions()
+                                   .Min(0.25f)
+                                   .Max(2.0f)
+                                   .DefaultValue(1.0f)
+                                   .ShowAdjustmentButtons(false)
+                                   .Format("Global Scale: %.2fx")
+                                   .LabelPosition(UIWidgets::LabelPosition::None));
 
     for (int i = HUD_EDITOR_ELEMENT_B; i < HUD_EDITOR_ELEMENT_MAX; i++) {
         ImGui::PushID(hudEditorElements[i].name);
