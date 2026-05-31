@@ -10,7 +10,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 
 ## Current Baseline
 
-- Android release `v1.5.0` is published from `android`.
+- Android release `v1.6.0` is being prepared from `android`.
 - Latest pushed Android commit during this audit: `8440c2a40 Harden SaveManager flash writes`.
 - Shared merge-base with both upstream references: `cf63334c28886d1cb168e742ecbaef3a7900f81d`.
 - The branch has many Android-specific commits, so raw ahead/behind counts are not useful by themselves. Track feature parity by commit/feature area instead.
