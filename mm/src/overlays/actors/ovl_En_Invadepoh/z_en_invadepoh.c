@@ -4455,4 +4455,14 @@ void EnInvadepoh_Cremia_Draw(Actor* thisx, PlayState* play) {
 void EnInvadepoh_Reset(void) {
     sEventState = ENINVADEPOH_EVENT_UNSET;
     sRewardFinished = false;
+    sAliensTooClose = false;
+    sLightBall = NULL;
+    sRomani = NULL;
+    sCremia = NULL;
+    sClosestAlien = NULL;
+
+    for (s32 i = 0; i < ARRAY_COUNT(sAlienInvaders); i++) {
+        sAlienInvaders[i] = NULL;
+        sAlienStateFlags[i] = 0;
+    }
 }

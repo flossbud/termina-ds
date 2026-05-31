@@ -78,6 +78,7 @@ void Boss03_Init(Actor* thisx, PlayState* play2);
 void Boss03_Destroy(Actor* thisx, PlayState* play);
 void Boss03_Update(Actor* thisx, PlayState* play2);
 void Boss03_Draw(Actor* thisx, PlayState* play);
+void Boss03_Reset(void);
 
 void func_809E344C(Boss03* this, PlayState* play);
 void func_809E34B8(Boss03* this, PlayState* play);
@@ -285,6 +286,7 @@ ActorInit Boss_03_InitVars = {
     /**/ Boss03_Destroy,
     /**/ Boss03_Update,
     /**/ Boss03_Draw,
+    /**/ Boss03_Reset,
 };
 
 // The limbs referenced here are not used. The spheres are positioned manually by Boss03_PostLimbDraw

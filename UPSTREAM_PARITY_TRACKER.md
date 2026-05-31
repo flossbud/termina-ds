@@ -111,6 +111,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Pre-playstate item tracker display (`#1477`) | Done locally | Low | Android's tracker is older than upstream's rewritten item tracker, so this ports the local equivalent: render faded tracker contents without a `PlayState` and avoid gameplay-only ammo/pause reads until a save is loaded. |
 | Older gameplay/rando microfix audit (`#1450`, `#1457`, `#1461`, `#1436`, `#1416`, `#1418`, `#1409`, `#1396`, `#1394`) | Done locally | Low | Auto Bank notification throttling, enemy soul draw segment fixes, swim grant, Deku Search Ball labels, skateblock push-only speed, Beaver race skip, cow softlock, and Swordsman pot logic were already present; ported the missing EnOt reset callback. |
 | Older cutscene/grass logic audit (`#1387`, `#1384`, `#1377`, `#1374`, `#1369`) | Verified present | Low | Mayor's Office skip preserves Dotour's notebook entry, Hungry Goron forced dialogue skip, Woodfall repeat clear-cutscene skip, chest-grotto grass actor-list mapping, and Gorman Track alien gating are already present in Android. |
+| Actor reset and shuffled drop visibility audit (`#1371`, `#1350`, `#1363`, `#1356`) | Done locally | Low | Grass/crate shuffled-state checks and Day 2 rain bean logic were already present; wired Boss03 and Dinolfos reset callbacks and extended Invadepoh reset cleanup for static alien/event pointers. |
 
 ## Next Candidate Batch
 
