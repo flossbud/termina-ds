@@ -4,6 +4,10 @@
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include <cstring>
+#include <ctime>
+#include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <png.h>
@@ -17,15 +21,12 @@ extern "C" {
 #define CVAR CVarGetInteger(CVAR_NAME, 0)
 
 static s16 fileNumber = 1;
+static u32 photoNumber = 0;
 static u16 pictoPhotoRGBABuffer[PICTO_PHOTO_SIZE];
 
-void SavePictoPng() {
-    const int width = PICTO_PHOTO_WIDTH;
-    const int height = PICTO_PHOTO_HEIGHT;
-
-    std::string path =
-        Ship::Context::GetPathRelativeToAppDirectory("saves/picto" + std::to_string(fileNumber) + ".png");
-
+void SaveRgba16Png(const std::string& path, const u16* source, s32 sourceWidth, s32 width, s32 height, s32 pixelLeft,
+                   s32 pixelTop) {
+    std::filesystem::create_directories(std::filesystem::path(path).parent_path());
     FILE* fp = fopen(path.c_str(), "wb");
     if (!fp) {
         return;
@@ -59,13 +60,16 @@ void SavePictoPng() {
 
     std::vector<uint8_t> buffer(width * height * 4);
 
-    for (int i = 0; i < width * height; ++i) {
-        uint16_t px = pictoPhotoRGBABuffer[i];
-        px = (px >> 8) | (px << 8);
-        buffer[i * 4 + 0] = ((px >> 11) & 0x1F) << 3;
-        buffer[i * 4 + 1] = ((px >> 6) & 0x1F) << 3;
-        buffer[i * 4 + 2] = ((px >> 1) & 0x1F) << 3;
-        buffer[i * 4 + 3] = (px & 1) ? 255 : 0;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            uint16_t px = source[(pixelTop + y) * sourceWidth + pixelLeft + x];
+            px = (px >> 8) | (px << 8);
+            size_t outIndex = (y * width + x) * 4;
+            buffer[outIndex + 0] = ((px >> 11) & 0x1F) << 3;
+            buffer[outIndex + 1] = ((px >> 6) & 0x1F) << 3;
+            buffer[outIndex + 2] = ((px >> 1) & 0x1F) << 3;
+            buffer[outIndex + 3] = 255;
+        }
     }
 
     std::vector<png_bytep> rows(height);
@@ -80,9 +84,42 @@ void SavePictoPng() {
     fclose(fp);
 }
 
+std::string GetCurrentPictoPath() {
+    return Ship::Context::GetPathRelativeToAppDirectory("saves/picto" + std::to_string(fileNumber) + ".png");
+}
+
+std::string GetPictographAlbumPath() {
+    return Ship::Context::GetPathRelativeToAppDirectory("saves/pictographs/file" + std::to_string(fileNumber));
+}
+
+std::string GetTimestampedPhotoName() {
+    std::time_t now = std::time(nullptr);
+    std::tm localTime = {};
+
+#ifdef _WIN32
+    localtime_s(&localTime, &now);
+#else
+    localtime_r(&now, &localTime);
+#endif
+
+    std::ostringstream name;
+    name << "photo_" << std::put_time(&localTime, "%Y%m%d_%H%M%S") << "_" << std::setw(3) << std::setfill('0')
+         << photoNumber++ << ".png";
+    return name.str();
+}
+
+void SavePictoPng() {
+    SaveRgba16Png(GetCurrentPictoPath(), pictoPhotoRGBABuffer, PICTO_PHOTO_WIDTH, PICTO_PHOTO_WIDTH,
+                  PICTO_PHOTO_HEIGHT, 0, 0);
+}
+
+void SavePictographAlbumPng(PreRender* prerender) {
+    std::filesystem::path path = std::filesystem::path(GetPictographAlbumPath()) / GetTimestampedPhotoName();
+    SaveRgba16Png(path.string(), prerender->fbufSave, SCREEN_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+}
+
 void LoadPictoPng() {
-    std::string path =
-        Ship::Context::GetPathRelativeToAppDirectory("saves/picto" + std::to_string(fileNumber) + ".png");
+    std::string path = GetCurrentPictoPath();
 
     FILE* fp = fopen(path.c_str(), "rb");
     if (!fp) {
@@ -181,12 +218,17 @@ void DrawPicto(s16 sp2CC) {
 
 void RegisterColorPictograph() {
     COND_VB_SHOULD(VB_PICTO_TAKE, true, {
+        if (!CVAR) {
+            return;
+        }
+
         PreRender* prerender = va_arg(args, PreRender*);
         ConvertImage(pictoPhotoRGBABuffer, prerender->fbufSave, SCREEN_WIDTH, PICTO_PHOTO_TOPLEFT_X,
                      PICTO_PHOTO_TOPLEFT_Y, (PICTO_PHOTO_TOPLEFT_X + PICTO_PHOTO_WIDTH) - 1,
                      (PICTO_PHOTO_TOPLEFT_Y + PICTO_PHOTO_HEIGHT) - 1);
 
         SavePictoPng();
+        SavePictographAlbumPng(prerender);
     });
 
     COND_VB_SHOULD(VB_PICTO_DISPLAY, CVAR, {
@@ -198,7 +240,10 @@ void RegisterColorPictograph() {
         }
     });
 
-    COND_HOOK(OnSaveLoad, true, [](s16 fileNum) { fileNumber = fileNum + 1; });
+    COND_HOOK(OnSaveLoad, true, [](s16 fileNum) {
+        fileNumber = fileNum + 1;
+        photoNumber = 0;
+    });
 
     COND_VB_SHOULD(VB_PICTO_ACTIVATE, true, {
         if (*should) {

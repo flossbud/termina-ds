@@ -1081,6 +1081,10 @@ void BenMenu::AddEnhancements() {
         .CVar("gEnhancements.Items.PictoBoxOnCUp")
         .Options(CheckboxOptions().Tooltip(
             "Press C-Up to activate the Pictograph Box once acquired, without needing to equip it to a C-button."));
+    AddWidget(path, "Color Pictograph Album", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Items.ColorPictograph")
+        .Options(CheckboxOptions().Tooltip(
+            "Displays the active pictograph in color and saves every shot as a full-color PNG album."));
     AddWidget(path, "Arrow Type Cycling", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.PlayerActions.ArrowCycle")
         .Options(CheckboxOptions().Tooltip(
