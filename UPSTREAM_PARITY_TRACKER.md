@@ -68,6 +68,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Gorman Track tree shuffle removal (`#1511`) | Verified present | Gorman Track trees are already absent from tree actor mapping, region checks, static check data, and rando check IDs. |
 | Stone Tower Temple water logic (`#1512`) | Verified present | Water-room checks are split into underwater region logic and require Swim/Light/Ice arrow conditions as upstream. |
 | Rando menu metrics/trap text polish (`#1508`) | Verified present | Balance status, non-junk item pool display, excluded-check refresh, and trap tooltip text are already present; Triforce tracker portion is not applicable to Android's current tracker. |
+| Granny story clock-shuffle softlock fix (`#1479`) | Done locally | Android already had the vanilla-behavior enum; current batch ports the missing Granny actor hook and redirects the day increment to the next owned half-day. |
 | Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
@@ -105,6 +106,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Refill/file-select/mask polish audit | Done locally | Low | Red Potion/Gold Dust refill and file-select rando icons verified; stale Blast Mask cooldown search/runtime metadata cleaned up; native compile check passes. |
 | Rando logic microfix audit | Done locally | Low | Curiosity Shop Seahorse requirements, Soaring hint, Smithy day gate, Progressive Time obtainability, and Giant Bee soul logic verified; Bad Bat tree heart-piece logic adjusted locally; native compile check passes. |
 | Older rando logic/menu audit | Done locally | Low | Verified Spider House hint replacements, time/glitchless fixes, Gorman Track tree removal, Stone Tower Temple water logic, and rando menu metrics/trap text polish are already present. |
+| Clock Shuffle Granny story redirect | Done locally | Medium | Ports the missing source hook from upstream `#1479`; native compile check passes. |
 
 ## Next Candidate Batch
 

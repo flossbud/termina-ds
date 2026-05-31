@@ -204,6 +204,27 @@ static std::string GetHalfDayDescriptionForMessage(int halfDayIndex) {
     return Rando::ClockShuffle::GetTimeDescriptionForMessage(targetDay, isNight ? DUSK_TIME : DAWN_TIME);
 }
 
+static void RedirectToNextOwnedHalfDay() {
+    int currentHalfDay = GetCurrentHalfDayIndex();
+    int nextHalfDay = FindNextOwnedHalfDayAfter(currentHalfDay, Rando::ClockItems::GetAllOwnedHalfDaysMask());
+
+    if (nextHalfDay == Rando::ClockItems::TERMINAL_STATE) {
+        gSaveContext.save.day = 3;
+        gSaveContext.save.time = GetConfiguredTerminalTime();
+        gSaveContext.respawnFlag = -8;
+        return;
+    }
+
+    Rando::ClockShuffle::SetTimeToHalfDayStart(nextHalfDay);
+    if (nextHalfDay & 1) {
+        gSaveContext.respawnFlag = -8;
+    } else {
+        gSaveContext.save.day--;
+        gSaveContext.respawnFlag = -4;
+        SET_EVENTINF(EVENTINF_TRIGGER_DAYTELOP);
+    }
+}
+
 static void ProcessClockShuffleMessage(u16* textId, bool* loadFromMessageTable, bool isSongOfTime) {
     auto entry = CustomMessage::LoadVanillaMessageTableEntry(*textId);
     int targetHalfDay;
@@ -441,5 +462,10 @@ void Rando::ClockShuffle::OnFileLoad() {
         }
 
         *timeVar = totalHours * CLOCK_TIME_HOUR;
+    });
+
+    COND_VB_SHOULD(VB_GRANNY_STORY_INCREMENT_DAY, shouldRegister, {
+        *should = false;
+        RedirectToNextOwnedHalfDay();
     });
 }
