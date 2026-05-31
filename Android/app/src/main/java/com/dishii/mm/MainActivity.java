@@ -54,6 +54,9 @@ public class MainActivity extends SDLActivity{
     private static final CountDownLatch setupLatch = new CountDownLatch(1);
     private static String currentDataRootPath = "/storage/emulated/0/2S2H";
     private static final String PREF_DATA_ROOT_PATH = "dataRootPath";
+    private static final String PREF_TOUCH_CONTROLS_DISABLED = "touchControlsDisabled";
+    // Legacy key name: true means the touch controls are hidden, not visible.
+    private static final String PREF_TOUCH_CONTROLS_HIDDEN = "controlsVisible";
     private AlertDialog dataRootMigrationDialog;
 
     @Override
@@ -756,6 +759,7 @@ public class MainActivity extends SDLActivity{
     private FrameLayout leftJoystick;
     private ImageView leftJoystickKnob;
     private View overlayView;
+    private ViewGroup buttonGroup;
 
     // Function to set up the controller overlay (inflate layout and initialize buttons)
     private void setupControllerOverlay() {
@@ -773,7 +777,7 @@ public class MainActivity extends SDLActivity{
         ViewGroup view = (ViewGroup) getContentView();
         view.addView(overlayView);
 
-        final ViewGroup buttonGroup = overlayView.findViewById(R.id.button_group);
+        buttonGroup = overlayView.findViewById(R.id.button_group);
 
         buttonA = overlayView.findViewById(R.id.buttonA);
         buttonB = overlayView.findViewById(R.id.buttonB);
@@ -825,28 +829,36 @@ public class MainActivity extends SDLActivity{
         setupLookAround(rightScreenArea);
 
         setupToggleButton(buttonToggle,buttonGroup);
+        applyTouchControlsVisibility();
 
     }
 
+    public void setTouchControlsDisabledFromNative(boolean disabled) {
+        preferences.edit().putBoolean(PREF_TOUCH_CONTROLS_DISABLED, disabled).apply();
+        runOnUiThread(this::applyTouchControlsVisibility);
+    }
+
+    private void applyTouchControlsVisibility() {
+        if (overlayView == null) {
+            return;
+        }
+
+        boolean touchControlsDisabled = preferences.getBoolean(PREF_TOUCH_CONTROLS_DISABLED, false);
+        overlayView.setVisibility(touchControlsDisabled ? View.GONE : View.VISIBLE);
+
+        if (buttonGroup != null) {
+            boolean controlsHidden = preferences.getBoolean(PREF_TOUCH_CONTROLS_HIDDEN, false);
+            buttonGroup.setVisibility(controlsHidden ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
+
     private void setupToggleButton(Button button, ViewGroup uiGroup){
-        boolean isHidden = preferences.getBoolean("controlsVisible", false); // Default to 'false' (visible)
-        uiGroup.setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE); // Set the initial visibility based on the saved state
-        /*if(isHidden){
-            detachController();
-        }*/
         button.setOnClickListener(new View.OnClickListener() {
-            boolean isHidden = false;
             @Override
             public void onClick(View v) {
-                if (isHidden) {
-                    uiGroup.setVisibility(View.VISIBLE); // Show UI elements
-                    //attachController();
-                } else {
-                    uiGroup.setVisibility(View.INVISIBLE); // Hide UI elements
-                    //detachController();
-                }
-                preferences.edit().putBoolean("controlsVisible", !isHidden).apply();
-                isHidden = !isHidden; // Toggle state
+                boolean controlsHidden = uiGroup.getVisibility() == View.VISIBLE;
+                preferences.edit().putBoolean(PREF_TOUCH_CONTROLS_HIDDEN, controlsHidden).apply();
+                applyTouchControlsVisibility();
             }
         });
     }

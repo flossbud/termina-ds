@@ -70,6 +70,26 @@ static void OpenAndroidDataFolderChooser() {
     }
     env->DeleteLocalRef(activityClass);
 }
+
+static void SetAndroidTouchControlsDisabled(bool disabled) {
+    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    jobject activity = (jobject)SDL_AndroidGetActivity();
+    if (env == nullptr || activity == nullptr) {
+        return;
+    }
+
+    jclass activityClass = env->GetObjectClass(activity);
+    if (activityClass == nullptr) {
+        return;
+    }
+
+    jmethodID setTouchControlsMethod =
+        env->GetMethodID(activityClass, "setTouchControlsDisabledFromNative", "(Z)V");
+    if (setTouchControlsMethod != nullptr) {
+        env->CallVoidMethod(activity, setTouchControlsMethod, disabled ? JNI_TRUE : JNI_FALSE);
+    }
+    env->DeleteLocalRef(activityClass);
+}
 #endif
 
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
@@ -400,6 +420,12 @@ void BenMenu::AddSettings() {
                      .Step(0.05f)
                      .Format("%.2f")
                      .Tooltip("Adjusts the Android menu size."));
+    AddWidget(path, "Disable Touch Controls", WIDGET_CVAR_CHECKBOX)
+        .CVar("gSettings.TouchControls.Disabled")
+        .Callback([](WidgetInfo& info) {
+            SetAndroidTouchControlsDisabled(CVarGetInteger("gSettings.TouchControls.Disabled", 0) != 0);
+        })
+        .Options(CheckboxOptions().Tooltip("Hides the Android touch controls and eye button."));
 #endif
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     AddWidget(path, "Menu Controller Navigation", WIDGET_CVAR_CHECKBOX)
