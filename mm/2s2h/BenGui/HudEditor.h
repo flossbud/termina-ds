@@ -6,6 +6,7 @@
 
 #include "UIWidgets.hpp"
 #include <unordered_map>
+#include "CosmeticEditor.h"
 
 class HudEditorWindow : public Ship::GuiWindow {
   public:
@@ -67,6 +68,8 @@ void HudEditor_ModifyDrawValuesFromBase(s16 baseX, s16 baseY, s16* rectLeft, s16
                                         s16* rectHeight, s16* dsdx, s16* dtdy);
 void HudEditor_ModifyDrawValues(s16* rectLeft, s16* rectTop, s16* rectWidth, s16* rectHeight, s16* dsdx, s16* dtdy);
 
+#define HUD_EDITOR_NO_COSMETIC nullptr
+
 typedef struct {
     HudEditorElementID id;
     const char* name;
@@ -79,15 +82,14 @@ typedef struct {
     const char* xCvar;
     const char* yCvar;
     const char* scaleCvar;
-    const char* colorCvar;
     const char* modeCvar;
+    const char* cosmeticOptionId;
 } HudEditorElement;
 
-#define HUD_EDITOR_ELEMENT(id, name, cvar, defaultX, defaultY, defaultR, defaultG, defaultB, defaultA)          \
-    {                                                                                                           \
-        id, name, defaultX, defaultY, defaultR, defaultG, defaultB, defaultA, "gHudEditor." cvar ".Position.X", \
-            "gHudEditor." cvar ".Position.Y", "gHudEditor." cvar ".Scale", "gHudEditor." cvar ".Color.Value",   \
-            "gHudEditor." cvar ".Mode"                                                                          \
+#define HUD_EDITOR_ELEMENT(id, name, cvar, defaultX, defaultY, defaultR, defaultG, defaultB, defaultA, cosmeticId) \
+    {                                                                                                              \
+        id, name, defaultX, defaultY, defaultR, defaultG, defaultB, defaultA, "gHudEditor." cvar ".Position.X",    \
+            "gHudEditor." cvar ".Position.Y", "gHudEditor." cvar ".Scale", "gHudEditor." cvar ".Mode", cosmeticId  \
     }
 
 extern HudEditorElementID hudEditorActiveElement;

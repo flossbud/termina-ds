@@ -1884,7 +1884,6 @@ void BenMenu::AddEnhancements() {
                      .Tooltip("Enables the HUD Editor window, allowing you to modify your HUD.")
                      .Size(Sizes::Inline));
 
-#if !defined(__ANDROID__)
     // Cosmetics Editor
     path = { "Enhancements", "Cosmetic Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "Cosmetic Editor", 1);
@@ -1902,13 +1901,7 @@ void BenMenu::AddEnhancements() {
         .CVar("gWindows.Timesplits.Settings")
         .WindowName("Time Splits Settings Window");
 
-    // Timesplit Settings
-    path = { "Enhancements", "Time Splits", SECTION_COLUMN_1 };
-    AddSidebarEntry("Enhancements", "Time Splits", 1);
-    AddWidget(path, "Popout Timesplits Settings", WIDGET_WINDOW_BUTTON)
-        .CVar("gWindows.Timesplits.Settings")
-        .WindowName("Time Splits Settings Window");
-
+#if !defined(__ANDROID__)
     // Audio Editor
     path = { "Enhancements", "Audio Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "Audio Editor", 1);

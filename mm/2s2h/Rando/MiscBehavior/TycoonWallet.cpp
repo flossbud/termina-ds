@@ -15,7 +15,8 @@ static void DrawTycoonRupeeIcon() {
 
     OPEN_DISPS(play->state.gfxCtx);
 
-    gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 220, 120, 255, interfaceCtx->magicAlpha);
+    gDPSetPrimColorOverride(OVERLAY_DISP++, 0, 0, 220, 120, 255, interfaceCtx->magicAlpha,
+                            COSMETIC_ID("HUD.RupeeIcon"));
     gDPSetEnvColor(OVERLAY_DISP++, 50, 0, 80, 255);
     HudEditor_SetActiveElement(HUD_EDITOR_ELEMENT_RUPEE_COUNTER);
     OVERLAY_DISP =

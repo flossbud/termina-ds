@@ -8,6 +8,7 @@
 #include <graphic/Fast3D/gfx_pc.h>
 #include "UIWidgets.hpp"
 #include "HudEditor.h"
+#include "CosmeticEditor.h"
 #include "Notification.h"
 #include "BenModals.h"
 #include "Rando/CheckTracker/CheckTracker.h"
@@ -40,6 +41,7 @@ std::shared_ptr<Ship::GuiWindow> mGfxDebuggerWindow;
 
 std::shared_ptr<SaveEditorWindow> mSaveEditorWindow;
 std::shared_ptr<HudEditorWindow> mHudEditorWindow;
+std::shared_ptr<CosmeticEditorWindow> mCosmeticEditorWindow;
 std::shared_ptr<ActorViewerWindow> mActorViewerWindow;
 std::shared_ptr<CollisionViewerWindow> mCollisionViewerWindow;
 std::shared_ptr<EventLogWindow> mEventLogWindow;
@@ -108,6 +110,10 @@ void SetupGuiElements() {
     mHudEditorWindow = std::make_shared<HudEditorWindow>("gWindows.HudEditor", "HUD Editor", ImVec2(480, 600));
     gui->AddGuiWindow(mHudEditorWindow);
 
+    mCosmeticEditorWindow =
+        std::make_shared<CosmeticEditorWindow>("gWindows.CosmeticEditor", "Cosmetic Editor", ImVec2(480, 600));
+    gui->AddGuiWindow(mCosmeticEditorWindow);
+
     mActorViewerWindow = std::make_shared<ActorViewerWindow>("gWindows.ActorViewer", "Actor Viewer", ImVec2(520, 600));
     gui->AddGuiWindow(mActorViewerWindow);
 
@@ -169,6 +175,7 @@ void Destroy() {
     mNotificationWindow = nullptr;
     mSaveEditorWindow = nullptr;
     mHudEditorWindow = nullptr;
+    mCosmeticEditorWindow = nullptr;
     mActorViewerWindow = nullptr;
     mItemTrackerWindow = nullptr;
     mItemTrackerSettingsWindow = nullptr;
