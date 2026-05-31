@@ -9,7 +9,9 @@ Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
 
 ## Current Release
 
-2 Ship Android 1.6.0
+2 Ship Android 4.0.2-android.1
+
+Upstream base: HarbourMasters 4.0.2 / Keiichi Charlie
 
 Android package id: `com.twoshipfork.mm`  
 App label: `2 Ship 2 Harkinian`

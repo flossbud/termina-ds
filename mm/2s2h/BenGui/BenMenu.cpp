@@ -382,7 +382,7 @@ void BenMenu::AddSettings() {
                      .Tooltip("Changes the Theme of the Menu Widgets.")
                      .ComboMap(&menuThemeOptions)
                      .DefaultIndex(Colors::LightBlue));
-    AddWidget(path, fmt::format("2 Ship Android ({})", (char*)gBuildVersion), WIDGET_TEXT);
+    AddWidget(path, (char*)gBuildVersion, WIDGET_TEXT);
     AddWidget(path, "Menu Background Opacity", WIDGET_CVAR_SLIDER_FLOAT)
         .CVar("gSettings.Menu.BackgroundOpacity")
         .Options(FloatSliderOptions().DefaultValue(0.85f).IsPercentage().Tooltip(
