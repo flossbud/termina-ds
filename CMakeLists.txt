@@ -9,7 +9,7 @@ project(2s2h VERSION 4.0.2 LANGUAGES C CXX)
 include(CMake/2ship-cvars.cmake)
 include(CMake/lus-cvars.cmake)
 set(PROJECT_BUILD_NAME "2 Ship Android" CACHE STRING "" FORCE)
-set(PROJECT_DISPLAY_VERSION "4.0.2-android.2" CACHE STRING "" FORCE)
+set(PROJECT_DISPLAY_VERSION "4.0.2-android.3" CACHE STRING "" FORCE)
 set(PROJECT_TEAM "github.com/harbourmasters" CACHE STRING "" FORCE)
 
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 2ship)

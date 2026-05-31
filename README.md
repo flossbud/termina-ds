@@ -9,7 +9,7 @@ Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
 
 ## Current Release
 
-2 Ship Android 4.0.2-android.2
+2 Ship Android 4.0.2-android.3
 
 Upstream base: HarbourMasters 4.0.2 / Keiichi Charlie
 
@@ -79,6 +79,6 @@ git -C libultraship apply ../patches/libultraship-android-fork.patch
 
 This is an unofficial community fork. It is not affiliated with or endorsed by HarbourMasters or Waterdish.
 
-No ROM, ROM-derived O2R/OTR file, extracted game assets, or copyrighted content is included in this repository. Release APKs may include the no-ROM `2ship.o2r` support archive generated from the port's custom assets. No piracy is condoned or encouraged.
+No ROM, ROM-derived O2R/OTR file, extracted game assets, or copyrighted content is included in this repository. Public release assets should only include the Android APK. No piracy is condoned or encouraged.
 
 See [NOTICE.md](NOTICE.md) and the included license files for attribution.

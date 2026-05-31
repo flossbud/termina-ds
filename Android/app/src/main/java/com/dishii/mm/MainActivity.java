@@ -153,6 +153,7 @@ public class MainActivity extends SDLActivity{
         int storedVersion = preferences.getInt("appVersion", 1);
 
         if (currentVersion > storedVersion) {
+            deleteOutdatedAssets();
             preferences.edit().putInt("appVersion", currentVersion).apply();
         }
     }
