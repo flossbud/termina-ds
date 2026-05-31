@@ -38,6 +38,22 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Fierce Deity Sheaths (`#1606`) | Done locally | Ported custom-model sheath display-list hook for Fierce Deity form. |
 | Custom Ocarina Controls (`#1598`) | Done locally | Ported menu/runtime hook and widened Android/libultraship controller masks to `uint32_t`; Android uses upper custom bits to avoid virtual-stick mask conflicts. |
 | Port Extraction Flow / ImGui scaling / file permission check (`#1709`) | Partially ported | Android already had storage-permission checks and modal helpers; current batch ports the major-version-only ROM archive regeneration behavior plus live Android menu-scale sizing. |
+| Transformation Mask Hints | Verified present | Rando option/menu entry, `FindMultiItemPlacement`, and South Clock Town sign hook are already present locally. |
+| NNL cow blacklist (`#1628`) | Verified present | Nearly No Logic already keeps Epona's Song off cow checks. |
+| RI_TRAP lesser item type (`#1704`) | Verified present | Knockoff Item is already `RITYPE_LESSER`. |
+| Moon crash edge-case hooks (`#1691`) | Verified present | Android already calls `GameInteractor_ExecuteBeforeMoonCrashSaveReset()` for the Oath-without-Giants edge case. |
+| Stale skeleton cache on alt toggle (`#1689`) | Verified present | `SkeletonPatcher::RegisterSkeleton` updates existing entries and unregister removes duplicate stale entries. |
+| Chateau state through Song of Time (`#1619`) | Verified present | Cycle option/menu entry and week-event restoration are already present. |
+| Extra Powder Kegs (`#1600`) | Verified present | Source hooks, HUD ammo behavior, and Android menu entry are already present. |
+| Better Owl Warp Menu (`#1572`) | Verified present | Better owl warp menu source, pause integration, and menu entry are already present. |
+| Picto Box on C-Up (`#1558`) | Verified present | Source hook, vanilla behavior bridge, and menu entry are already present. |
+| Always Show Shrine of Truth Feathers (`#1594`) | Verified present | Source hook, vanilla behavior bridge, and menu entry are already present. |
+| Bank Reward Hint (`#1595`) | Verified present | Bank sign hint behavior, rando option, and menu entry are already present. |
+| Tycoon's Wallet (`#1597`) | Verified present | Rando item, draw/conversion/give/remove behavior, tracker setting, and wallet HUD handling are already present. |
+| Gossip Stone hint weights (`#1567`) | Verified present | Gossip hint strength option and weighted item-type handling are already present. |
+| Flippers icon (`#1586`) | Verified present | Flippers texture and draw-item wiring are already present. |
+| Chu drops flagged-bomb fix (`#1587`) | Verified present | Chu drop replacement masks actor params before comparing bomb-drop IDs. |
+| Format strings before printing (`#1644`) | Verified present | ImGui dynamic text/tooltip calls audited in local paths already use explicit format strings. |
 | Tatl Great Bay interrupt exclusion (`#1569`) | Verified present | Local code already excludes the Great Bay Termina Field cutscene IDs. |
 | Music Box House player freeze (`#1563`) | Verified present | Local code already freezes player movement after skipping the Gibdo dad burst-out cutscene. |
 | Tingle Always in Clock Town (`#1690`) | Verified present | Source/menu hook already exists in `Enhancements/Cycle`. |
@@ -69,6 +85,7 @@ This tracker is for Android parity work that needs adaptation instead of direct 
 | Fierce Deity Sheaths | Done locally | Low | Self-registering custom-model hook ported from upstream; native compile check passes. |
 | Custom Ocarina Controls | Done locally | Medium | Upstream feature ported with Android-specific `uint32_t` button masks above the virtual-stick range; native compile check passes. |
 | Extraction flow and Android menu-scale cleanup | Done locally | Medium | ROM archive compatibility now checks major version only, ROM picker cancel no longer shows an extra error, and Android menu scale applies widget spacing live. |
+| Rando/timesaver presence audit | Done locally | Low | Confirmed Transformation Mask Hints, NNL cow blacklist, RI_TRAP lesser type, Shrine feathers, Picto C-Up, Extra Powder Kegs, Better Owl Warp, Bank Reward Hint, Tycoon's Wallet, Gossip Stone weights, Flippers icon, and Chu drop fix are already present. |
 
 ## Next Candidate Batch
 
@@ -76,17 +93,18 @@ These are good 3-4 item batches for the next GitHub build.
 
 | Priority | Upstream area | Status | Why next |
 | --- | --- | --- | --- |
-| 1 | Song Items (`#1566`) plus softlock fix (`#1696`) | Done locally | Android menu entry is now visible; upstream source and gossip-stone cleanup hooks are ported pending GitHub build validation. |
-| 2 | Extended Projectile Interaction Distance (`#1681`) | Done locally | Android already exposed the menu item but hid it as unsupported; source is now ported and adapted for local collider/actor field names. |
-| 3 | Disable SFX replacement (`#1679`) | Verified Android-handled | Local SFX path does not call SFX replacement, and sequence-player replacement lookup is already commented out. No audio-editor dependency needed. |
-| 4 | Custom Ocarina Controls (`#1598`) | Done locally | Ported with widened libultraship button masks and Android-safe custom bit assignments; validate mappings through the next GitHub APK. |
-| 5 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Partially ported | Keep deeper extraction-progress/window-bootstrap pieces under review; Android now has the low-risk archive-version and menu-scale portions. |
+| 1 | Basic surround sound support (`#1516`) | Needs libultraship audio review | Upstream depends on newer LUS audio-channel plumbing; Android currently opens SDL audio as stereo and needs a careful libultraship adaptation. |
+| 2 | Port Extraction Flow, ImGui scaling, file permission check from SoH (`#1709`) | Partially ported | Keep deeper extraction-progress/window-bootstrap pieces under review; Android now has the low-risk archive-version and menu-scale portions. |
+| 3 | Cosmetics editor modernization (`#1633`, `#1617`) | Deferred | Large UI and rendering surface; likely needs Android layout/performance review before porting. |
+| 4 | ClockShuffle cleanup / Keiichi rando drift (`#1546`, `develop-keiichi`) | Needs review | Large rando logic diff; audit separately from gameplay enhancement batches. |
+| 5 | Surround/cosmetics/rando tracker cleanup | In progress | Continue narrowing remaining upstream-only deltas before choosing the next GitHub build batch. |
 
 ## Larger Backlog
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | Audio editor / custom sequences | Deferred | Many upstream files are absent locally. Needs libultraship compatibility review. |
+| Basic surround sound support | Needs review | Game-side setting changes are straightforward, but Android/libultraship needs channel negotiation/conversion before enabling 5.1 output safely. |
 | Cosmetics editor UI | Deferred | Large UI addition; likely desktop-oriented. Needs Android menu/layout review. |
 | Song Items | Done locally | Ported source, D-pad behavior, menu exposure, and softlock fix together. |
 | Upstream BenGui modernization | Deferred | Broad changes; avoid mixing with gameplay fixes. |
