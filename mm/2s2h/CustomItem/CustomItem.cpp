@@ -128,6 +128,9 @@ void CustomItem00_Update(Actor* actor, PlayState* play) {
     bool playerInRangeOfPickup =
         playerInGoronRoll ? ((actor->xzDistToPlayer <= 60.0f) && (fabsf(actor->playerHeightRel) <= fabsf(100.0f)))
                           : ((actor->xzDistToPlayer <= 30.0f) && (fabsf(actor->playerHeightRel) <= fabsf(50.0f)));
+    if (CUSTOM_ITEM_FLAGS & CustomItem::KEEP_ON_PLAYER) {
+        playerInRangeOfPickup = true;
+    }
 
     if (CUSTOM_ITEM_FLAGS & CustomItem::KILL_ON_TOUCH) {
         // Pretty self explanatory, if the player is within range, kill the actor and call the action function

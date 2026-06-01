@@ -147,6 +147,7 @@ static RegisterShipInitFunc refreshInitFunc(
         });
 
         if (IS_RANDO) {
+            allTrapItems.clear();
             for (auto& [randoCheckId, _] : Rando::StaticData::Checks) {
                 RandoSaveCheck saveCheck = RANDO_SAVE_CHECKS[randoCheckId];
                 if (saveCheck.shuffled &&
@@ -160,7 +161,7 @@ static RegisterShipInitFunc refreshInitFunc(
     { "IS_RANDO" });
 
 RandoItemId Rando::CurrentJunkItem(RandoCheckId randoCheckId) {
-    if (CVarGetInteger("gRando.JunkItems", 0) == 0) {
+    if (CVarGetInteger("gRando.JunkItems", 1) == 0) {
         Ship_Random_Seed(gSaveContext.save.shipSaveInfo.rando.finalSeed + randoCheckId +
                          (gPlayState->gameplayFrames / 30));
         return obtainableJunkItems[Ship_Random(0, obtainableJunkItems.size() - 1)];
@@ -171,7 +172,7 @@ RandoItemId Rando::CurrentJunkItem(RandoCheckId randoCheckId) {
 }
 
 RandoItemId Rando::CurrentTrapItem(RandoCheckId randoCheckId) {
-    if (CVarGetInteger("gRando.TrapItems", 0) == 0) {
+    if (CVarGetInteger("gRando.TrapItems", 1) == 0) {
         if (obtainableTrapItems.size() == 0) {
             return RI_RUPEE_SILVER;
         }

@@ -380,6 +380,7 @@ static void DrawGeneralTab() {
     UIWidgets::CVarCombobox(
         "Junk Items", "gRando.JunkItems", &junkItemsOptions,
         UIWidgets::ComboboxOptions()
+            .DefaultIndex(1)
             .ComponentAlignment(UIWidgets::ComponentAlignment::Right)
             .LabelPosition(UIWidgets::LabelPosition::Near)
             .Tooltip(
@@ -389,6 +390,7 @@ static void DrawGeneralTab() {
     UIWidgets::CVarCombobox(
         "Trap Items", "gRando.TrapItems", &trapItemsOptions,
         UIWidgets::ComboboxOptions()
+            .DefaultIndex(1)
             .ComponentAlignment(UIWidgets::ComponentAlignment::Right)
             .LabelPosition(UIWidgets::LabelPosition::Near)
             .Tooltip("Default (Dynamic): Trap items will change dynamically as you progress, ensuring they are an item "
@@ -780,9 +782,10 @@ static void DrawStartingItemsTab() {
 
     auto setStartingItemsList = Rando::GetStartingItemsFromConfig();
 
-    uint32_t listIndex = 0;
-    for (auto& startingItem : setStartingItemsList) {
-        ImGui::PushID(listIndex);
+    int32_t startingItemToRemove = -1;
+    for (size_t listIndex = 0; listIndex < setStartingItemsList.size(); listIndex++) {
+        RandoItemId startingItem = setStartingItemsList[listIndex];
+        ImGui::PushID(static_cast<int32_t>(listIndex));
         ImVec2 imageSize = ImVec2(42.0f, 42.0f);
         if ((startingItem >= RI_SONG_DOUBLE_TIME && startingItem <= RI_SONG_TIME) ||
             startingItem == RI_PROGRESSIVE_LULLABY) {
@@ -802,17 +805,20 @@ static void DrawStartingItemsTab() {
 
         if (ImGui::ImageButton(std::to_string(listIndex).c_str(), textureId, imageSize, ImVec2(0, 0), ImVec2(1, 1),
                                ImVec4(0, 0, 0, 0), tintColor)) {
-            setStartingItemsList.erase(setStartingItemsList.begin() + listIndex);
-            Rando::SetStartingItemsInConfig(setStartingItemsList);
-            RefreshMetrics();
+            startingItemToRemove = static_cast<int32_t>(listIndex);
         }
         UIWidgets::Tooltip(tooltipText.c_str());
-        listIndex++;
 
-        if ((listIndex + 1) % 15 != 0) {
+        if ((listIndex + 2) % 15 != 0) {
             ImGui::SameLine();
         }
         ImGui::PopID();
+    }
+
+    if (startingItemToRemove >= 0 && startingItemToRemove < static_cast<int32_t>(setStartingItemsList.size())) {
+        setStartingItemsList.erase(setStartingItemsList.begin() + startingItemToRemove);
+        Rando::SetStartingItemsInConfig(setStartingItemsList);
+        RefreshMetrics();
     }
 
     ImGui::PopStyleColor(3);
