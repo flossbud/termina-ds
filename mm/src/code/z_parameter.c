@@ -3557,7 +3557,7 @@ s16 sRupeeRefillCounts[] = { 1, 5, 10, 20, 50, 100, 200 };
 
 // 2S2H [Enhancements] This was originally Item_Give, we wrapped it for hooking purposes
 u8 Item_GiveImpl(PlayState* play, u8 item) {
-    Player* player = GET_PLAYER(play);
+    Player* player = play != NULL ? GET_PLAYER(play) : NULL;
     u8 i;
     u8 temp;
     u8 slot;
@@ -3602,7 +3602,9 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
     } else if ((item >= ITEM_SWORD_KOKIRI) && (item <= ITEM_SWORD_GILDED)) {
         SET_EQUIP_VALUE(EQUIP_TYPE_SWORD, item - ITEM_SWORD_KOKIRI + EQUIP_VALUE_SWORD_KOKIRI);
         CUR_FORM_EQUIP(EQUIP_SLOT_B) = item;
-        Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
+        if (play != NULL) {
+            Interface_LoadItemIconImpl(play, EQUIP_SLOT_B);
+        }
         if (item == ITEM_SWORD_RAZOR) {
             gSaveContext.save.saveInfo.playerData.swordHealth = 100;
         }
@@ -3611,7 +3613,9 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
     } else if ((item >= ITEM_SHIELD_HERO) && (item <= ITEM_SHIELD_MIRROR)) {
         if (GET_CUR_EQUIP_VALUE(EQUIP_TYPE_SHIELD) != (u16)(item - ITEM_SHIELD_HERO + EQUIP_VALUE_SHIELD_HERO)) {
             SET_EQUIP_VALUE(EQUIP_TYPE_SHIELD, item - ITEM_SHIELD_HERO + EQUIP_VALUE_SHIELD_HERO);
-            Player_SetEquipmentData(play, player);
+            if (play != NULL) {
+                Player_SetEquipmentData(play, player);
+            }
             return ITEM_NONE;
         }
         return item;
@@ -3850,11 +3854,25 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
         return ITEM_NONE;
 
     } else if (item == ITEM_RECOVERY_HEART) {
-        Health_ChangeBy(play, 0x10);
+        if (play != NULL) {
+            Health_ChangeBy(play, 0x10);
+        } else if (gSaveContext.save.saveInfo.playerData.health < gSaveContext.save.saveInfo.playerData.healthCapacity) {
+            gSaveContext.save.saveInfo.playerData.health += 0x10;
+            if (gSaveContext.save.saveInfo.playerData.health > gSaveContext.save.saveInfo.playerData.healthCapacity) {
+                gSaveContext.save.saveInfo.playerData.health = gSaveContext.save.saveInfo.playerData.healthCapacity;
+            }
+        }
         return item;
 
     } else if (item == ITEM_MAGIC_JAR_SMALL) {
-        Magic_Add(play, MAGIC_NORMAL_METER / 2);
+        if (play != NULL) {
+            Magic_Add(play, MAGIC_NORMAL_METER / 2);
+        } else {
+            gSaveContext.save.saveInfo.playerData.magic += MAGIC_NORMAL_METER / 2;
+            if (gSaveContext.save.saveInfo.playerData.magic > gSaveContext.magicCapacity) {
+                gSaveContext.save.saveInfo.playerData.magic = gSaveContext.magicCapacity;
+            }
+        }
         if (!CHECK_WEEKEVENTREG(WEEKEVENTREG_12_80)) {
             SET_WEEKEVENTREG(WEEKEVENTREG_12_80);
             return ITEM_NONE;
@@ -3862,7 +3880,14 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
         return item;
 
     } else if (item == ITEM_MAGIC_JAR_BIG) {
-        Magic_Add(play, MAGIC_NORMAL_METER);
+        if (play != NULL) {
+            Magic_Add(play, MAGIC_NORMAL_METER);
+        } else {
+            gSaveContext.save.saveInfo.playerData.magic += MAGIC_NORMAL_METER;
+            if (gSaveContext.save.saveInfo.playerData.magic > gSaveContext.magicCapacity) {
+                gSaveContext.save.saveInfo.playerData.magic = gSaveContext.magicCapacity;
+            }
+        }
         if (!CHECK_WEEKEVENTREG(WEEKEVENTREG_12_80)) {
             SET_WEEKEVENTREG(WEEKEVENTREG_12_80);
             return ITEM_NONE;
@@ -3938,33 +3963,47 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
 
                     if ((slot + i) == C_SLOT_EQUIP(0, EQUIP_SLOT_C_LEFT)) {
                         BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_C_LEFT) = item;
-                        Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_LEFT);
+                        if (play != NULL) {
+                            Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_LEFT);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_C_LEFT] = BTN_ENABLED;
                     } else if ((slot + i) == C_SLOT_EQUIP(0, EQUIP_SLOT_C_DOWN)) {
                         BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_C_DOWN) = item;
-                        Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_DOWN);
+                        if (play != NULL) {
+                            Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_DOWN);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_C_DOWN] = BTN_ENABLED;
                     } else if ((slot + i) == C_SLOT_EQUIP(0, EQUIP_SLOT_C_RIGHT)) {
                         BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_C_RIGHT) = item;
-                        Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_RIGHT);
+                        if (play != NULL) {
+                            Interface_LoadItemIconImpl(play, EQUIP_SLOT_C_RIGHT);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_C_RIGHT] = BTN_ENABLED;
                     }
                     // #region 2S2H [DPad]
                     else if ((slot + i) == DPAD_SLOT_EQUIP(0, EQUIP_SLOT_D_RIGHT)) {
                         DPAD_BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_D_RIGHT) = item;
-                        Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_RIGHT);
+                        if (play != NULL) {
+                            Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_RIGHT);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_D_RIGHT] = BTN_ENABLED;
                     } else if ((slot + i) == DPAD_SLOT_EQUIP(0, EQUIP_SLOT_D_LEFT)) {
                         DPAD_BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_D_LEFT) = item;
-                        Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_LEFT);
+                        if (play != NULL) {
+                            Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_LEFT);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_D_LEFT] = BTN_ENABLED;
                     } else if ((slot + i) == DPAD_SLOT_EQUIP(0, EQUIP_SLOT_D_DOWN)) {
                         DPAD_BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_D_DOWN) = item;
-                        Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_DOWN);
+                        if (play != NULL) {
+                            Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_DOWN);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_D_DOWN] = BTN_ENABLED;
                     } else if ((slot + i) == DPAD_SLOT_EQUIP(0, EQUIP_SLOT_D_UP)) {
                         DPAD_BUTTON_ITEM_EQUIP(0, EQUIP_SLOT_D_UP) = item;
-                        Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_UP);
+                        if (play != NULL) {
+                            Interface_Dpad_LoadItemIconImpl(play, EQUIP_SLOT_D_UP);
+                        }
                         gSaveContext.buttonStatus[EQUIP_SLOT_D_UP] = BTN_ENABLED;
                     }
                     // #endregion
@@ -3989,7 +4028,9 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
             for (i = EQUIP_SLOT_C_LEFT; i <= EQUIP_SLOT_C_RIGHT; i++) {
                 if (temp == GET_CUR_FORM_BTN_ITEM(i)) {
                     SET_CUR_FORM_BTN_ITEM(i, item);
-                    Interface_LoadItemIconImpl(play, i);
+                    if (play != NULL) {
+                        Interface_LoadItemIconImpl(play, i);
+                    }
                     return ITEM_NONE;
                 }
             }
@@ -3997,7 +4038,9 @@ u8 Item_GiveImpl(PlayState* play, u8 item) {
             for (s16 j = EQUIP_SLOT_D_RIGHT; j <= EQUIP_SLOT_D_UP; j++) {
                 if (temp == DPAD_GET_CUR_FORM_BTN_ITEM(j)) {
                     DPAD_SET_CUR_FORM_BTN_ITEM(j, item);
-                    Interface_Dpad_LoadItemIconImpl(play, j);
+                    if (play != NULL) {
+                        Interface_Dpad_LoadItemIconImpl(play, j);
+                    }
                     return ITEM_NONE;
                 }
             }
