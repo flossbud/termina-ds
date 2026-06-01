@@ -2,12 +2,15 @@
 #include <public/bridge/consolevariablebridge.h>
 #include <filesystem>
 #include "BenPort.h"
+#include <spdlog/spdlog.h>
 
 #include <libultraship/libultra/types.h>
 
 std::vector<std::string> Rando::Spoiler::spoilerOptions;
-const std::filesystem::path randomizerFolderPath(Ship::Context::GetPathRelativeToAppDirectory("randomizer",
-                                                                                              appShortName));
+
+static std::filesystem::path GetRandomizerFolderPath() {
+    return Ship::Context::GetPathRelativeToAppDirectory("randomizer", appShortName);
+}
 
 // This function refreshes the list of spoiler files in the randomizer folder, this list is used in the Randomizer UI,
 // and also includes an option to generate a new seed at the top of the list.
@@ -17,13 +20,24 @@ void Rando::Spoiler::RefreshOptions() {
     Rando::Spoiler::spoilerOptions.push_back("Generate New Seed");
     s32 spoilerFileIndex = -1;
 
-    // ensure the randomizer folder exists
-    if (!std::filesystem::exists(randomizerFolderPath)) {
-        std::filesystem::create_directory(randomizerFolderPath);
+    std::error_code ec;
+    std::filesystem::path randomizerFolderPath = GetRandomizerFolderPath();
+    std::filesystem::create_directories(randomizerFolderPath, ec);
+    if (ec) {
+        SPDLOG_ERROR("Failed to create randomizer folder '{}': {}", randomizerFolderPath.string(), ec.message());
+        CVarSetInteger("gRando.SpoilerFileIndex", 0);
+        CVarSetString("gRando.SpoilerFile", "");
+        return;
     }
 
     // Add all files in the randomizer folder to the list of spoiler options
-    for (const auto& entry : std::filesystem::directory_iterator(randomizerFolderPath)) {
+    for (const auto& entry : std::filesystem::directory_iterator(randomizerFolderPath, ec)) {
+        if (ec) {
+            SPDLOG_ERROR("Failed to scan randomizer folder '{}': {}", randomizerFolderPath.string(), ec.message());
+            CVarSetInteger("gRando.SpoilerFileIndex", 0);
+            CVarSetString("gRando.SpoilerFile", "");
+            return;
+        }
         if (entry.is_regular_file()) {
             std::string fileName = entry.path().filename().string();
             Rando::Spoiler::spoilerOptions.push_back(fileName);
