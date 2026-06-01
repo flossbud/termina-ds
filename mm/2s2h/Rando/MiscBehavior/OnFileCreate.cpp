@@ -193,6 +193,7 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
             RANDO_SAVE_CHECKS[RC_STARTING_ITEM_DEKU_MASK].eligible = true;
             RANDO_SAVE_CHECKS[RC_STARTING_ITEM_SONG_OF_HEALING].eligible = true;
 
+            Rando::OnSaveLoad(fileNum);
             GameInteractor::Instance->ExecuteHooks<GameInteractor::OnRandoSeedGeneration>();
 
         } catch (const std::exception& e) {

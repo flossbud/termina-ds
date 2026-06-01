@@ -9,7 +9,7 @@
 #include <Context.h>
 
 // When a save is loaded, we want to unregister all hooks and re-register them if it's a rando save
-void OnSaveLoadHandler(s16 fileNum) {
+void Rando::OnSaveLoad(s16 fileNum) {
     Rando::MiscBehavior::OnFileLoad();
     Rando::ActorBehavior::OnFileLoad();
     Rando::CheckTracker::OnFileLoad();
@@ -26,7 +26,7 @@ void Rando::Init() {
     Rando::ActorBehavior::Init();
     Rando::CheckTracker::Init();
 
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>(OnSaveLoadHandler);
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>(Rando::OnSaveLoad);
 }
 
 RandoCheckId Rando::FindItemPlacement(RandoItemId randoItemId) {

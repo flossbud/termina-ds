@@ -14,6 +14,7 @@
 namespace Rando {
 
 void Init();
+void OnSaveLoad(s16 fileNum);
 void DrawItem(RandoItemId randoItemId, RandoCheckId randoCheckId = RC_UNKNOWN, Actor* actor = nullptr);
 void GiveItem(RandoItemId randoItemId);
 void RemoveItem(RandoItemId randoItemId);
