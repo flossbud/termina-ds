@@ -31,7 +31,17 @@ void Rando::Spoiler::RefreshOptions() {
     }
 
     // Add all files in the randomizer folder to the list of spoiler options
-    for (const auto& entry : std::filesystem::directory_iterator(randomizerFolderPath, ec)) {
+    std::filesystem::directory_iterator it(randomizerFolderPath, ec);
+    if (ec) {
+        SPDLOG_ERROR("Failed to scan randomizer folder '{}': {}", randomizerFolderPath.string(), ec.message());
+        CVarSetInteger("gRando.SpoilerFileIndex", 0);
+        CVarSetString("gRando.SpoilerFile", "");
+        return;
+    }
+
+    std::filesystem::directory_iterator end;
+    while (it != end) {
+        const auto& entry = *it;
         if (ec) {
             SPDLOG_ERROR("Failed to scan randomizer folder '{}': {}", randomizerFolderPath.string(), ec.message());
             CVarSetInteger("gRando.SpoilerFileIndex", 0);
@@ -47,6 +57,8 @@ void Rando::Spoiler::RefreshOptions() {
                 spoilerFileIndex = Rando::Spoiler::spoilerOptions.size() - 1;
             }
         }
+
+        it.increment(ec);
     }
 
     // If the current spoiler file is not in the randomizer folder, reset the cvar

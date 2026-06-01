@@ -207,6 +207,18 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
             char invalidName[8] = { 18, 23, 31, 10, 21, 18, 13, 62 };
             memcpy(gSaveContext.save.saveInfo.playerData.playerName, invalidName, sizeof(invalidName));
             gSaveContext.save.saveInfo.playerData.newf[0] = '\0';
+        } catch (...) {
+            SPDLOG_ERROR("Seed Failure: unknown randomizer error");
+            Audio_PlaySfx(NA_SE_SY_QUIZ_INCORRECT);
+            Notification::Emit({
+                .prefix = "Seed Failure:",
+                .prefixColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
+                .message = "Unknown randomizer error",
+            });
+            gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_VANILLA;
+            char invalidName[8] = { 18, 23, 31, 10, 21, 18, 13, 62 };
+            memcpy(gSaveContext.save.saveInfo.playerData.playerName, invalidName, sizeof(invalidName));
+            gSaveContext.save.saveInfo.playerData.newf[0] = '\0';
         }
     }
 }
