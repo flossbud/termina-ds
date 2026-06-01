@@ -2,12 +2,10 @@
 
 #include <fstream>
 #include <filesystem>
-#include <limits>
 #include <nlohmann/json.hpp>
 #include <libultraship/libultraship.h>
 
 #include "macros.h"
-#include "PR/os_internal_flash.h"
 #include "BenJsonConversions.hpp"
 #include "BenPort.h"
 
@@ -26,28 +24,6 @@ u16 Sram_CalcChecksum(void* data, size_t count);
 #define IS_VALID_FILE(save)                                                                    \
     ((GET_NEWF(save, 0) == 'Z') && (GET_NEWF(save, 1) == 'E') && (GET_NEWF(save, 2) == 'L') && \
      (GET_NEWF(save, 3) == 'D') && (GET_NEWF(save, 4) == 'A') && (GET_NEWF(save, 5) == '3'))
-
-static bool SaveManager_CanCopyFromFlashBuffer(const u8* saveBuffer, u32 pageCount, size_t requiredSize,
-                                               const char* saveType) {
-    if (saveBuffer == nullptr) {
-        SPDLOG_ERROR("Skipping {} save write: null save buffer", saveType);
-        return false;
-    }
-
-    if (pageCount > std::numeric_limits<u32>::max() / FLASH_BLOCK_SIZE) {
-        SPDLOG_ERROR("Skipping {} save write: page count overflow", saveType);
-        return false;
-    }
-
-    const size_t availableSize = static_cast<size_t>(pageCount) * FLASH_BLOCK_SIZE;
-    if (availableSize < requiredSize) {
-        SPDLOG_ERROR("Skipping {} save write: buffer too small ({} bytes available, {} required)", saveType,
-                     availableSize, requiredSize);
-        return false;
-    }
-
-    return true;
-}
 
 static std::filesystem::path SaveManager_GetSavesFolderPath() {
     return Ship::Context::GetPathRelativeToAppDirectory("saves", appShortName);
@@ -350,7 +326,8 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
     }
 
     if (flashSave == FLASH_SAVE_SRAM_HEADER || flashSave == FLASH_SAVE_SRAM_HEADER_BACKUP) {
-        if (!SaveManager_CanCopyFromFlashBuffer(saveBuffer, pageCount, sizeof(SaveOptions), "global options")) {
+        if (saveBuffer == nullptr) {
+            SPDLOG_ERROR("Skipping global options save write: null save buffer");
             return;
         }
 
@@ -379,7 +356,8 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
         case FLASH_SAVE_FILE_1_NEW_CYCLE_SAVE:
         case FLASH_SAVE_FILE_2_NEW_CYCLE_SAVE:
         case FLASH_SAVE_FILE_3_NEW_CYCLE_SAVE: {
-            if (!SaveManager_CanCopyFromFlashBuffer(saveBuffer, pageCount, sizeof(Save), "new cycle")) {
+            if (saveBuffer == nullptr) {
+                SPDLOG_ERROR("Skipping new cycle save write: null save buffer");
                 return;
             }
 
@@ -424,7 +402,8 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
         case FLASH_SAVE_FILE_1_OWL_SAVE:
         case FLASH_SAVE_FILE_2_OWL_SAVE:
         case FLASH_SAVE_FILE_3_OWL_SAVE: {
-            if (!SaveManager_CanCopyFromFlashBuffer(saveBuffer, pageCount, offsetof(SaveContext, fileNum), "owl")) {
+            if (saveBuffer == nullptr) {
+                SPDLOG_ERROR("Skipping owl save write: null save buffer");
                 return;
             }
 

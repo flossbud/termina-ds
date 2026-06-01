@@ -2,6 +2,7 @@
 #include "Rando/MiscBehavior/ClockShuffle.h"
 #include <public/bridge/consolevariablebridge.h>
 #include <sstream>
+#include <spdlog/spdlog.h>
 
 extern "C" {
 #include "variables.h"
@@ -12,18 +13,33 @@ namespace Rando {
 
 namespace Logic {
 
+static std::vector<RandoCheckId> GetExcludedChecksFromConfig() {
+    std::vector<RandoCheckId> excludedChecks;
+    std::string excludedChecksList = CVarGetString("gRando.ExcludedChecks", "");
+    std::string word;
+    std::istringstream stream(excludedChecksList);
+
+    while (std::getline(stream, word, ',')) {
+        if (word.empty()) {
+            continue;
+        }
+
+        try {
+            excludedChecks.push_back((RandoCheckId)std::stoi(word));
+        } catch (const std::exception& e) {
+            SPDLOG_ERROR("Ignoring invalid randomizer excluded check '{}': {}", word, e.what());
+        }
+    }
+
+    return excludedChecks;
+}
+
 void GeneratePools(RandoSaveInfo& saveInfo, std::vector<RandoCheckId>& checkPool, std::vector<RandoItemId>& itemPool) {
     std::vector<RandoItemId> startingItems = Rando::GetStartingItemsFromSave(saveInfo);
     std::vector<RandoItemId> computedStartingItems = Rando::GetComputedStartingItems(saveInfo);
     startingItems.insert(startingItems.end(), computedStartingItems.begin(), computedStartingItems.end());
 
-    std::vector<RandoCheckId> excludedChecks;
-    std::string excludedChecksList = CVarGetString("gRando.ExcludedChecks", "");
-    std::string word;
-    std::istringstream stream(excludedChecksList);
-    while (std::getline(stream, word, ',')) {
-        excludedChecks.push_back((RandoCheckId)std::stoi(word));
-    }
+    std::vector<RandoCheckId> excludedChecks = GetExcludedChecksFromConfig();
 
     // First loop through all regions and add checks/items to the pool
     for (auto& [randoRegionId, randoRegion] : Rando::Logic::Regions) {

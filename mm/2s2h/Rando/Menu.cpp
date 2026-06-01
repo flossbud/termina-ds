@@ -162,12 +162,21 @@ void SaveExcludedChecks() {
 
 void LoadExcludedChecks() {
     std::string checksList = CVarGetString("gRando.ExcludedChecks", "");
+    checkExclusionList.clear();
 
     if (checksList != "") {
         std::string word;
         std::istringstream stream(checksList);
         while (std::getline(stream, word, ',')) {
-            checkExclusionList.push_back((RandoCheckId)std::stoi(word));
+            if (word.empty()) {
+                continue;
+            }
+
+            try {
+                checkExclusionList.push_back((RandoCheckId)std::stoi(word));
+            } catch (const std::exception& e) {
+                SPDLOG_ERROR("Ignoring invalid randomizer excluded check '{}': {}", word, e.what());
+            }
         }
     }
     SortExcludedChecks();
@@ -192,7 +201,16 @@ void RefreshMetrics() {
     auto startingItems = Rando::GetStartingItemsFromConfig();
     Rando::SetStartingItemsInSave(randoSaveInfo, startingItems);
 
-    Rando::Logic::GeneratePools(randoSaveInfo, checkPool, itemPool);
+    try {
+        Rando::Logic::GeneratePools(randoSaveInfo, checkPool, itemPool);
+    } catch (const std::exception& e) {
+        SPDLOG_ERROR("Failed to refresh randomizer metrics: {}", e.what());
+        checksInPool = 0;
+        itemsInPool = 0;
+        junkInPool = 0;
+        balanceStatus = 2;
+        return;
+    }
 
     checksInPool = checkPool.size();
     itemsInPool = itemPool.size();
