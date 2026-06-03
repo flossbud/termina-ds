@@ -444,6 +444,11 @@ void BenMenu::AddSettings() {
         .CVar("gSettings.ResetBtn")
         .Options(BtnSelectorOptions().DefaultValue(BTN_CUSTOM_MODIFIER2));
 #if defined(__ANDROID__)
+    AddWidget(path, "Version", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "Version");
+        ImGui::SameLine();
+        ImGui::TextUnformatted(gBuildVersion);
+    });
     AddWidget(path, "Current Data Folder", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         std::string dataFolderPath = Ship::Context::GetAppDirectoryPath(appShortName);
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "Current Data Folder");
@@ -1130,6 +1135,10 @@ void BenMenu::AddEnhancements() {
         .CVar("gEnhancements.PlayerActions.ArrowCycle")
         .Options(CheckboxOptions().Tooltip(
             "While aiming the bow, use R to cycle between Normal, Fire, Ice and Light arrows."));
+    AddWidget(path, "Bomb Arrows", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Equipment.BombArrows")
+        .Options(CheckboxOptions().Tooltip(
+            "Allows equipping Bomb Arrows by equipping Bombs onto a bow button in the pause menu."));
     AddWidget(path, "Remote Bombchu Control", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.PlayerActions.RemoteBombchu")
         .Options(CheckboxOptions().Tooltip(
@@ -1585,10 +1594,11 @@ void BenMenu::AddEnhancements() {
                               "- Owl Warp menu crash when moving the cursor with Index-Warp active\n"
                               "- Remote Hookshot Hookslide crashes when over voids in Great Bay Temple")
                      .DefaultValue(true));
-    AddWidget(path, "Fix Ammo Count Color", WIDGET_CVAR_CHECKBOX)
-        .CVar("gFixes.FixAmmoCountEnvColor")
-        .Options(CheckboxOptions().Tooltip("Fixes a missing gDPSetEnvColor, which causes the ammo count to be "
-                                           "the wrong color prior to obtaining magic or other conditions."));
+    AddWidget(path, "Fix Button Env Color", WIDGET_CVAR_CHECKBOX)
+        .CVar("gFixes.FixButtonEnvColor")
+        .Options(CheckboxOptions().Tooltip("Fixes a missing gDPSetEnvColor, which causes ammo counts and B button "
+                                           "action labels to be the wrong color prior to obtaining magic or other "
+                                           "conditions."));
     AddWidget(path, "Fix Epona stealing Sword", WIDGET_CVAR_CHECKBOX)
         .CVar("gFixes.FixEponaStealingSword")
         .Options(CheckboxOptions().Tooltip(

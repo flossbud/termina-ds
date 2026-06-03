@@ -6150,6 +6150,11 @@ s16 sDpadItemAmmoY[] = {
 void Interface_Dpad_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
     u8 i;
     u16 ammo;
+
+    if (!GameInteractor_Should(VB_DRAW_HUD_AMMO_COUNT, true, button, alpha, true)) {
+        return;
+    }
+
     OPEN_DISPS(play->state.gfxCtx);
 
     i = ((void)0, DPAD_GET_CUR_FORM_BTN_ITEM(button));
@@ -6261,6 +6266,11 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
     static s16 sAmmoDigitsYPositions[] = { 35, 35, 51, 35 };
     u8 i;
     u16 ammo;
+
+    if (!GameInteractor_Should(VB_DRAW_HUD_AMMO_COUNT, true, button, alpha, false)) {
+        return;
+    }
+
     OPEN_DISPS(play->state.gfxCtx);
 
     i = ((void)0, GET_CUR_FORM_BTN_ITEM(button));
@@ -6284,14 +6294,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
         }
 
         gDPPipeSync(OVERLAY_DISP++);
-        //! @bug Missing a gDPSetEnvColor here, which means the ammo count will be drawn with the last env color set.
-        //! Once you have the magic meter, this becomes a non issue, as the magic meter will set the color to black,
-        //! but prior to that, when certain conditions are met, the color will have last been set by the wallet icon
-        //! causing the ammo count to be drawn incorrectly. This is most obvious when you get deku nuts early on, and
-        //! the ammo count is drawn with a shade of green.
-        if (CVarGetInteger("gFixes.FixAmmoCountEnvColor", 0)) {
-            gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 0, 255);
-        }
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
 
         if ((button == EQUIP_SLOT_B) && (gSaveContext.minigameStatus == MINIGAME_STATUS_ACTIVE)) {
             ammo = play->interfaceCtx.minigameAmmo;
@@ -6383,6 +6386,7 @@ void Interface_DrawBButtonIcons(PlayState* play) {
         gDPPipeSync(OVERLAY_DISP++);
         gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
                           PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->bAlpha);
         gDPLoadTextureBlock_4b(OVERLAY_DISP++, interfaceCtx->doActionSegment[DO_ACTION_SEG_B].mainTex, G_IM_FMT_IA,
                                DO_ACTION_TEX_WIDTH, DO_ACTION_TEX_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -6426,6 +6430,7 @@ void Interface_DrawBButtonIcons(PlayState* play) {
         gDPPipeSync(OVERLAY_DISP++);
         gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
                           PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        GameInteractor_Should(VB_SET_BUTTON_ENV_COLOR, false);
         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->bAlpha);
         gDPLoadTextureBlock_4b(OVERLAY_DISP++, interfaceCtx->doActionSegment[DO_ACTION_SEG_B].subTex, G_IM_FMT_IA,
                                DO_ACTION_TEX_WIDTH, DO_ACTION_TEX_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,

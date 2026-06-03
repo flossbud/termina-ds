@@ -2,6 +2,7 @@
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/CustomMessage/CustomMessage.h"
+#include <string>
 
 extern "C" {
 #include "variables.h"
@@ -14,13 +15,13 @@ s32 Snap_RecordPictographedActors(PlayState* play);
 
 void RegisterBetterPictoMessage() {
     COND_ID_HOOK(OnOpenText, 0xF8, CVAR, [](u16* textId, bool* loadFromMessageTable) {
-        if (!CHECK_QUEST_ITEM(QUEST_PICTOGRAPH)) {
-            Snap_RecordPictographedActors(gPlayState);
-        }
+        u32 savedPictoFlags0 = gSaveContext.save.saveInfo.pictoFlags0;
+        u32 savedPictoFlags1 = gSaveContext.save.saveInfo.pictoFlags1;
+
+        Snap_RecordPictographedActors(gPlayState);
 
         std::string target = "";
 
-        std::vector<std::string> actorsInPicture;
         if (Snap_CheckFlag(PICTO_VALID_IN_SWAMP))
             target = "the Swamp";
         if (Snap_CheckFlag(PICTO_VALID_MONKEY))
@@ -39,6 +40,9 @@ void RegisterBetterPictoMessage() {
             target = "a Pirate";
         if (Snap_CheckFlag(PICTO_VALID_DEKU_KING))
             target = "the Deku King";
+
+        gSaveContext.save.saveInfo.pictoFlags0 = savedPictoFlags0;
+        gSaveContext.save.saveInfo.pictoFlags1 = savedPictoFlags1;
 
         if (target == "") {
             return;
