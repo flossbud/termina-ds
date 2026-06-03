@@ -3,6 +3,8 @@ def buildAsApplication = !buildAsLibrary
 def repoRoot = rootProject.projectDir.parentFile
 def androidVcpkgRoot = System.getenv("VCPKG_ROOT") ?: new File(repoRoot, "build/vcpkg").absolutePath
 def androidVcpkgRootArg = androidVcpkgRoot.replace('\\', '/')
+def androidAppVersionCode = 4000207
+def androidAppVersionName = "4.0.2-android.3.4"
 if (buildAsApplication) {
     apply plugin: 'com.android.application'
 }
@@ -23,15 +25,15 @@ android {
         }
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 4000206
-        versionName "4.0.2-android.3.3"
+        versionCode androidAppVersionCode
+        versionName androidAppVersionName
         externalNativeBuild {
             //ndkBuild {
             //    arguments "APP_PLATFORM=android-23"
             //    abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
             //}
             cmake {
-                 arguments "-DSDL_SHARED=ON", "-DANDROID_STL=c++_static", "-DHAVE_LD_VERSION_SCRIPT=OFF",'-DUSE_OPENGLES=ON', "-DPNG_SHARED=OFF", "-DPNG_STATIC=ON", "-DPNG_TESTS=OFF", "-DANDROID_VCPKG_ROOT=${androidVcpkgRootArg}"
+                 arguments "-DSDL_SHARED=ON", "-DANDROID_STL=c++_static", "-DHAVE_LD_VERSION_SCRIPT=OFF",'-DUSE_OPENGLES=ON', "-DPNG_SHARED=OFF", "-DPNG_STATIC=ON", "-DPNG_TESTS=OFF", "-DANDROID_VCPKG_ROOT=${androidVcpkgRootArg}", "-DANDROID_APP_VERSION_NAME=${androidAppVersionName}"
                  abiFilters 'arm64-v8a'
             }
         }

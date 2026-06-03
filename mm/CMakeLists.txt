@@ -205,6 +205,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	OUTPUT_NAME "2s2h.elf"
 	)
 endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND DEFINED ANDROID_APP_VERSION_NAME)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ANDROID_APP_VERSION_NAME="${ANDROID_APP_VERSION_NAME}")
+endif()
 ################################################################################
 # MSVC runtime library
 ################################################################################

@@ -1,45 +1,54 @@
-# 2 Ship 2 Harkinian Android Port
-A port of 2 Ship 2 Harkinian to Android. <br>
+# 2 Ship 2 Harkinian Android
 
-Original Repository: https://github.com/HarbourMasters/2ship2harkinian <br>
-<br>
+Android port of 2 Ship 2 Harkinian, based on the HarbourMasters project.
 
-Supported (probably): Android 7+ (OpenGL ES 3.0+ required) <br>
-Tested On: Android 15 <br>
+Original repository: https://github.com/HarbourMasters/2ship2harkinian
 
-<h3>Installation:</h3>
-1. Install the apk from here: https://github.com/Waterdish/2ship2harkinian-Android/releases. <br>
-2. Open the app once. It will generate the directory for your rom. Allow all file permissions and then close and reopen the app.<br>
-3. Select "Yes" when prompted by the app if you would like to generate an O2R. Select "Yes" when it asks to look for a rom. Navigate to your "MM.z64" and select it. The extraction should start.<br>
-5. It will launch straight into the game on subsequent plays. <br>
-<br>
-  
-Use Back/Select/- controller button, or the Android back button (swipe left if using gesture controls) to open Enhancements menu. Use touch controls to navigate menus. <br>
+Current Android release: **v4.0.2-android.3.4**
 
-<h3>FAQ:</h3>
-Q: Where do I add mods? <br>
-  A: 2S2H folder at root of device. <br> <br>
+Supported: Android 7+ with OpenGL ES 3.0+
 
-Q: Why is it immediately crashing? <br>
-  A: Try deleting and re-extracting the O2R file (mm.o2r). <br> <br>
+Tested on: Android 15
 
-Q: The game opened once, but now it's just a black screen. <br>
-  A: Reinstall and don't raise MSAA above 1 in Settings->Graphics <br><br>
+## Installation
 
-Q: The GUI scaling is too big/too small. <br>
-  A: There is no GUI scaling option implemented yet. This will come in a future update. <br><br>
+1. Install the APK from the releases page: https://github.com/linkzenic/2ship2harkinian-Android/releases
+2. Open the app once so it can create the data folder and copy bundled support files.
+3. When prompted, select your legally obtained `MM.z64` ROM so the app can generate `mm.o2r`.
+4. Subsequent launches should start directly into the game.
 
-Q: Gyro Aim? <br>
-  A: It works. You just need to press any controller button when it asks for input. It will default to your phone's gyro if the controller doesn't support it. <br> <br>
+Use the Back, Select, or minus controller button, or the Android back gesture/button, to open the 2 Ship 2 Harkinian menu. Use touch controls or a controller to navigate menus.
 
-Q: My controller is not doing anything. <br>
-  A: Close the Enhancements Menu. If the Enhancements Menu is not open, open it with the Android back button and check if it is detected in Settings->Controller->Controller Mapping. If it is, press refresh. <br><br>
+## Data Folder
 
-<b>Known Bugs</b>:<br>
-Orientation Lock does not work. https://github.com/libsdl-org/SDL/issues/6090<br>
-Near-plane clipping when the camera is close to walls.<br>
-Picto box images render black. <br>
+The app stores user data in the selected 2S2H data folder. You can view the current folder and change it from Settings > General.
 
-<h3>Build Instructions:</h3>
-1. Edit the app/build.gradle file to point to your ndk folder. NDK 26+ tested as working.<br>
-2. Open the project in android studio and build.<br>
+Mods and user preset files should be placed in the relevant folders inside the selected data folder.
+
+## FAQ
+
+**Why is it immediately crashing?**
+
+Try deleting and regenerating `mm.o2r` from your own ROM.
+
+**My controller is not doing anything.**
+
+Open the menu and check Settings > Controls to confirm the controller is detected and mapped.
+
+**Can I hide the on-screen touch controls?**
+
+Yes. Use Settings > General > Disable Touch Controls.
+
+**Can I resize the menu?**
+
+Yes. Use Settings > General > Menu Scale.
+
+## Known Issues
+
+Orientation lock is limited by SDL behavior on Android: https://github.com/libsdl-org/SDL/issues/6090
+
+Near-plane clipping can occur when the camera is close to walls.
+
+## Build Notes
+
+Android builds are produced through GitHub Actions. The APK bundles `2ship.o2r` support data, but does not bundle `mm.o2r`; users generate `mm.o2r` from their own ROM.

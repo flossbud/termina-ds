@@ -21,6 +21,9 @@
 #if defined(__ANDROID__)
 #include <jni.h>
 #include <SDL.h>
+#ifndef ANDROID_APP_VERSION_NAME
+#define ANDROID_APP_VERSION_NAME "unknown"
+#endif
 #endif
 
 extern "C" {
@@ -447,7 +450,7 @@ void BenMenu::AddSettings() {
     AddWidget(path, "Version", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "Version");
         ImGui::SameLine();
-        ImGui::TextUnformatted(gBuildVersion);
+        ImGui::TextUnformatted(ANDROID_APP_VERSION_NAME);
     });
     AddWidget(path, "Current Data Folder", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) {
         std::string dataFolderPath = Ship::Context::GetAppDirectoryPath(appShortName);
