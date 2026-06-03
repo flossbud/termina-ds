@@ -73,6 +73,19 @@ jobs:
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;26.0.10792818" "cmake;3.30.3"
 
+      - name: Install Android vcpkg dependencies
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/build/vcpkg
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/26.0.10792818"
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+          mkdir -p build
+          if [ ! -d "$VCPKG_ROOT" ]; then
+            git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT" --depth 1
+          fi
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh"
+          "$VCPKG_ROOT/vcpkg" install --triplet arm64-android zlib libpng libogg libvorbis opus opusfile
+
       - name: Prepare release signing key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -93,6 +106,7 @@ jobs:
       - name: Build release APK
         working-directory: Android
         env:
+          VCPKG_ROOT: ${{ github.workspace }}/build/vcpkg
           ANDROID_KEYSTORE_PATH: release-keystore.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
