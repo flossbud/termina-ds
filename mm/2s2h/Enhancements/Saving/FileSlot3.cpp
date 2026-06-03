@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/ShipInit.hpp"
 
 extern "C" {
@@ -8,9 +8,10 @@ extern FileSelectState* gFileSelectState;
 }
 
 #define CVAR_NAME "gEnhancements.Saving.FileSlot3"
+#define CVAR CVarGetInteger(CVAR_NAME, true)
 
 void RegisterFileSlot3() {
-    // Reset file select so save metadata and visible slots refresh immediately after changing the option.
+    // Reset the file select state to reload the save metadata
     if (gFileSelectState != NULL) {
         STOP_GAMESTATE(&gFileSelectState->state);
         SET_NEXT_GAMESTATE(&gFileSelectState->state, FileSelect_Init, sizeof(FileSelectState));

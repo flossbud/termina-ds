@@ -2,20 +2,17 @@
 
 #include <spdlog/spdlog.h>
 #include <imgui.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
-#include <libultraship/libultraship.h>
-#include <graphic/Fast3D/gfx_pc.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "UIWidgets.hpp"
 #include "HudEditor.h"
-#include "CosmeticEditor.h"
 #include "2s2h/Enhancements/Audio/AudioEditor.h"
+#include "CosmeticEditor.h"
 #include "Notification.h"
-#include "BenModals.h"
-#include "Rando/CheckTracker/CheckTracker.h"
+#include "2s2h/Rando/CheckTracker/CheckTracker.h"
 
 #ifdef __APPLE__
-#include "graphic/Fast3D/gfx_metal.h"
+#include <fast/backends/gfx_metal.h>
 #endif
 
 #ifdef __SWITCH__
@@ -23,13 +20,21 @@
 #endif
 
 #include "include/global.h"
-#include "include/z64audio.h"
 
-#include "Enhancements/Trackers/ItemTracker.h"
-#include "Enhancements/Trackers/ItemTrackerSettings.h"
+#include "Enhancements/Trackers/ItemTracker/ItemTracker.h"
+#include "Enhancements/Trackers/ItemTracker/ItemTrackerSettings.h"
 #include "Enhancements/Trackers/DisplayOverlay.h"
-#include "Enhancements/Trackers/TimeSplits/Timesplits.h"
+#include "Enhancements/Trackers//TimeSplits/Timesplits.h"
 #include "Enhancements/Trackers/TimeSplits/TimesplitsSettings.h"
+#include "BenMenu.h"
+#include "BenMenuBar.h"
+#include "DeveloperTools/HookDebugger.h"
+#include "DeveloperTools/SaveEditor.h"
+#include "DeveloperTools/ActorViewer.h"
+#include "DeveloperTools/CollisionViewer.h"
+#include "DeveloperTools/EventLog.h"
+#include "DeveloperTools/DLViewer.h"
+#include "DeveloperTools/MessageViewer.h"
 
 namespace BenGui {
 // MARK: - Delegates
@@ -39,41 +44,58 @@ std::shared_ptr<BenMenuBar> mBenMenuBar;
 std::shared_ptr<Ship::GuiWindow> mConsoleWindow;
 std::shared_ptr<Ship::GuiWindow> mStatsWindow;
 std::shared_ptr<Ship::GuiWindow> mGfxDebuggerWindow;
+std::shared_ptr<Ship::GuiWindow> mInputEditorWindow;
 
+std::shared_ptr<HookDebuggerWindow> mHookDebuggerWindow;
 std::shared_ptr<SaveEditorWindow> mSaveEditorWindow;
 std::shared_ptr<HudEditorWindow> mHudEditorWindow;
 std::shared_ptr<CosmeticEditorWindow> mCosmeticEditorWindow;
-std::shared_ptr<AudioEditor> mAudioEditorWindow;
 std::shared_ptr<ActorViewerWindow> mActorViewerWindow;
 std::shared_ptr<CollisionViewerWindow> mCollisionViewerWindow;
 std::shared_ptr<EventLogWindow> mEventLogWindow;
+std::shared_ptr<DLViewerWindow> mDLViewerWindow;
+std::shared_ptr<MessageViewerWindow> mMessageViewerWindow;
+std::shared_ptr<AudioEditor> mAudioEditorWindow;
 std::shared_ptr<BenMenu> mBenMenu;
-std::shared_ptr<BenModalWindow> mModalWindow;
-std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 std::shared_ptr<Notification::Window> mNotificationWindow;
+std::shared_ptr<Rando::CheckTracker::CheckTrackerWindow> mRandoCheckTrackerWindow;
+std::shared_ptr<Rando::CheckTracker::SettingsWindow> mRandoCheckTrackerSettingsWindow;
 std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
 std::shared_ptr<ItemTrackerSettingsWindow> mItemTrackerSettingsWindow;
 std::shared_ptr<DisplayOverlayWindow> mDisplayOverlayWindow;
 std::shared_ptr<TimesplitsWindow> mTimesplitsWindow;
 std::shared_ptr<TimesplitsSettingsWindow> mTimesplitsSettingsWindow;
-std::shared_ptr<Rando::CheckTracker::CheckTrackerWindow> mRandoCheckTrackerWindow;
-std::shared_ptr<Rando::CheckTracker::SettingsWindow> mRandoCheckTrackerSettingsWindow;
+std::shared_ptr<InputViewer> mInputViewer;
+std::shared_ptr<InputViewerSettingsWindow> mInputViewerSettings;
+std::shared_ptr<BenModalWindow> mModalWindow;
 
 UIWidgets::Colors GetMenuThemeColor() {
-    return mBenMenu != nullptr ? mBenMenu->GetMenuThemeColor() : UIWidgets::Colors::Blue;
+    return mBenMenu->GetMenuThemeColor();
 }
 
 void SetupGuiElements() {
     auto gui = Ship::Context::GetInstance()->GetWindow()->GetGui();
 
     auto& style = ImGui::GetStyle();
+#if defined(__ANDROID__)
+    float androidMenuScale = CVarGetFloat("gSettings.Menu.AndroidScale", 1.45f);
+    if (androidMenuScale < 1.0f) {
+        androidMenuScale = 1.0f;
+    } else if (androidMenuScale > 3.0f) {
+        androidMenuScale = 3.0f;
+    }
+    style.FramePadding = ImVec2(4.0f * androidMenuScale, 6.0f * androidMenuScale);
+    style.ItemSpacing = ImVec2(8.0f * androidMenuScale, 6.0f * androidMenuScale);
+    style.ItemInnerSpacing = ImVec2(4.0f * androidMenuScale, 4.0f * androidMenuScale);
+    style.ScrollbarSize = 14.0f * androidMenuScale;
+    style.GrabMinSize = 12.0f * androidMenuScale;
+    ImGui::GetIO().FontGlobalScale = androidMenuScale;
+#else
     style.FramePadding = ImVec2(4.0f, 6.0f);
     style.ItemSpacing = ImVec2(8.0f, 6.0f);
+#endif
     style.Colors[ImGuiCol_MenuBarBg] = UIWidgets::ColorValues.at(UIWidgets::Colors::DarkGray);
 
-#ifdef __ANDROID__
-    CVarClear(CVAR_MENU_BAR_OPEN);
-#endif
     mBenMenuBar = std::make_shared<BenMenuBar>(CVAR_MENU_BAR_OPEN, CVarGetInteger(CVAR_MENU_BAR_OPEN, 0));
     gui->SetMenuBar(std::reinterpret_pointer_cast<Ship::GuiMenuBar>(mBenMenuBar));
 
@@ -103,8 +125,14 @@ void SetupGuiElements() {
         SPDLOG_ERROR("Could not find input GfxDebuggerWindow");
     }
 
-    mBenInputEditorWindow = std::make_shared<BenInputEditorWindow>("gWindows.BenInputEditor", "2S2H Input Editor");
-    gui->AddGuiWindow(mBenInputEditorWindow);
+    mInputEditorWindow = gui->GetGuiWindow("2S2H Input Editor");
+    if (mInputEditorWindow == nullptr) {
+        SPDLOG_ERROR("Could not find input editor window");
+    }
+
+    mHookDebuggerWindow =
+        std::make_shared<HookDebuggerWindow>("gWindows.HookDebugger", "Hook Debugger", ImVec2(480, 600));
+    gui->AddGuiWindow(mHookDebuggerWindow);
 
     mSaveEditorWindow = std::make_shared<SaveEditorWindow>("gWindows.SaveEditor", "Save Editor", ImVec2(480, 600));
     gui->AddGuiWindow(mSaveEditorWindow);
@@ -116,9 +144,6 @@ void SetupGuiElements() {
         std::make_shared<CosmeticEditorWindow>("gWindows.CosmeticEditor", "Cosmetic Editor", ImVec2(480, 600));
     gui->AddGuiWindow(mCosmeticEditorWindow);
 
-    mAudioEditorWindow = std::make_shared<AudioEditor>("gWindows.AudioEditor", "Audio Editor", ImVec2(520, 600));
-    gui->AddGuiWindow(mAudioEditorWindow);
-
     mActorViewerWindow = std::make_shared<ActorViewerWindow>("gWindows.ActorViewer", "Actor Viewer", ImVec2(520, 600));
     gui->AddGuiWindow(mActorViewerWindow);
 
@@ -128,6 +153,15 @@ void SetupGuiElements() {
 
     mEventLogWindow = std::make_shared<EventLogWindow>("gWindows.EventLog", "Event Log", ImVec2(520, 600));
     gui->AddGuiWindow(mEventLogWindow);
+
+    mDLViewerWindow = std::make_shared<DLViewerWindow>("gWindows.DLViewer", "DL Viewer", ImVec2(520, 600));
+    gui->AddGuiWindow(mDLViewerWindow);
+    mMessageViewerWindow =
+        std::make_shared<MessageViewerWindow>("gWindows.MessageViewer", "Message Viewer", ImVec2(520, 600));
+    gui->AddGuiWindow(mMessageViewerWindow);
+
+    mAudioEditorWindow = std::make_shared<AudioEditor>("gWindows.AudioEditor", "Audio Editor", ImVec2(520, 600));
+    gui->AddGuiWindow(mAudioEditorWindow);
 
     mItemTrackerWindow = std::make_shared<ItemTrackerWindow>("gWindows.ItemTracker", "Item Tracker");
     gui->AddGuiWindow(mItemTrackerWindow);
@@ -146,23 +180,26 @@ void SetupGuiElements() {
         "gWindows.Timesplits.Settings", "Time Splits Settings Window", ImVec2(567, 97));
     gui->AddGuiWindow(mTimesplitsSettingsWindow);
 
-    mModalWindow = std::make_shared<BenModalWindow>("gWindows.Modals", "Modals");
-    gui->AddGuiWindow(mModalWindow);
-    mModalWindow->Show();
-
-    mRandoCheckTrackerWindow =
-        std::make_shared<Rando::CheckTracker::CheckTrackerWindow>("gWindows.CheckTracker", "Check Tracker");
-    gui->AddGuiWindow(mRandoCheckTrackerWindow);
-
-    mRandoCheckTrackerSettingsWindow = std::make_shared<Rando::CheckTracker::SettingsWindow>(
-        "gWindows.CheckTrackerSettings", "Check Tracker Settings", ImVec2(800, 400));
-    gui->AddGuiWindow(mRandoCheckTrackerSettingsWindow);
-
-    gui->SetPadBtnTogglesMenu();
-
     mNotificationWindow = std::make_shared<Notification::Window>("gWindows.Notifications", "Notifications Window");
     gui->AddGuiWindow(mNotificationWindow);
     mNotificationWindow->Show();
+
+    mRandoCheckTrackerWindow = std::make_shared<Rando::CheckTracker::CheckTrackerWindow>(
+        "gWindows.CheckTracker", "Check Tracker", ImVec2(375, 460));
+    gui->AddGuiWindow(mRandoCheckTrackerWindow);
+
+    mRandoCheckTrackerSettingsWindow = std::make_shared<Rando::CheckTracker::SettingsWindow>(
+        "gWindows.CheckTrackerSettings", "Check Tracker Settings");
+    gui->AddGuiWindow(mRandoCheckTrackerSettingsWindow);
+
+    mInputViewer = std::make_shared<InputViewer>("gWindows.InputViewer", "Input Viewer");
+    gui->AddGuiWindow(mInputViewer);
+    mInputViewerSettings = std::make_shared<InputViewerSettingsWindow>("gWindows.InputViewerSettings",
+                                                                       "Input Viewer Settings", ImVec2(500, 525));
+    gui->AddGuiWindow(mInputViewerSettings);
+    mModalWindow = std::make_shared<BenModalWindow>("gWindows.ModalWindow", "Modal Window");
+    gui->AddGuiWindow(mModalWindow);
+    mModalWindow->Show();
 }
 
 void Destroy() {
@@ -171,57 +208,34 @@ void Destroy() {
     gui->RemoveAllGuiWindows();
     mBenMenuBar = nullptr;
     mBenMenu = nullptr;
+    mModalWindow = nullptr;
     mStatsWindow = nullptr;
     mConsoleWindow = nullptr;
-    mBenInputEditorWindow = nullptr;
     mGfxDebuggerWindow = nullptr;
+    mInputEditorWindow = nullptr;
     mCollisionViewerWindow = nullptr;
     mEventLogWindow = nullptr;
     mNotificationWindow = nullptr;
+    mRandoCheckTrackerWindow = nullptr;
+    mRandoCheckTrackerSettingsWindow = nullptr;
+
+    mHookDebuggerWindow = nullptr;
     mSaveEditorWindow = nullptr;
     mHudEditorWindow = nullptr;
     mCosmeticEditorWindow = nullptr;
-    mAudioEditorWindow = nullptr;
     mActorViewerWindow = nullptr;
+    mDLViewerWindow = nullptr;
+    mMessageViewerWindow = nullptr;
+    mAudioEditorWindow = nullptr;
     mItemTrackerWindow = nullptr;
     mItemTrackerSettingsWindow = nullptr;
-    mDisplayOverlayWindow = nullptr;
-    mTimesplitsWindow = nullptr;
-    mTimesplitsSettingsWindow = nullptr;
-    mModalWindow = nullptr;
-    mRandoCheckTrackerWindow = nullptr;
-    mRandoCheckTrackerSettingsWindow = nullptr;
+    mInputViewer = nullptr;
+    mInputViewerSettings = nullptr;
 }
 
 void RegisterPopup(std::string title, std::string message, std::string button1, std::string button2,
                    std::function<void()> button1callback, std::function<void()> button2callback) {
-    if (mModalWindow != nullptr) {
-        mModalWindow->RegisterPopup(title, message, button1, button2, button1callback, button2callback);
-    }
+    mModalWindow->RegisterPopup(title, message, button1, button2, button1callback, button2callback);
 }
 
-size_t PopupsQueued() {
-    return mModalWindow != nullptr ? mModalWindow->PopupsQueued() : 0;
-}
-
-bool DismissPopup(std::string title) {
-    if (mModalWindow != nullptr && mModalWindow->IsPopupOpen(title)) {
-        mModalWindow->DismissPopup();
-        return true;
-    }
-    return false;
-}
-
-void SetDisplayOverlayVisibility(bool visible) {
-    if (mDisplayOverlayWindow != nullptr) {
-        if (visible) {
-            mDisplayOverlayWindow->Show();
-        } else {
-            mDisplayOverlayWindow->Hide();
-        }
-    } else {
-        CVarSetInteger("gWindows.DisplayOverlay", visible ? 1 : 0);
-    }
-    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
-}
 } // namespace BenGui

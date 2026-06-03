@@ -143,12 +143,7 @@ void Rando::GiveItem(RandoItemId randoItemId) {
         case RI_WALLET_GIANT:
             Item_Give(gPlayState, Rando::StaticData::Items[randoItemId].itemId);
             // Fill Rupees to max, this may be opt-in later
-            // Use remaining space rather than full capacity to avoid excess in the accumulator.
-            gSaveContext.rupeeAccumulator = CUR_CAPACITY(UPG_WALLET) - gSaveContext.save.saveInfo.playerData.rupees;
-            break;
-        case RI_WALLET_TYCOON:
-            Inventory_ChangeUpgrade(UPG_WALLET, 3);
-            gSaveContext.rupeeAccumulator = CUR_CAPACITY(UPG_WALLET) - gSaveContext.save.saveInfo.playerData.rupees;
+            gSaveContext.rupeeAccumulator = CUR_CAPACITY(UPG_WALLET);
             break;
         case RI_GS_TOKEN_SWAMP:
             // Set QUEST_QUIVER to match bug mentioned in z_parameter.c

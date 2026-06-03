@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -13,12 +13,8 @@ s32 Player_UpperAction_7(Player* thisx, PlayState* play);
 s32 Player_UpperAction_8(Player* thisx, PlayState* play);
 }
 
-extern bool IsBombArrowButton(s32 slot, bool isDpad);
-extern void SetBombArrowButton(s32 slot, bool state, bool isDpad);
-
 #define CVAR_NAME "gEnhancements.PlayerActions.ArrowCycle"
 #define CVAR CVarGetInteger(CVAR_NAME, 0)
-#define BOMB_ARROW_CVAR_NAME "gEnhancements.Equipment.BombArrows"
 
 // Magic arrow costs based on z_player.c
 static const s16 sMagicArrowCosts[] = { 4, 4, 8 };
@@ -32,32 +28,27 @@ static const s16 BUTTON_HIGHLIGHT_ALPHA = 128;
 static s16 sButtonFlashTimer = 0;
 static s16 sButtonFlashCount = 0;
 static s8 sJustCycledFrames = 0;
-static bool sCycleButtonWasHeld = false;
 
-enum ArrowCycleType {
-    ARROW_CYCLE_NORMAL,
-    ARROW_CYCLE_FIRE,
-    ARROW_CYCLE_ICE,
-    ARROW_CYCLE_LIGHT,
-    ARROW_CYCLE_BOMB,
-    ARROW_CYCLE_MAX
-};
+// Arrow Type Definitions
+static const PlayerItemAction ARROW_NORMAL = PLAYER_IA_BOW;
+static const PlayerItemAction ARROW_FIRE = PLAYER_IA_BOW_FIRE;
+static const PlayerItemAction ARROW_ICE = PLAYER_IA_BOW_ICE;
+static const PlayerItemAction ARROW_LIGHT = PLAYER_IA_BOW_LIGHT;
 
-static const PlayerItemAction sArrowCycleToPlayerIA[] = {
-    PLAYER_IA_BOW,       // ARROW_CYCLE_NORMAL
-    PLAYER_IA_BOW_FIRE,  // ARROW_CYCLE_FIRE
-    PLAYER_IA_BOW_ICE,   // ARROW_CYCLE_ICE
-    PLAYER_IA_BOW_LIGHT, // ARROW_CYCLE_LIGHT
-    PLAYER_IA_BOW,       // ARROW_CYCLE_BOMB
+static const PlayerItemAction sArrowCycleOrder[] = {
+    ARROW_NORMAL,
+    ARROW_FIRE,
+    ARROW_ICE,
+    ARROW_LIGHT,
 };
 
 // Utility Functions
 static bool IsHoldingBow(Player* player) {
-    return player->heldItemAction >= PLAYER_IA_BOW && player->heldItemAction <= PLAYER_IA_BOW_LIGHT;
+    return player->heldItemAction >= ARROW_NORMAL && player->heldItemAction <= ARROW_LIGHT;
 }
 
 static bool IsHoldingMagicBow(Player* player) {
-    return player->heldItemAction >= PLAYER_IA_BOW_FIRE && player->heldItemAction <= PLAYER_IA_BOW_LIGHT;
+    return player->heldItemAction >= ARROW_FIRE && player->heldItemAction <= ARROW_LIGHT;
 }
 
 static bool IsAimingBow(Player* player) {
@@ -65,63 +56,32 @@ static bool IsAimingBow(Player* player) {
                                     (player->upperActionFunc == Player_UpperAction_7) /* Arrow pulled back on bow */);
 }
 
-static bool IsBombArrowEnhancementEnabled() {
-    return CVarGetInteger(BOMB_ARROW_CVAR_NAME, 0);
-}
-
-static bool HasBombArrows() {
-    return IsBombArrowEnhancementEnabled() && (INV_CONTENT(ITEM_BOMB) == ITEM_BOMB);
-}
-
-static bool IsBombArrowButton(const Player* player) {
-    if (player->heldItemButton < 0) {
-        return false;
-    }
-
-    if (IS_HELD_DPAD(player->heldItemButton)) {
-        s32 dpadSlot = HELD_ITEM_TO_DPAD(player->heldItemButton);
-        return IsBombArrowButton(dpadSlot, true);
-    }
-
-    if (player->heldItemButton == EQUIP_SLOT_B) {
-        return false;
-    }
-
-    return IsBombArrowButton(player->heldItemButton, false);
-}
-
-static bool HasArrowType(ArrowCycleType cycleType) {
-    switch (cycleType) {
-        case ARROW_CYCLE_NORMAL:
+static bool HasArrowType(PlayerItemAction arrowType) {
+    switch (arrowType) {
+        case ARROW_NORMAL:
             return true;
-        case ARROW_CYCLE_FIRE:
+        case ARROW_FIRE:
             return (INV_CONTENT(ITEM_ARROW_FIRE) == ITEM_ARROW_FIRE);
-        case ARROW_CYCLE_ICE:
+        case ARROW_ICE:
             return (INV_CONTENT(ITEM_ARROW_ICE) == ITEM_ARROW_ICE);
-        case ARROW_CYCLE_LIGHT:
+        case ARROW_LIGHT:
             return (INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT);
-        case ARROW_CYCLE_BOMB:
-            return HasBombArrows();
         default:
             return false;
     }
 }
 
-static s32 GetBowItemForCycleType(ArrowCycleType cycleType) {
-    switch (cycleType) {
-        case ARROW_CYCLE_FIRE:
+static s32 GetBowItemForArrow(PlayerItemAction arrowType) {
+    switch (arrowType) {
+        case ARROW_FIRE:
             return ITEM_BOW_FIRE;
-        case ARROW_CYCLE_ICE:
+        case ARROW_ICE:
             return ITEM_BOW_ICE;
-        case ARROW_CYCLE_LIGHT:
+        case ARROW_LIGHT:
             return ITEM_BOW_LIGHT;
         default:
             return ITEM_BOW;
     }
-}
-
-static s32 GetSlotForCycleType(ArrowCycleType cycleType) {
-    return cycleType == ARROW_CYCLE_BOMB ? SLOT_BOMB : SLOT_BOW;
 }
 
 static bool CanCycleArrows() {
@@ -137,45 +97,27 @@ static bool CanCycleArrows() {
 
     return !gHorseIsMounted && player->rideActor == NULL && INV_CONTENT(SLOT_BOW) == ITEM_BOW &&
            (INV_CONTENT(ITEM_ARROW_FIRE) == ITEM_ARROW_FIRE || INV_CONTENT(ITEM_ARROW_ICE) == ITEM_ARROW_ICE ||
-            INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT || HasBombArrows());
-}
-
-static bool IsCycleButtonPressed(Input* input) {
-    bool isHeld = CHECK_BTN_ANY(input->cur.button, BTN_R);
-    bool isPressed = CHECK_BTN_ANY(input->press.button, BTN_R) || (isHeld && !sCycleButtonWasHeld);
-
-    sCycleButtonWasHeld = isHeld;
-    return isPressed;
+            INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT);
 }
 
 // Arrow Cycling Logic
-static ArrowCycleType GetCurrentCycleType(Player* player) {
-    if (IsBombArrowButton(player)) {
-        return ARROW_CYCLE_BOMB;
-    }
-    switch (player->heldItemAction) {
-        case PLAYER_IA_BOW_FIRE:
-            return ARROW_CYCLE_FIRE;
-        case PLAYER_IA_BOW_ICE:
-            return ARROW_CYCLE_ICE;
-        case PLAYER_IA_BOW_LIGHT:
-            return ARROW_CYCLE_LIGHT;
-        default:
-            return ARROW_CYCLE_NORMAL;
-    }
-}
-
-static ArrowCycleType GetNextArrowCycleType(Player* player) {
-    ArrowCycleType current = GetCurrentCycleType(player);
-
-    for (int offset = 1; offset < ARROW_CYCLE_MAX; offset++) {
-        ArrowCycleType next = static_cast<ArrowCycleType>((current + offset) % ARROW_CYCLE_MAX);
-        if (HasArrowType(next)) {
-            return next;
+static s8 GetNextArrowType(s8 currentArrowType) {
+    int currentIndex = 0;
+    for (int i = 0; i < (int)ARRAY_COUNT(sArrowCycleOrder); i++) {
+        if (sArrowCycleOrder[i] == currentArrowType) {
+            currentIndex = i;
+            break;
         }
     }
 
-    return ARROW_CYCLE_NORMAL;
+    for (int offset = 1; offset <= (int)ARRAY_COUNT(sArrowCycleOrder); offset++) {
+        int nextIndex = (currentIndex + offset) % ARRAY_COUNT(sArrowCycleOrder);
+        if (HasArrowType(sArrowCycleOrder[nextIndex])) {
+            return sArrowCycleOrder[nextIndex];
+        }
+    }
+
+    return ARROW_NORMAL;
 }
 
 // UI Update Functions
@@ -246,22 +188,19 @@ static void UpdateFlashEffect(PlayState* play) {
                       &play->interfaceCtx.shipInterface.dpad.dUpAlpha);
 }
 
-static void UpdateEquippedBow(PlayState* play, ArrowCycleType cycleType) {
-    s32 bowItem = GetBowItemForCycleType(cycleType);
-    s32 slot = GetSlotForCycleType(cycleType);
+static void UpdateEquippedBow(PlayState* play, s8 arrowType) {
+    s32 bowItem = GetBowItemForArrow(static_cast<PlayerItemAction>(arrowType));
 
     // Update C-buttons
     for (s32 i = EQUIP_SLOT_C_LEFT; i <= EQUIP_SLOT_C_RIGHT; i++) {
         if ((BUTTON_ITEM_EQUIP(0, i) == ITEM_BOW) ||
             (BUTTON_ITEM_EQUIP(0, i) >= ITEM_BOW_FIRE && BUTTON_ITEM_EQUIP(0, i) <= ITEM_BOW_LIGHT)) {
             BUTTON_ITEM_EQUIP(0, i) = bowItem;
-            C_SLOT_EQUIP(0, i) = slot;
+            C_SLOT_EQUIP(0, i) = SLOT_BOW;
             Interface_LoadItemIcon(play, i);
             gSaveContext.buttonStatus[i] = BTN_ENABLED;
             sButtonFlashTimer = BUTTON_FLASH_DURATION;
             sButtonFlashCount = 0;
-
-            SetBombArrowButton(i, cycleType == ARROW_CYCLE_BOMB, false);
         }
     }
 
@@ -270,13 +209,11 @@ static void UpdateEquippedBow(PlayState* play, ArrowCycleType cycleType) {
         if ((DPAD_BUTTON_ITEM_EQUIP(0, i) == ITEM_BOW) ||
             (DPAD_BUTTON_ITEM_EQUIP(0, i) >= ITEM_BOW_FIRE && DPAD_BUTTON_ITEM_EQUIP(0, i) <= ITEM_BOW_LIGHT)) {
             DPAD_BUTTON_ITEM_EQUIP(0, i) = bowItem;
-            DPAD_SLOT_EQUIP(0, i) = slot;
+            DPAD_SLOT_EQUIP(0, i) = SLOT_BOW;
             Interface_Dpad_LoadItemIcon(play, i);
             gSaveContext.shipSaveContext.dpad.status[i] = BTN_ENABLED;
             sButtonFlashTimer = BUTTON_FLASH_DURATION;
             sButtonFlashCount = 0;
-
-            SetBombArrowButton(i, cycleType == ARROW_CYCLE_BOMB, true);
         }
     }
 
@@ -285,8 +222,7 @@ static void UpdateEquippedBow(PlayState* play, ArrowCycleType cycleType) {
 
 // Core Arrow Cycling Function
 static void CycleToNextArrow(PlayState* play, Player* player) {
-    ArrowCycleType nextType = GetNextArrowCycleType(player);
-    PlayerItemAction nextIA = sArrowCycleToPlayerIA[nextType];
+    s8 nextArrow = GetNextArrowType(player->heldItemAction);
 
     if (player->heldActor != NULL && player->heldActor->id == ACTOR_EN_ARROW) {
         EnArrow* arrow = (EnArrow*)player->heldActor;
@@ -295,12 +231,11 @@ static void CycleToNextArrow(PlayState* play, Player* player) {
             Actor_Kill(arrow->actor.child);
         }
 
-        // Killing the held arrow while parent is still set does not consume bomb-arrow ammo
         Actor_Kill(&arrow->actor);
     }
 
-    Player_InitItemAction(play, player, nextIA);
-    UpdateEquippedBow(play, nextType);
+    Player_InitItemAction(play, player, static_cast<PlayerItemAction>(nextArrow));
+    UpdateEquippedBow(play, nextArrow);
     Audio_PlaySfx(NA_SE_PL_CHANGE_ARMS);
 }
 
@@ -323,7 +258,7 @@ void ArrowCycleMain() {
         return;
     }
 
-    if (IsAimingBow(player) && IsCycleButtonPressed(input) && player->heldActor != NULL &&
+    if (IsAimingBow(player) && CHECK_BTN_ANY(input->press.button, BTN_R) && player->heldActor != NULL &&
         player->heldActor->id == ACTOR_EN_ARROW) {
         if (IsHoldingMagicBow(player) && gSaveContext.magicState != MAGIC_STATE_IDLE && player->heldActor == NULL) {
             Audio_PlaySfx(NA_SE_SY_ERROR);

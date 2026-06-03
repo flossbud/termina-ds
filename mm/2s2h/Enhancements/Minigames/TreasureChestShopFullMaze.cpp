@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -7,7 +7,6 @@
 #define TAKARAYA_WALL_COLUMNS 8
 
 extern "C" {
-#include "variables.h"
 extern f32 sTakarayaWallHeights[TAKARAYA_WALL_ROWS][TAKARAYA_WALL_COLUMNS];
 extern u8 sTakarayaWallStates[TAKARAYA_WALL_ROWS][TAKARAYA_WALL_COLUMNS];
 }

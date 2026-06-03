@@ -1,16 +1,20 @@
-#include <libultraship/libultraship.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "variables.h"
 #include "overlays/kaleido_scope/ovl_kaleido_scope/z_kaleido_scope.h"
 }
 
+#define CVAR_NAME "gCheats.EasyFrameAdvance"
+#define CVAR CVarGetInteger(CVAR_NAME, 0)
+
 static int frameAdvanceTimer = 0;
 
 void RegisterEasyFrameAdvance() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateMainStart>([]() {
-        if (!CVarGetInteger("gCheats.EasyFrameAdvance", 0) || gPlayState == NULL) {
+    COND_HOOK(OnGameStateMainStart, CVAR, []() {
+        if (gPlayState == NULL) {
             return;
         }
 
@@ -29,3 +33,5 @@ void RegisterEasyFrameAdvance() {
         }
     });
 }
+
+static RegisterShipInitFunc initFunc(RegisterEasyFrameAdvance, { CVAR_NAME });

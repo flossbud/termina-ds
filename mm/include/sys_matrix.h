@@ -14,7 +14,7 @@ typedef enum {
 } MatrixMode;
 
 #define MATRIX_FINALIZE_AND_LOAD(pkt, gfxCtx) \
-    gSPMatrix(pkt, Matrix_NewMtx(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW)
+    gSPMatrix(pkt, Matrix_Finalize(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW)
 
 extern Mtx gIdentityMtx;
 extern MtxF gIdentityMtxF;
@@ -53,7 +53,7 @@ void Matrix_SetTranslateRotateYXZ(f32 x, f32 y, f32 z, Vec3s* rot);
 
 Mtx* Matrix_MtxFToMtx(MtxF* src, Mtx* dest);
 Mtx* Matrix_ToMtx(Mtx* dest);
-Mtx* Matrix_NewMtx(struct GraphicsContext* gfxCtx);
+Mtx* Matrix_Finalize(struct GraphicsContext* gfxCtx);
 Mtx* Matrix_MtxFToNewMtx(MtxF* src, struct GraphicsContext* gfxCtx);
 
 /* Vector operations */

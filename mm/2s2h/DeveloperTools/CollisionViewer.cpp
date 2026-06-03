@@ -1,13 +1,10 @@
 #include "CollisionViewer.h"
-#include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/BenGui/UIWidgets.hpp"
 
 #include <vector>
 #include <string>
 #include <cmath>
 #include <random>
-#include <libultraship/bridge.h>
-#include <libultraship/libultraship.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 
 extern "C" {
@@ -64,7 +61,7 @@ void CollisionViewerWindow::DrawElement() {
         CVarClear("gCollisionViewer.ATCollisionColor");
         CVarClear("gCollisionViewer.SpecialSurfaceColor");
         CVarClear("gCollisionViewer.InteractableColor");
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
     }
 
     ImGui::SeparatorText("Collision Types");
@@ -82,29 +79,28 @@ void CollisionViewerWindow::DrawElement() {
 
     if (ImGui::BeginTable("table table", 3, ImGuiTableFlags_NoBordersInBody)) {
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Normal", "gCollisionViewer.SceneCollisionColor.Value", { 255, 255, 255, 255 });
+        UIWidgets::CVarColorPicker("Normal", "gCollisionViewer.SceneCollisionColor", { 255, 255, 255, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Void", "gCollisionViewer.VoidCollisionColor.Value", { 255, 0, 0, 255 });
+        UIWidgets::CVarColorPicker("Void", "gCollisionViewer.VoidCollisionColor", { 255, 0, 0, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Entrance", "gCollisionViewer.EntranceCollisionColor.Value", { 0, 255, 0, 255 });
+        UIWidgets::CVarColorPicker("Entrance", "gCollisionViewer.EntranceCollisionColor", { 0, 255, 0, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Slope", "gCollisionViewer.SlopeCollisionColor.Value", { 255, 255, 128, 255 });
+        UIWidgets::CVarColorPicker("Slope", "gCollisionViewer.SlopeCollisionColor", { 255, 255, 128, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Hookshotable", "gCollisionViewer.HookshotCollisionColor.Value",
-                                   { 128, 128, 255, 255 });
+        UIWidgets::CVarColorPicker("Hookshotable", "gCollisionViewer.HookshotCollisionColor", { 128, 128, 255, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("Waterbox", "gCollisionViewer.WaterboxCollisionColor.Value", { 0, 0, 255, 255 });
+        UIWidgets::CVarColorPicker("Waterbox", "gCollisionViewer.WaterboxCollisionColor", { 0, 0, 255, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("OC", "gCollisionViewer.OCollisionColor.Value", { 255, 255, 255, 255 });
+        UIWidgets::CVarColorPicker("OC", "gCollisionViewer.OCollisionColor", { 255, 255, 255, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("AC", "gCollisionViewer.ACollisionColor.Value", { 0, 0, 255, 255 });
+        UIWidgets::CVarColorPicker("AC", "gCollisionViewer.ACollisionColor", { 0, 0, 255, 255 });
         ImGui::TableNextColumn();
-        UIWidgets::CVarColorPicker("AT", "gCollisionViewer.ATCollisionColor.Value", { 255, 0, 0, 255 });
+        UIWidgets::CVarColorPicker("AT", "gCollisionViewer.ATCollisionColor", { 255, 0, 0, 255 });
         ImGui::EndTable();
     }
-    UIWidgets::CVarColorPicker("Special Surface (Grass/Sand/Etc)", "gCollisionViewer.SpecialSurfaceColor.Value",
+    UIWidgets::CVarColorPicker("Special Surface (Grass/Sand/Etc)", "gCollisionViewer.SpecialSurfaceColor",
                                { 192, 255, 192, 255 });
-    UIWidgets::CVarColorPicker("Interactable (Vines/Crawlspace/Etc)", "gCollisionViewer.InteractableColor.Value",
+    UIWidgets::CVarColorPicker("Interactable (Vines/Crawlspace/Etc)", "gCollisionViewer.InteractableColor",
                                { 192, 0, 192, 255 });
 
     ImGui::EndDisabled();
@@ -141,10 +137,10 @@ void CreateCylinderData() {
     cylinderVtx.push_back(gdSPDefVtxN(0, 128, 0, 0, 0, 0, 127, 0, 0xFF)); // Top center vertex
     // Create two rings of vertices
     for (int i = 0; i < CYL_DIVS; ++i) {
-        short vtx_x = floorf(0.5f + cosf(2.f * M_PI * i / CYL_DIVS) * 128.f);
-        short vtx_z = floorf(0.5f - sinf(2.f * M_PI * i / CYL_DIVS) * 128.f);
-        signed char norm_x = cosf(2.f * M_PI * i / CYL_DIVS) * 127.f;
-        signed char norm_z = -sinf(2.f * M_PI * i / CYL_DIVS) * 127.f;
+        short vtx_x = floorf(0.5f + cosf(2.f * M_PIf * i / CYL_DIVS) * 128.f);
+        short vtx_z = floorf(0.5f - sinf(2.f * M_PIf * i / CYL_DIVS) * 128.f);
+        signed char norm_x = cosf(2.f * M_PIf * i / CYL_DIVS) * 127.f;
+        signed char norm_z = -sinf(2.f * M_PIf * i / CYL_DIVS) * 127.f;
         cylinderVtx.push_back(gdSPDefVtxN(vtx_x, 0, vtx_z, 0, 0, norm_x, 0, norm_z, 0xFF));
         cylinderVtx.push_back(gdSPDefVtxN(vtx_x, 128, vtx_z, 0, 0, norm_x, 0, norm_z, 0xFF));
     }

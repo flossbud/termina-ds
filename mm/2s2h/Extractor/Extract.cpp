@@ -6,9 +6,9 @@
 #endif
 #include "Extract.h"
 #include "portable-file-dialogs.h"
-#include <utils/binarytools/BitConverter.h>
+#include <ship/utils/binarytools/BitConverter.h>
 #include "build.h"
-#include <Context.h>
+#include <ship/Context.h>
 
 #ifdef unix
 #include <dirent.h>
@@ -55,6 +55,7 @@
 #include <unordered_map>
 #include <random>
 #include <string>
+#include <sstream>
 
 extern "C" uint32_t CRC32C(unsigned char* data, size_t dataSize);
 
@@ -83,7 +84,7 @@ enum class ButtonId : int {
 const char* javaRomPath = NULL;
 bool fileDialogOpen = false;
 
-//function to be called from C
+// function to be called from C
 void openFilePickerFromC(JNIEnv* env, jobject javaObject) {
     fileDialogOpen = true;
     jclass javaClass = env->GetObjectClass(javaObject);
@@ -91,7 +92,8 @@ void openFilePickerFromC(JNIEnv* env, jobject javaObject) {
     env->CallVoidMethod(javaObject, openFilePickerMethod);
 }
 // Define the native method to handle the selected file path
-extern "C" void JNICALL Java_com_dishii_mm_MainActivity_nativeHandleSelectedFile(JNIEnv* env, jobject obj, jstring filePath) {
+extern "C" void JNICALL Java_com_twoshipfork_mm_MainActivity_nativeHandleSelectedFile(JNIEnv* env, jobject obj,
+                                                                                 jstring filePath) {
     const char* filePathStr = env->GetStringUTFChars(filePath, 0);
     javaRomPath = strdup(filePathStr); // save filepath to string
     fileDialogOpen = false;
@@ -319,14 +321,11 @@ bool Extractor::GetRomPathFromBox() {
     jobject javaObject = (jobject)SDL_AndroidGetActivity();
     std::vector<std::string> selection;
     openFilePickerFromC(javaEnv, javaObject);
-    while(fileDialogOpen){
-        //Do nothing until it's chosen
+    while (fileDialogOpen) {
+        // Do nothing until it's chosen
         SDL_Delay(250);
     }
-    if (javaRomPath == NULL) {
-        return false;
-    }
-    SDL_Log("%s",javaRomPath);
+    SDL_Log("%s", javaRomPath);
     selection.push_back(javaRomPath);
 #endif
     if (selection.empty()) {
@@ -412,6 +411,7 @@ bool Extractor::ManuallySearchForRom() {
     std::ifstream inFile;
 
     if (!GetRomPathFromBox()) {
+        ShowErrorBox("No rom selected", "No Rom selected. Exiting");
         return false;
     }
 
@@ -487,6 +487,17 @@ bool Extractor::Run(std::string searchPath, RomSearchMode searchMode) {
             default:
                 UNREACHABLE;
                 break;
+        }
+    }
+
+    if (roms.size() > 1) {
+        int ret = ShowYesNoBox("Multiple ROMs Found", "Multiple ROM files were detected. Select one manually?");
+        if (ret == IDYES) {
+            if (!ManuallySearchForRomMatchingType(searchMode)) {
+                return false;
+            }
+            roms.clear();
+            roms.push_back(mCurrentRomPath);
         }
     }
 
@@ -578,11 +589,13 @@ std::string Extractor::Mkdtemp() {
 }
 
 extern "C" int zapd_main(int argc, char** argv);
+static void MessageboxWorker();
 
 bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
-    constexpr int argc = 18;
+    constexpr int argc = 22;
     char xmlPath[1024];
     char confPath[1024];
+    char filelistsPath[1024];
     char portVersion[18]; // 5 digits for int16_max (x3) + separators + terminator
     std::array<const char*, argc> argv;
     const char* version = GetZapdVerStr();
@@ -591,16 +604,6 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     std::string romPath = std::filesystem::absolute(mCurrentRomPath).string();
     installPath = std::filesystem::absolute(installPath).string();
     exportdir = std::filesystem::absolute(exportdir).string();
-
-#ifdef __ANDROID__
-    if (!std::filesystem::exists(exportdir) || !std::filesystem::is_directory(exportdir) ||
-        access(exportdir.c_str(), W_OK) != 0) {
-        ShowErrorBox("Storage Permission Required",
-                     "The 2S2H folder is not writable. Please grant file access and restart the app.");
-        return false;
-    }
-#endif
-
     // Work this out in the temporary folder
     std::string tempdir = Mkdtemp();
     std::string curdir = std::filesystem::current_path().string();
@@ -618,9 +621,47 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
 
     std::filesystem::current_path(tempdir);
 
-    snprintf(xmlPath, 1024, "assets/extractor/xmls/%s", version);
+    snprintf(xmlPath, 1024, "assets/xml/%s", version);
     snprintf(confPath, 1024, "assets/extractor/Config_%s.xml", version);
+    snprintf(filelistsPath, 1024, "assets/extractor/filelists");
     snprintf(portVersion, 18, "%d.%d.%d", gBuildVersionMajor, gBuildVersionMinor, gBuildVersionPatch);
+
+#ifdef __ANDROID__
+    std::ostringstream missingPaths;
+    if (!std::filesystem::exists(confPath)) {
+        missingPaths << confPath << "\n";
+    }
+    if (!std::filesystem::exists(xmlPath)) {
+        missingPaths << xmlPath << "\n";
+    }
+    if (!std::filesystem::exists(filelistsPath)) {
+        missingPaths << filelistsPath << "\n";
+    }
+
+    {
+        std::ofstream debugFile(installPath + "/extractor-debug.txt", std::ios::out | std::ios::trunc);
+        debugFile << "tempdir=" << tempdir << "\n";
+        debugFile << "curdir=" << curdir << "\n";
+        debugFile << "cwd=" << std::filesystem::current_path().string() << "\n";
+        debugFile << "installPath=" << installPath << "\n";
+        debugFile << "exportdir=" << exportdir << "\n";
+        debugFile << "romPath=" << romPath << "\n";
+        debugFile << "xmlPath=" << xmlPath << " exists=" << std::filesystem::exists(xmlPath) << "\n";
+        debugFile << "confPath=" << confPath << " exists=" << std::filesystem::exists(confPath) << "\n";
+        debugFile << "filelistsPath=" << filelistsPath << " exists=" << std::filesystem::exists(filelistsPath) << "\n";
+    }
+
+    if (!missingPaths.str().empty()) {
+        std::string error = "The Android extractor asset copy is incomplete. Missing paths in temp directory:\n\n" +
+                            missingPaths.str() +
+                            "\nDelete the assets folder in your selected 2S2H data folder and reinstall a freshly "
+                            "rebuilt APK.";
+        std::filesystem::current_path(curdir);
+        std::filesystem::remove_all(tempdir);
+        ShowErrorBox("Extractor Assets Missing", error.c_str());
+        return false;
+    }
+#endif
 
     argv[0] = "ZAPD";
     argv[1] = "ed";
@@ -629,9 +670,9 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     argv[4] = "-b";
     argv[5] = romPath.c_str();
     argv[6] = "-fl";
-    argv[7] = "assets/extractor/filelists";
+    argv[7] = filelistsPath;
     argv[8] = "-gsf";
-    argv[9] = "1";
+    argv[9] = "0";
     argv[10] = "-rconf";
     argv[11] = confPath;
     argv[12] = "-se";
@@ -640,6 +681,10 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     argv[15] = otrFile;
     argv[16] = "--portVer";
     argv[17] = portVersion;
+    argv[18] = "-o";
+    argv[19] = "placeholder";
+    argv[20] = "-osf";
+    argv[21] = "placeholder";
 
 #ifdef _WIN32
     // Grab a handle to the command window.
@@ -650,14 +695,25 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     ShowWindow(cmdWindow, SW_SHOW);
     SetWindowPos(cmdWindow, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 #else
-    // Show extraction in background message until linux/mac can have visual progress
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Extracting",
-                             "Extraction will now begin in the background.\n\nPlease be patient for the process to "
-                             "finish. Do not close the main program.",
-                             nullptr);
+    std::thread mbThread(MessageboxWorker);
+    mbThread.detach();
 #endif
 
-    zapd_main(argc, (char**)argv.data());
+    try {
+        zapd_main(argc, (char**)argv.data());
+    } catch (const std::exception& e) {
+        std::string error = "ZAPD extraction failed:\n\n";
+        error += e.what();
+        std::filesystem::current_path(curdir);
+        std::filesystem::remove_all(tempdir);
+        ShowErrorBox("Extractor Failed", error.c_str());
+        return false;
+    } catch (...) {
+        std::filesystem::current_path(curdir);
+        std::filesystem::remove_all(tempdir);
+        ShowErrorBox("Extractor Failed", "ZAPD extraction failed with an unknown exception.");
+        return false;
+    }
 
 #ifdef _WIN32
     // Hide the command window again.
@@ -670,5 +726,12 @@ bool Extractor::CallZapd(std::string installPath, std::string exportdir) {
     std::filesystem::current_path(curdir);
     std::filesystem::remove_all(tempdir);
 
-    return 0;
+    return false;
+}
+
+static void MessageboxWorker() {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Extracting",
+                             "Extraction will now begin in the background.\n\nPlease be patient for the process to "
+                             "finish. Do not close the main program.",
+                             nullptr);
 }

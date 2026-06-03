@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -34,43 +34,10 @@ void EnKaizoku_ChangeAnim(EnKaizoku* enKaizoku, EnKaizokuAnimation animIndex);
 void EnWiz_SetupSecondPhaseCutscene(EnWiz* enWiz, PlayState* play);
 extern EnKnight* sThinKnightInstance;
 extern EnKnight* sWideKnightInstance;
-
-void func_80B86B58(EnKaizoku* enKaizoku);
-void func_80B86B74(EnKaizoku* enKaizoku, PlayState* play);
-void func_80B872A4(EnKaizoku* enKaizoku);
-void func_80B8971C(EnKaizoku* enKaizoku, PlayState* play);
-void func_809F24C8(Boss06* boss06, PlayState* play);
-void func_809F2EE8(Boss06* boss06, PlayState* play);
-void func_809B3E9C(EnKnight* enKnight, PlayState* play);
-void func_809B71DC(EnKnight* enKnight, PlayState* play);
-extern EnKnight* D_809BEFD4;
-extern EnKnight* D_809BEFD8;
 }
 
 #define CVAR_NAME "gEnhancements.Cutscenes.SkipEnemyCutscenes"
 #define CVAR CVarGetInteger(CVAR_NAME, 0)
-
-#define EnKaizoku_SetupPlayerWinCutscene func_80B86B58
-#define EnKaizoku_PlayerWinCutscene func_80B86B74
-#define EnKaizoku_SetupReady func_80B872A4
-#define EnKaizoku_DefeatKnockdown func_80B8971C
-#define Boss06_CurtainBurningCutscene func_809F24C8
-#define Boss06_CurtainDestroyed func_809F2EE8
-#define EnKnight_SetupWait func_809B3E9C
-#define EnKnight_IgosSitting func_809B71DC
-#define sThinKnightInstance D_809BEFD4
-#define sWideKnightInstance D_809BEFD8
-
-#define EVENTINF_INTRO_CS_WATCHED_GOHT EVENTINF_53
-#define EVENTINF_INTRO_CS_WATCHED_ODOLWA EVENTINF_54
-#define EVENTINF_INTRO_CS_WATCHED_TWINMOLD EVENTINF_55
-#define EVENTINF_INTRO_CS_WATCHED_GYORG EVENTINF_56
-#define EVENTINF_INTRO_CS_WATCHED_IGOS_DU_IKANA EVENTINF_57
-#define EVENTINF_INTRO_CS_WATCHED_WART EVENTINF_60
-#define EVENTINF_INTRO_CS_WATCHED_MAJORA EVENTINF_61
-#define EVENTINF_ENTR_CS_WATCHED_GOHT EVENTINF_62
-#define EVENTINF_INTRO_CS_WATCHED_GOMESS EVENTINF_63
-#define ACTOR_FLAG_FREEZE_EXCEPTION ACTOR_FLAG_100000
 
 // Set by enemy actors to control the camera override hooks
 static bool skipSetCamera = false;
@@ -171,19 +138,19 @@ void RegisterSkipEnemyIntros() {
             // Pirate already defeated, don't do anything
             return;
         }
-        enKaizoku->unk_59C = 0;
+        enKaizoku->cutsceneState = 0;
         enKaizoku->picto.actor.flags &= ~ACTOR_FLAG_FREEZE_EXCEPTION;
         enKaizoku->picto.actor.flags &= ~ACTOR_FLAG_LOCK_ON_DISABLED;
         enKaizoku->picto.actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
         enKaizoku->picto.actor.draw = EnKaizoku_Draw;
         enKaizoku->picto.actor.gravity = -2.0f;
-        enKaizoku->unk_2F8.x = 1.0f;
-        enKaizoku->unk_2F8.y = 1.0f;
-        enKaizoku->unk_2F8.z = 1.0f;
-        enKaizoku->unk_304.x = 1.0f;
-        enKaizoku->unk_304.y = 1.0f;
-        enKaizoku->unk_304.z = 1.0f;
-        enKaizoku->unk_2D8 = 0; // Flag for updating animation
+        enKaizoku->swordScaleRight.x = 1.0f;
+        enKaizoku->swordScaleRight.y = 1.0f;
+        enKaizoku->swordScaleRight.z = 1.0f;
+        enKaizoku->swordScaleLeft.x = 1.0f;
+        enKaizoku->swordScaleLeft.y = 1.0f;
+        enKaizoku->swordScaleLeft.z = 1.0f;
+        enKaizoku->animationsDisabled = 0; // Flag for updating animation
         Audio_SetMainBgmVolume(0x7F, 0);
         Audio_PlayBgm_StorePrevBgm(NA_BGM_MINI_BOSS);
         EnKaizoku_SetupReady(enKaizoku);
@@ -341,10 +308,10 @@ void RegisterSkipEnemyCutscenes() {
         EnKaizoku* enKaizoku = (EnKaizoku*)actor;
         if (enKaizoku->actionFunc == EnKaizoku_DefeatKnockdown) {
             if (enKaizoku->skelAnime.curFrame >= 25.0f) {
-                enKaizoku->unk_2D8 = false;
-                enKaizoku->unk_59C = 2; // Skip actor+player position change
+                enKaizoku->animationsDisabled = false;
+                enKaizoku->cutsceneState = 2; // Skip actor+player position change
                 EnKaizoku_SetupPlayerWinCutscene(enKaizoku);
-                EnKaizoku_ChangeAnim(enKaizoku, EN_KAIZOKU_ANIM_18);
+                EnKaizoku_ChangeAnim(enKaizoku, KAIZOKU_ANIM_THROW_FLASH);
             }
         } else if (enKaizoku->actionFunc == EnKaizoku_PlayerWinCutscene) {
             // Restore player's rotation; do not constantly face pirate
@@ -371,16 +338,16 @@ void RegisterSkipEnemyCutscenes() {
         Boss06* boss06 = (Boss06*)actor;
         // Igos du Ikana curtain burning. Just instantly snap to the post-burned state
         if (boss06->actionFunc == Boss06_CurtainBurningCutscene) {
-            boss06->unk_1C9 = 2; // BOSS06_CS_STATE_PAN_OVER_LIGHT_RAY
-            boss06->unk_1CA = 0;
-            boss06->unk_1B4 = 0.0f;
-            boss06->unk_1B0 = 0.0f;
-            boss06->unk_144 = 2; // BOSS06_DRAWFLAG_LIGHT_RAY
-            boss06->unk_1A4 = 0.0f;
-            boss06->unk_1A0 = 0.0f;
-            boss06->unk_1DC = 18.0f;
-            boss06->unk_1E0 = 255.0f;
-            boss06->unk_19C = 1.0f;
+            boss06->csState = 2; // BOSS06_CS_STATE_PAN_OVER_LIGHT_RAY
+            boss06->csFrameCount = 0;
+            boss06->arrowHitPos.y = 0.0f;
+            boss06->arrowHitPos.x = 0.0f;
+            boss06->drawFlags = 2; // BOSS06_DRAWFLAG_LIGHT_RAY
+            boss06->lightRayBaseOffsetZ = 0.0f;
+            boss06->lightRayTopVerticesOffset = 0.0f;
+            boss06->lightOrbScale = 18.0f;
+            boss06->lightOrbAlphaFactor = 255.0f;
+            boss06->lightRayBrightness = 1.0f;
             Actor_SpawnAsChild(&gPlayState->actorCtx, actor, gPlayState, ACTOR_MIR_RAY2, actor->world.pos.x,
                                actor->world.pos.y - 200.0f, actor->world.pos.z - 170.0f, 15, 0, 0, 1);
             boss06->actionFunc = Boss06_CurtainDestroyed;
@@ -394,14 +361,15 @@ void RegisterSkipEnemyCutscenes() {
         if (enKnight->actionFunc == EnKnight_IgosSitting) {
             // This is Igos, and the two lackeys have been slain. Skip cutscene, start next phase
             if (sThinKnightInstance->actor.draw == NULL && sWideKnightInstance->actor.draw == NULL) {
-                enKnight->unk17A = enKnight->unk178 = enKnight->unk176 = enKnight->unk174 = 0;
-                enKnight->unk684 = 0;
-                enKnight->unk6A4 = 0.0f;
-                enKnight->unk46C = enKnight->unk470 = 1.0f;
-                enKnight->unk688 = 0;
+                enKnight->rightLegLowerRotation = enKnight->leftLegLowerRotation = enKnight->rightLegUpperRotation =
+                    enKnight->leftLegUpperRotation = 0;
+                enKnight->csTimer = 0;
+                enKnight->csStepValue = 0.0f;
+                enKnight->swordScale = enKnight->shieldScale = 1.0f;
+                enKnight->csState = 0;
                 EnKnight_SetupWait(enKnight, gPlayState);
-                enKnight->unk14A[2] = 300;
-                enKnight->unk152 = true;
+                enKnight->timers[2] = 300;
+                enKnight->doBgChecks = true;
                 enKnight->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
                 enKnight->actor.gravity = -1.5f;
             }

@@ -1,24 +1,6 @@
 #ifndef ENHANCEMENTS_H
 #define ENHANCEMENTS_H
 
-#include "Camera/Camera.h"
-#include "Cheats/Cheats.h"
-#include "Cutscenes/Cutscenes.h"
-#include "Cycle/Cycle.h"
-#include "Dialogue/Dialogue.h"
-#include "Equipment/Equipment.h"
-#include "Fixes/Fixes.h"
-#include "Graphics/Graphics.h"
-#include "Masks/Masks.h"
-#include "Minigames/Minigames.h"
-#include "Modes/Modes.h"
-#include "Player/Player.h"
-#include "Restorations/Restorations.h"
-#include "Saving/SavingEnhancements.h"
-#include "Songs/Songs.h"
-#include "DifficultyOptions/DifficultyOptions.h"
-#include "Timesavers/Timesavers.h"
-
 enum AlwaysWinDoggyRaceOptions {
     ALWAYS_WIN_DOGGY_RACE_OFF,
     ALWAYS_WIN_DOGGY_RACE_MASKOFTRUTH,
@@ -79,27 +61,5 @@ enum GoronRaceDifficultyOptions {
     GORON_RACE_DIFFICULTY_BALANCED,
     GORON_RACE_DIFFICULTY_SKIP,
 };
-
-enum MirroredWorldModeOptions {
-    MIRRORED_WORLD_OFF,
-    MIRRORED_WORLD_ALWAYS,
-    MIRRORED_WORLD_RANDOM,
-    MIRRORED_WORLD_RANDOM_SEEDED,
-    MIRRORED_WORLD_DUNGEONS_TEMPLES,
-    MIRRORED_WORLD_DUNGEONS_SPIDERS,
-    MIRRORED_WORLD_DUNGEONS_ALL,
-    MIRRORED_WORLD_DUNGEONS_RANDOM,
-    MIRRORED_WORLD_DUNGEONS_RANDOM_SEEDED,
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void InitEnhancements();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // ENHANCEMENTS_H

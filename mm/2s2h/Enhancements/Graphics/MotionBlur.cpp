@@ -1,18 +1,16 @@
-#include <libultraship/bridge.h>
-
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/BenGui/UIWidgets.hpp"
 
 extern "C" {
-#include "z64.h"
+#include "variables.h"
 }
 
 const char* motionBlurOptions[] = { "Dynamic (default)", "Always Off", "Always On" };
 
 void MotionBlur_RenderMenuOptions() {
     ImGui::SeparatorText("Motion Blur");
-    UIWidgets::CVarCombobox(
-        "Motion Blur Mode", "gEnhancements.Graphics.MotionBlur.Mode", motionBlurOptions,
-        UIWidgets::ComboboxOptions().LabelPosition(UIWidgets::LabelPosition::None));
+    UIWidgets::CVarCombobox("Motion Blur Mode", "gEnhancements.Graphics.MotionBlur.Mode", motionBlurOptions,
+                            UIWidgets::ComboboxOptions().LabelPosition(UIWidgets::LabelPosition::None));
 
     UIWidgets::CVarCheckbox(
         "Interpolate", "gEnhancements.Graphics.MotionBlur.Interpolate",
@@ -24,8 +22,7 @@ void MotionBlur_RenderMenuOptions() {
         UIWidgets::Checkbox("On/Off", (bool*)&R_MOTION_BLUR_ENABLED);
         if (R_MOTION_BLUR_ENABLED) {
             int32_t motionBlurStrength = R_MOTION_BLUR_ALPHA;
-            if (UIWidgets::SliderInt("Strength", &motionBlurStrength,
-                                     UIWidgets::IntSliderOptions().Min(0).Max(255))) {
+            if (UIWidgets::SliderInt("Strength", &motionBlurStrength, { .min = 0, .max = 255 })) {
                 R_MOTION_BLUR_ALPHA = motionBlurStrength;
             }
         }

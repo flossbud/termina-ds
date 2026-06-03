@@ -14,6 +14,7 @@
 #include "stack.h"
 #include "stackcheck.h"
 #include "BenPort.h"
+#include <libultraship/bridge/crashhandlerbridge.h>
 
 // Variables are put before most headers as a hacky way to bypass bss reordering
 OSMesgQueue sSerialEventQueue;
@@ -49,27 +50,85 @@ size_t gSystemHeapSize = 0;
 #ifdef __ANDROID__
 #include <jni.h>
 #include <SDL.h>
+extern void Android_SetDataRootPath(const char* path);
+
+static void update_native_data_root_path(JNIEnv* env) {
+    jclass mainActivityClass = (*env)->FindClass(env, "com/twoshipfork/mm/MainActivity");
+    if (mainActivityClass == NULL) {
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionClear(env);
+        }
+        return;
+    }
+
+    jmethodID getPathMethod =
+        (*env)->GetStaticMethodID(env, mainActivityClass, "getDataRootPathFromNative", "()Ljava/lang/String;");
+    if (getPathMethod == NULL) {
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionClear(env);
+        }
+        (*env)->DeleteLocalRef(env, mainActivityClass);
+        return;
+    }
+
+    jstring javaPath = (jstring)(*env)->CallStaticObjectMethod(env, mainActivityClass, getPathMethod);
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        (*env)->DeleteLocalRef(env, mainActivityClass);
+        return;
+    }
+
+    if (javaPath != NULL) {
+        const char* path = (*env)->GetStringUTFChars(env, javaPath, NULL);
+        if (path != NULL) {
+            Android_SetDataRootPath(path);
+            (*env)->ReleaseStringUTFChars(env, javaPath, path);
+        }
+        (*env)->DeleteLocalRef(env, javaPath);
+    }
+
+    (*env)->DeleteLocalRef(env, mainActivityClass);
+}
+
 void wait_for_java_setup() {
     JNIEnv* env = SDL_AndroidGetJNIEnv();
-    jobject activity = SDL_AndroidGetActivity();
-
-    jclass activityClass = (*env)->GetObjectClass(env, activity);
-    jclass mainActivityClass = (*env)->FindClass(env, "com/dishii/mm/MainActivity");
+    jclass mainActivityClass = (*env)->FindClass(env, "com/twoshipfork/mm/MainActivity");
+    if (mainActivityClass == NULL) {
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionClear(env);
+        }
+        return;
+    }
 
     jmethodID waitMethod = (*env)->GetStaticMethodID(env, mainActivityClass, "waitForSetupFromNative", "()V");
+    if (waitMethod == NULL) {
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionClear(env);
+        }
+        (*env)->DeleteLocalRef(env, mainActivityClass);
+        return;
+    }
 
     (*env)->CallStaticVoidMethod(env, mainActivityClass, waitMethod);
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        (*env)->DeleteLocalRef(env, mainActivityClass);
+        return;
+    }
+
+    (*env)->DeleteLocalRef(env, mainActivityClass);
+    update_native_data_root_path(env);
 }
 #endif
 
 void InitOTR();
-
+void Heaps_Free(void);
 #ifdef __GNUC__
 #define SDL_main main
 #endif
 #ifdef __ANDROID__
 int SDL_main(int argc, char** argv /* void* arg*/) {
-    wait_for_java_setup();  // Pause here until Java is ready
+    wait_for_java_setup(); // Pause here until Java is ready
 #else
 void SDL_main(int argc, char** argv /* void* arg*/) {
 #endif
@@ -92,6 +151,7 @@ void SDL_main(int argc, char** argv /* void* arg*/) {
 #endif // _WIN32
 
     InitOTR();
+    CrashHandlerRegisterCallback(CrashHandler_PrintExt);
     Heaps_Alloc();
 
     gScreenWidth = SCREEN_WIDTH;
@@ -102,7 +162,7 @@ void SDL_main(int argc, char** argv /* void* arg*/) {
     Check_RegionIsSupported();
     Check_ExpansionPak();
     sysHeap = gSystemHeap;
-    // fb = 0x80780000;
+    // fb = FRAMEBUFFERS_START_ADDR;
     // gSystemHeapSize = fb - sysHeap;
     SystemHeap_Init(sysHeap, SYSTEM_HEAP_SIZE);
 
@@ -168,4 +228,5 @@ void SDL_main(int argc, char** argv /* void* arg*/) {
 #ifdef _WIN32
     FreeConsole();
 #endif
+    Heaps_Free();
 }

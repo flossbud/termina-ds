@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -24,6 +24,7 @@ void RegisterInfiniteDekuHopping() {
         Player* player = GET_PLAYER(gPlayState);
 
         if (player->transformation == PLAYER_FORM_DEKU && player->stateFlags3 & PLAYER_STATE3_200000) {
+            // Deku Link's air control speedTarget gets halved, so we negate that by doubling it when deku hopping
             *dekuSpeedTargetMultiplier *= 2.0f;
         }
     });

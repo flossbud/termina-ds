@@ -2,11 +2,6 @@
 #define RANDO_CLOCK_SHUFFLE_H
 
 #include "Rando/Types.h"
-#include <string>
-
-extern "C" {
-#include "ultra64.h"
-}
 
 namespace Rando {
 namespace ClockItems {

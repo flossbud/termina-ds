@@ -1,11 +1,6 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
-
-extern "C" {
-#include "functions.h"
-#include "variables.h"
-}
 
 #define CVAR_NAME "gEnhancements.Masks.EquipWhileSwimming"
 #define CVAR CVarGetInteger(CVAR_NAME, 0)

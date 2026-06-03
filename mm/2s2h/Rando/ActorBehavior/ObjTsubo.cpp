@@ -1,5 +1,5 @@
 #include "ActorBehavior.h"
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 
 #include "2s2h/CustomItem/CustomItem.h"
 #include "2s2h/Rando/Rando.h"
@@ -335,7 +335,7 @@ void IdentifyPot(Actor* actor, bool* should) {
 
 void ObjTsubo_RandoDraw(Actor* actor, PlayState* play) {
     if (!CVarGetInteger("gRando.CSMC", 0)) {
-        Gfx_DrawDListOpa(play, (Gfx*)gPotMajorDL);
+        Gfx_DrawDListOpa(play, (Gfx*)gPotStandardDL);
         return;
     }
 

@@ -6,7 +6,7 @@
 
 #include "z_file_select.h"
 #include "z64rumble.h"
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 
 // When choosing a file to copy or erase, the 6 main menu buttons are placed at these offsets
 s16 sChooseFileYOffsets[] = { -48, -48, -48, -24, -24, 0 };
@@ -104,6 +104,7 @@ void FileSelect_SelectCopySource(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY >= 30) {
                 this->buttonIndex--;
+                // Instead of removing File 3 entirely, the index is manually adjusted to skip it
                 if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
                     this->buttonIndex == FS_BTN_COPY_FILE_3) {
                     this->buttonIndex = FS_BTN_COPY_FILE_2;
@@ -113,6 +114,7 @@ void FileSelect_SelectCopySource(GameState* thisx) {
                 }
             } else {
                 this->buttonIndex++;
+                // Instead of removing File 3 entirely, the index is manually adjusted to skip it
                 if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
                     this->buttonIndex == FS_BTN_COPY_FILE_3) {
                     this->buttonIndex = FS_BTN_COPY_QUIT;
@@ -238,6 +240,7 @@ void FileSelect_SelectCopyDest(GameState* thisx) {
             Audio_PlaySfx(NA_SE_SY_FSEL_CURSOR);
             if (this->stickAdjY >= 30) {
                 this->buttonIndex--;
+                // Instead of removing File 3 entirely, the index is manually adjusted to skip it
                 if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
                     this->buttonIndex == FS_BTN_COPY_FILE_3) {
                     this->buttonIndex = FS_BTN_COPY_FILE_2;
@@ -247,6 +250,7 @@ void FileSelect_SelectCopyDest(GameState* thisx) {
                     if (this->buttonIndex < FS_BTN_COPY_FILE_1) {
                         this->buttonIndex = FS_BTN_COPY_QUIT;
                     }
+                    // Instead of removing File 3 entirely, the index is manually adjusted to skip it
                     if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
                         this->buttonIndex == FS_BTN_COPY_FILE_3) {
                         this->buttonIndex = FS_BTN_COPY_FILE_2;
@@ -262,6 +266,7 @@ void FileSelect_SelectCopyDest(GameState* thisx) {
                 if (this->buttonIndex == this->selectedFileIndex) {
                     this->buttonIndex++;
                 }
+                // Instead of removing File 3 entirely, the index is manually adjusted to skip it
                 if (!CVarGetInteger("gEnhancements.Saving.FileSlot3", true) &&
                     this->buttonIndex == FS_BTN_COPY_FILE_3) {
                     this->buttonIndex = FS_BTN_COPY_QUIT;
@@ -415,7 +420,7 @@ void FileSelect_CopyConfirm(GameState* thisx) {
     FileSelectState* this = (FileSelectState*)thisx;
     SramContext* sramCtx = &this->sramCtx;
     Input* input = CONTROLLER1(&this->state);
-    u16 dayTime;
+    u16 time;
 
     if (((this->buttonIndex != FS_BTN_CONFIRM_YES) && CHECK_BTN_ANY(input->press.button, BTN_A | BTN_START)) ||
         CHECK_BTN_ALL(input->press.button, BTN_B)) {
@@ -424,8 +429,7 @@ void FileSelect_CopyConfirm(GameState* thisx) {
         this->configMode = CM_RETURN_TO_COPY_DEST;
         Audio_PlaySfx(NA_SE_SY_FSEL_CLOSE);
     } else if (CHECK_BTN_ANY(input->press.button, BTN_A | BTN_START)) {
-        dayTime = gSaveContext.save.time;
-        gSaveContext.save.time = dayTime;
+        gSaveContext.save.time = time = CURRENT_TIME; // Set to itself with unused temp
         this->nameAlpha[this->copyDestFileIndex] = 0;
         this->fileInfoAlpha[this->copyDestFileIndex] = this->nameAlpha[this->copyDestFileIndex];
         this->nextTitleLabel = FS_TITLE_COPY_COMPLETE;
@@ -434,7 +438,8 @@ void FileSelect_CopyConfirm(GameState* thisx) {
         if (!gSaveContext.flashSaveAvailable) {
             this->configMode = CM_COPY_ANIM_1;
         } else {
-            Sram_SetFlashPagesDefault(sramCtx, gFlashSaveStartPages[this->copyDestFileIndex * FLASH_SAVE_MAIN_MULTIPLIER],
+            Sram_SetFlashPagesDefault(sramCtx,
+                                      gFlashSaveStartPages[this->copyDestFileIndex * FLASH_SAVE_MAIN_MULTIPLIER],
                                       gFlashSpecialSaveNumPages[this->copyDestFileIndex * FLASH_SAVE_MAIN_MULTIPLIER]);
             Sram_StartWriteToFlashDefault(sramCtx);
             this->configMode = CM_COPY_WAIT_FOR_FLASH_SAVE;

@@ -8,23 +8,12 @@
 extern "C" {
 #include "overlays/actors/ovl_En_Test4/z_en_test4.h"
 #include "overlays/actors/ovl_Obj_Tokei_Step/z_obj_tokei_step.h"
-void func_80A42198(EnTest4* thisx);
-void func_80A425E4(EnTest4* thisx, PlayState* play);
+void EnTest4_GetBellTimeOnDay3(EnTest4* thisx);
+void EnTest4_GetBellTimeAndShrinkScreenBeforeDay3(EnTest4* thisx, PlayState* play);
 void ObjTokeiStep_SetupOpen(ObjTokeiStep* thisx);
 void ObjTokeiStep_DrawOpen(Actor* thisx, PlayState* play);
 void ObjTokeiStep_DoNothing(ObjTokeiStep* thisx, PlayState* play);
 }
-
-#ifndef PLAYER_START_MODE_B
-#define PLAYER_START_MODE_B PLAYER_INITMODE_B
-#endif
-
-#define prevTime unk_146
-#define daytimeIndex csIdIndex
-#define prevBellTime lastBellTime
-#define sceneSequences sequenceCtx
-#define EnTest4_GetBellTimeOnDay3 func_80A42198
-#define EnTest4_GetBellTimeAndShrinkScreenBeforeDay3 func_80A425E4
 
 static constexpr u16 DAWN_TIME = CLOCK_TIME(6, 0);
 static constexpr u16 DUSK_TIME = CLOCK_TIME(18, 0);
@@ -188,7 +177,7 @@ static void ForceSceneReload() {
     gPlayState->transitionTrigger = TRANS_TRIGGER_START;
     gPlayState->transitionType = TRANS_TYPE_FADE_BLACK_FAST;
 
-    Play_SetRespawnData(&gPlayState->state, RESPAWN_MODE_RETURN, gSaveContext.save.entrance, gPlayState->roomCtx.curRoom.num,
+    Play_SetRespawnData(gPlayState, RESPAWN_MODE_RETURN, gSaveContext.save.entrance, gPlayState->roomCtx.curRoom.num,
                         PLAYER_PARAMS(0xFF, PLAYER_START_MODE_B), &player->actor.world.pos, player->actor.world.rot.y);
 
     gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK;
@@ -261,9 +250,11 @@ static bool CheckAndSkipUnownedTime(Actor* timeActor) {
             enTest4->daytimeIndex = 0;
             gSaveContext.save.day--;
         } else {
-            enTest4->daytimeIndex = IsNight(time) ? 0 : 1;
+            // For DUSK skips, set to DAY so vanilla's dusk transition fires on the next
+            // frame, displaying the "Night of..." title card and dog cry SFX.
+            enTest4->daytimeIndex = (time == DUSK_TIME) ? 1 : (IsNight(time) ? 0 : 1);
             Interface_NewDay(gPlayState, gSaveContext.save.day);
-            func_800FEAF4(&gPlayState->envCtx);
+            Environment_NewDay(&gPlayState->envCtx);
 
             // Flip numSetupActors to trigger actor kill/respawn for the new half-day.
             gPlayState->numSetupActors = -gPlayState->numSetupActors;
@@ -288,7 +279,7 @@ static bool CheckAndSkipUnownedTime(Actor* timeActor) {
         gSaveContext.screenScaleFlag = false;
         gSaveContext.screenScale = 1000.0f;
 
-        if (gSaveContext.save.day == 3 && IsNight(time)) {
+        if (gSaveContext.save.day == 3 && time < DAWN_TIME) {
             ObjTokeiStep* objTokeiStep = (ObjTokeiStep*)Actor_FindNearby(gPlayState, &GET_PLAYER(gPlayState)->actor,
                                                                          ACTOR_OBJ_TOKEI_STEP, ACTORCAT_BG, 99999.9f);
             if (objTokeiStep != NULL && objTokeiStep->actionFunc == ObjTokeiStep_DoNothing) {
@@ -297,7 +288,11 @@ static bool CheckAndSkipUnownedTime(Actor* timeActor) {
             }
         }
 
-        enTest4->prevTime = time - CLOCK_TIME(0, 1);
+        // For dawn skips, prevTime must be just before dawn (in the nighttime range) so the
+        // night-to-day detection in CheckAndSkipUnownedTime correctly increments the day.
+        // For other skips (dusk/terminal), use the destination time directly to prevent
+        // false dawn transition detection caused by s16 wrapping in EnTest4_HandleEvents.
+        enTest4->prevTime = (time == DAWN_TIME) ? (time - CLOCK_TIME(0, 1)) : time;
         return true;
     }
     return false;

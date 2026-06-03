@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <window/gui/GuiWindow.h>
+#include <ship/window/gui/GuiWindow.h>
 
 class BenModalWindow final : public Ship::GuiWindow {
   public:
@@ -15,6 +15,5 @@ class BenModalWindow final : public Ship::GuiWindow {
                        std::function<void()> button1callback = nullptr,
                        std::function<void()> button2callback = nullptr);
     bool IsPopupOpen(std::string title);
-    size_t PopupsQueued();
     void DismissPopup();
 };

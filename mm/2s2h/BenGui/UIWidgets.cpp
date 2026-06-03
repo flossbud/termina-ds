@@ -1,6 +1,7 @@
 #include "UIWidgets.hpp"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
+#include <algorithm>
 #include <string>
 #include <random>
 #include <unordered_map>
@@ -9,6 +10,30 @@
 #include "2s2h/BenPort.h"
 
 namespace UIWidgets {
+
+static ImVec2 AndroidCompactPadding(ImVec2 padding) {
+#if defined(__ANDROID__)
+    return ImVec2(std::min(padding.x, 6.0f), std::min(padding.y, 3.0f));
+#else
+    return padding;
+#endif
+}
+
+static float AndroidCompactBorder(float border) {
+#if defined(__ANDROID__)
+    return std::min(border, 1.0f);
+#else
+    return border;
+#endif
+}
+
+static float AndroidCompactAlpha(float alpha) {
+#if defined(__ANDROID__)
+    return std::min(alpha, 0.85f);
+#else
+    return alpha;
+#endif
+}
 
 // Automatically adds newlines to break up text longer than a specified number of characters
 // Manually included newlines will still be respected and reset the line length
@@ -117,8 +142,8 @@ void PushStyleButton(const ImVec4& color, const ImVec2 padding) {
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(color.x, color.y, color.z, 0.6f));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(padding));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, AndroidCompactBorder(5.0f));
 }
 
 void PushStyleButton(Colors color, ImVec2 padding) {
@@ -134,13 +159,13 @@ void PushStyleInput(const ImVec4& color) {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(color.x, color.y, color.z, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(color.x, color.y, color.z, 0.8f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(color.x, color.y, color.z, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, 0.8f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(1.0f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(0.8f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(0.6f)));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(ImVec2(10.0f, 8.0f)));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, AndroidCompactBorder(5.0f));
 }
 
 void PushStyleInput(Colors color) {
@@ -203,14 +228,14 @@ bool WindowButton(const char* label, const char* cvarName, std::shared_ptr<Ship:
 }
 
 void PushStyleCheckbox(const ImVec4& color, ImVec2 padding) {
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, 0.8f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(1.0f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(0.8f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(0.6f)));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
     ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(1.0f, 1.0f, 1.0f, 0.7f));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(padding));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, AndroidCompactBorder(5.0f));
 }
 
 void PushStyleCheckbox(Colors color, ImVec2 padding) {
@@ -446,7 +471,7 @@ bool Checkbox(const char* _label, bool* value, const CheckboxOptions& options) {
                                                             : ImGuiCol_FrameBg),
                        true, style.FrameRounding);
     ImU32 check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
-    bool mixed_value = (g.LastItemData.InFlags & ImGuiItemFlags_MixedValue) != 0;
+    bool mixed_value = (g.LastItemData.ItemFlags & ImGuiItemFlags_MixedValue) != 0;
     if (mixed_value) {
         // Undocumented tristate/mixed/indeterminate checkbox (#2644)
         // This may seem awkwardly designed because the aim is to make ImGuiItemFlags_MixedValue supported by all
@@ -474,7 +499,7 @@ bool CVarCheckbox(const char* label, const char* cvarName, const CheckboxOptions
     bool value = (bool)CVarGetInteger(cvarName, options.defaultValue);
     if (Checkbox(label, &value, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -499,14 +524,14 @@ bool StateButton(const char* str_id, const char* label, ImVec2 size, ButtonOptio
     if (!ImGui::ItemAdd(bb, id))
         return false;
 
-    if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat) {
+    if (g.LastItemData.ItemFlags & ImGuiItemFlags_ButtonRepeat) {
         ImGui::PushItemFlag(ImGuiItemFlags_ButtonRepeat, true);
     }
 
     bool hovered, held;
     bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
 
-    if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat) {
+    if (g.LastItemData.ItemFlags & ImGuiItemFlags_ButtonRepeat) {
         ImGui::PopItemFlag(); // ImGuiItemFlags_ButtonRepeat;
     }
     PushStyleButton(options.color);
@@ -557,7 +582,7 @@ void PushStyleCombobox(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 3.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(ImVec2(10.0f, 6.0f)));
 }
 
 void PushStyleCombobox(Colors color) {
@@ -579,7 +604,7 @@ void PushStyleTabs(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 3.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(ImVec2(10.0f, 6.0f)));
 }
 
 void PushStyleTabs(Colors color) {
@@ -593,15 +618,15 @@ void PopStyleTabs() {
 
 void PushStyleSlider(Colors color_) {
     const ImVec4& color = ColorValues.at(color_);
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(1.0f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(1.0f)));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, AndroidCompactAlpha(1.0f)));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(color.x, color.y, color.z, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0, 1.0, 1.0, 0.4f));
     ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1.0, 1.0, 1.0, 0.5f));
     ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 3.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, AndroidCompactPadding(ImVec2(10.0f, 8.0f)));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 }
 
@@ -716,7 +741,7 @@ bool CVarSliderInt(const char* label, const char* cvarName, const IntSliderOptio
     int32_t value = CVarGetInteger(cvarName, options.defaultValue);
     if (SliderInt(label, &value, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -858,7 +883,7 @@ bool CVarSliderFloat(const char* label, const char* cvarName, const FloatSliderO
     float value = CVarGetFloat(cvarName, options.defaultValue);
     if (SliderFloat(label, &value, options)) {
         CVarSetFloat(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -932,7 +957,7 @@ bool CVarInputString(const char* label, const char* cvarName, const InputOptions
     std::string value = CVarGetString(cvarName, options.defaultValue.c_str());
     if (InputString(label, &value, options)) {
         CVarSetString(cvarName, value.c_str());
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -984,19 +1009,26 @@ bool CVarInputInt(const char* label, const char* cvarName, const InputOptions& o
     int32_t value = CVarGetInteger(cvarName, defaultValue);
     if (InputInt(label, &value, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
     return dirty;
 }
 
-bool CVarColorPicker(const char* label, const char* valueCvar, Color_RGBA8 defaultColor, bool hasAlpha,
-                     const char* lockedCvar, UIWidgets::Colors themeColor) {
-    Color_RGBA8 color = CVarGetColor(valueCvar, defaultColor);
+bool CVarColorPicker(const char* label, const char* cvarName, Color_RGBA8 defaultColor, bool hasAlpha,
+                     uint8_t modifiers, UIWidgets::Colors themeColor) {
+    std::string valueCVar = std::string(cvarName) + ".Value";
+    std::string rainbowCVar = std::string(cvarName) + ".Rainbow";
+    std::string lockedCVar = std::string(cvarName) + ".Locked";
+    Color_RGBA8 color = CVarGetColor(valueCVar.c_str(), defaultColor);
     ImVec4 colorVec = ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
     bool changed = false;
-    bool locked = lockedCvar != nullptr && CVarGetInteger(lockedCvar, 0);
+    bool showReset = modifiers & ColorPickerResetButton;
+    bool showRandom = modifiers & ColorPickerRandomButton;
+    bool showRainbow = modifiers & ColorPickerRainbowCheck;
+    bool showLock = modifiers & ColorPickerLockCheck;
+    bool locked = CVarGetInteger(lockedCVar.c_str(), 0);
     ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoInputs;
     ImGui::BeginDisabled(locked);
     PushStyleCombobox(UIWidgets::Colors::DarkGray);
@@ -1007,15 +1039,63 @@ bool CVarColorPicker(const char* label, const char* valueCvar, Color_RGBA8 defau
         changed = ImGui::ColorEdit3(label, (float*)&colorVec, flags | ImGuiColorEditFlags_NoAlpha);
     }
     PopStyleCombobox();
+    ImGui::AlignTextToFramePadding();
+    if (showReset) {
+        ImGui::SameLine();
+        std::string uniqueTag = "Reset##" + std::string(label);
+        if (UIWidgets::Button(uniqueTag.c_str(),
+                              UIWidgets::ButtonOptions({ { .tooltip = "Resets this color to its default value" } })
+                                  .Color(themeColor)
+                                  .Size(UIWidgets::Sizes::Inline))) {
+            CVarClearBlock(valueCVar.c_str());
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+        }
+    }
+    if (showRandom) {
+        ImGui::SameLine();
+        std::string uniqueTag = "Random##" + std::string(label);
+        if (UIWidgets::Button(uniqueTag.c_str(),
+                              UIWidgets::ButtonOptions({ { .tooltip = "Generates a random color value to use" } })
+                                  .Color(themeColor)
+                                  .Size(UIWidgets::Sizes::Inline))) {
+            colorVec = GetRandomValue();
+            color.r = fmin(fmax(colorVec.x * 255, 0), 255);
+            color.g = fmin(fmax(colorVec.y * 255, 0), 255);
+            color.b = fmin(fmax(colorVec.z * 255, 0), 255);
+            CVarSetColor(valueCVar.c_str(), color);
+            CVarSetInteger(rainbowCVar.c_str(), 0); // On click disable rainbow mode.
+            ShipInit::Init(rainbowCVar.c_str());
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+        }
+    }
+    if (showRainbow) {
+        ImGui::SameLine();
+        std::string uniqueTag = "Rainbow##" + std::string(cvarName) + "Rainbow";
+
+        UIWidgets::CVarCheckbox(
+            uniqueTag.c_str(), rainbowCVar.c_str(),
+            UIWidgets::CheckboxOptions(
+                { { .tooltip = "Cycles through colors on a timer\nOverwrites previously chosen color" } })
+                .Color(themeColor));
+    }
     ImGui::EndDisabled();
+    if (showLock) {
+        ImGui::SameLine();
+        std::string uniqueTag = "Lock##" + std::string(cvarName) + "Locked";
+
+        UIWidgets::CVarCheckbox(
+            uniqueTag.c_str(), lockedCVar.c_str(),
+            UIWidgets::CheckboxOptions({ { .tooltip = "Prevents this color from being changed" } }).Color(themeColor));
+    }
     if (changed) {
         color.r = (uint8_t)(colorVec.x * 255.0f);
         color.g = (uint8_t)(colorVec.y * 255.0f);
         color.b = (uint8_t)(colorVec.z * 255.0f);
         color.a = (uint8_t)(colorVec.w * 255.0f);
-        CVarSetColor(valueCvar, color);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
-        ShipInit::Init(valueCvar);
+        CVarSetColor(valueCVar.c_str(), color);
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+        ShipInit::Init(valueCVar.c_str());
+        changed = true;
     }
 
     return changed;
@@ -1051,7 +1131,7 @@ bool RadioButton(const char* label, bool active, const RadioButtonsOptions& opti
     if (pressed)
         ImGui::MarkItemEdited(id);
 
-    ImGui::RenderNavHighlight(total_bb, id);
+    ImGui::RenderNavCursor(total_bb, id);
     const int num_segment = window->DrawList->_CalcCircleAutoSegmentCount(radius);
     window->DrawList->AddCircleFilled(center, radius,
                                       ImGui::GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive
@@ -1088,7 +1168,7 @@ bool CVarRadioButton(const char* text, const char* cvarName, int32_t id, const R
     PushStyleCheckbox(options.color);
     if (ImGui::RadioButton(make_invisible.c_str(), id == val)) {
         CVarSetInteger(cvarName, id);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ret = true;
     }
     ImGui::SameLine();
@@ -1122,7 +1202,7 @@ void DrawFlagArray32(const std::string& name, uint32_t& flags, Colors color) {
         }
         if (ImGui::IsItemHovered()) {
             std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
-            ImGui::SetTooltip("%s", label.c_str());
+            ImGui::SetTooltip(label.c_str());
         }
         ImGui::PopStyleVar();
         PopStyleCheckbox();
@@ -1152,37 +1232,7 @@ void DrawFlagArray16(const std::string& name, uint16_t& flags, Colors color) {
         }
         if (ImGui::IsItemHovered()) {
             std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
-            ImGui::SetTooltip("%s", label.c_str());
-        }
-        ImGui::PopStyleVar();
-        PopStyleCheckbox();
-        ImGui::PopID();
-    }
-    ImGui::PopID();
-}
-
-void DrawFlagArray8(const std::string& name, uint8_t& flags, Colors color) {
-    ImGui::PushID(name.c_str());
-    for (int8_t flagIndex = 0; flagIndex < 8; flagIndex++) {
-        if ((flagIndex % 8) != 0) {
-            ImGui::SameLine();
-        }
-        ImGui::PushID(flagIndex);
-        uint8_t bitMask = 1 << flagIndex;
-        bool flag = (flags & bitMask) != 0;
-        PushStyleCheckbox(color);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 6.0f));
-        std::string id = fmt::format("##{}{}", name, flagIndex);
-        if (ImGui::Checkbox(id.c_str(), &flag)) {
-            if (flag) {
-                flags |= bitMask;
-            } else {
-                flags &= ~bitMask;
-            }
-        }
-        if (ImGui::IsItemHovered()) {
-            std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
-            ImGui::SetTooltip("%s", label.c_str());
+            ImGui::SetTooltip(label.c_str());
         }
         ImGui::PopStyleVar();
         PopStyleCheckbox();
@@ -1216,7 +1266,7 @@ void DrawFlagTableArray16(const FlagTable& flagTable, uint16_t& flags) {
             if (!label.size()) {
                 label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
             }
-            ImGui::SetTooltip("%s", label.c_str());
+            ImGui::SetTooltip(label.c_str());
         }
         ImGui::PopStyleVar();
         PopStyleCheckbox();
@@ -1250,7 +1300,7 @@ void DrawFlagTableArray8(const FlagTable& flagTable, uint16_t row, uint8_t& flag
             if (!label.size()) {
                 label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
             }
-            ImGui::SetTooltip("%s", label.c_str());
+            ImGui::SetTooltip(label.c_str());
         }
         ImGui::PopStyleVar();
         PopStyleCheckbox();
@@ -1282,7 +1332,7 @@ void DrawFlagTableArray8Mask(const FlagTable& flagTable, uint16_t row, uint8_t& 
         if (ImGui::IsItemHovered()) {
             std::string label = WrappedText(flagEntry.description, 60).c_str();
             label += fmt::format("{}0x{:02X} ({})", label.size() ? "\n" : "", bitMask, flagIndex);
-            ImGui::SetTooltip("%s", label.c_str());
+            ImGui::SetTooltip(label.c_str());
         }
         ImGui::PopStyleVar();
         PopStyleCheckbox();
@@ -1380,7 +1430,7 @@ bool CVarBtnSelector(const char* label, const char* cvarName, const BtnSelectorO
     int32_t value = CVarGetInteger(cvarName, options.defaultValue);
     if (BtnSelector(label, &value, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }

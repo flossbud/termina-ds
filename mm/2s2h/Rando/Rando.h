@@ -4,7 +4,6 @@
 #include "StaticData/StaticData.h"
 #include "Types.h"
 #include "variables.h"
-#include <nlohmann/json.hpp>
 
 #define IS_RANDO (gSaveContext.save.shipSaveInfo.saveType == SAVETYPE_RANDO)
 #define RANDO_SAVE_CHECKS gSaveContext.save.shipSaveInfo.rando.randoSaveChecks
@@ -14,7 +13,6 @@
 namespace Rando {
 
 void Init();
-void OnSaveLoad(s16 fileNum);
 void DrawItem(RandoItemId randoItemId, RandoCheckId randoCheckId = RC_UNKNOWN, Actor* actor = nullptr);
 void GiveItem(RandoItemId randoItemId);
 void RemoveItem(RandoItemId randoItemId);

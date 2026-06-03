@@ -5,10 +5,6 @@
 #include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/CustomItem/CustomItem.h"
 
-extern "C" {
-#include "functions.h"
-}
-
 #define CVAR_NAME "gEnhancements.Timesavers.AutoBankDeposit"
 #define CVAR CVarGetInteger(CVAR_NAME, 0)
 

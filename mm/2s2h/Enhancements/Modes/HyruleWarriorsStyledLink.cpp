@@ -1,6 +1,6 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
-#include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
+#include "Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/ShipInit.hpp"
 
 extern "C" {
@@ -14,7 +14,8 @@ extern const char* D_801C0B20[28];
 
 void RegisterHyruleWarriorsStyledLink() {
     COND_ID_HOOK(OnPlayerPostLimbDraw, PLAYER_LIMB_HEAD, CVAR, [](Player* player, s32 limbIndex) {
-        // Match the vanilla mask draw visibility check used while the player is in first-person/cutscene states.
+        // This emulates the vanilla check for if the masks should be drawn, specifically around
+        // z_player.c 12923 (Player_Draw)
         if (player->stateFlags1 & PLAYER_STATE1_100000) {
             Vec3f temp;
             SkinMatrix_Vec3fMtxFMultXYZ(&gPlayState->viewProjectionMtxF, &player->actor.focus.pos, &temp);
@@ -27,7 +28,7 @@ void RegisterHyruleWarriorsStyledLink() {
             INV_CONTENT(ITEM_MASK_KEATON) == ITEM_MASK_KEATON) {
             OPEN_DISPS(gPlayState->state.gfxCtx);
             Matrix_Push();
-            Matrix_RotateYS(0x38E3, MTXMODE_APPLY);
+            Matrix_RotateYS(0x38e3, MTXMODE_APPLY);
             Matrix_RotateZS(-0x12F6, MTXMODE_APPLY);
             Matrix_Translate(300.0f, -250.0f, 77.7f, MTXMODE_APPLY);
             Matrix_Scale(0.648f, 0.648f, 0.648f, MTXMODE_APPLY);
@@ -37,7 +38,6 @@ void RegisterHyruleWarriorsStyledLink() {
             CLOSE_DISPS(gPlayState->state.gfxCtx);
         }
     });
-
     COND_ID_HOOK(OnPlayerPostLimbDraw, PLAYER_LIMB_WAIST, CVAR, [](Player* player, s32 limbIndex) {
         if (player->transformation == PLAYER_FORM_HUMAN && player->itemAction != PLAYER_IA_MASK_FIERCE_DEITY &&
             INV_CONTENT(ITEM_MASK_FIERCE_DEITY) == ITEM_MASK_FIERCE_DEITY) {

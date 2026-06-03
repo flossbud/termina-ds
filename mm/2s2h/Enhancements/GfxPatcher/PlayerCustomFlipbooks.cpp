@@ -1,15 +1,11 @@
 #include "PlayerCustomFlipbooks.h"
-
-#include <array>
-#include <string>
+#include "2s2h/BenPort.h"
 
 extern "C" {
-#include "z64light.h"
 #include "z64player.h"
 extern TexturePtr sPlayerEyesTextures[PLAYER_FORM_MAX][PLAYER_EYES_MAX];
 extern TexturePtr sPlayerMouthTextures[PLAYER_FORM_MAX][PLAYER_MOUTH_MAX];
 uint8_t ResourceMgr_FileExists(const char* resName);
-bool ResourceMgr_IsAltAssetsEnabled();
 }
 
 static const char* sFDEyesTextures[PLAYER_EYES_MAX] = {
@@ -51,136 +47,87 @@ static const char* sGoronMouthTextures[PLAYER_MOUTH_MAX] = {
     "__OTR__objects/object_link_goron/gLinkGoronMouthSmileTex",
 };
 
-static const char* sHumanEyesTextures[PLAYER_EYES_MAX] = {
-    "__OTR__objects/object_link_child/gLinkHumanEyesOpenTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesHalfTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesClosedTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesRightTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesLeftTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesUpTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesDownTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesWincingTex",
-};
+static s32 sFacePatchState = 0;
 
-static const char* sHumanEyesTexturesLegacy[PLAYER_EYES_MAX] = {
-    "__OTR__objects/object_link_child/gLinkHumanEyesOpenTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesHalfTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesClosedTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesRollRightTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesRollLeftTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesRollUpTex",
-    "__OTR__objects/object_link_child/gLinkHumanEyesRollDownTex",
-    "__OTR__objects/object_link_child/object_link_child_Tex_003800",
-};
-
-static const char* sHumanMouthTextures[PLAYER_MOUTH_MAX] = {
-    "__OTR__objects/object_link_child/gLinkHumanMouthClosedTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthHalfTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthOpenTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthSmileTex",
-};
-
-static const char* sHumanMouthTexturesLegacy[PLAYER_MOUTH_MAX] = {
-    "__OTR__objects/object_link_child/gLinkHumanMouthClosedTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthTeethTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthAngryTex",
-    "__OTR__objects/object_link_child/gLinkHumanMouthHappyTex",
-};
-
-static std::array<std::string, PLAYER_EYES_MAX> sResolvedFDEyesTextures;
-static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedFDMouthTextures;
-static std::array<std::string, PLAYER_EYES_MAX> sResolvedDekuEyesTextures;
-static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedDekuMouthTextures;
-static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedGoronMouthTextures;
-static std::array<std::string, PLAYER_EYES_MAX> sResolvedHumanEyesTextures;
-static std::array<std::string, PLAYER_MOUTH_MAX> sResolvedHumanMouthTextures;
-
-static s32 sFacePatchAltState = -1;
-
-static bool ResolveTexturePath(const char* basePath, std::string& resolvedPath) {
-    std::string resourcePath = basePath;
-    if (resourcePath.starts_with("__OTR__")) {
-        resourcePath = resourcePath.substr(7);
-    }
-
-    if (ResourceMgr_IsAltAssetsEnabled()) {
-        const std::string altPath = "__OTR__alt/" + resourcePath;
-        if (ResourceMgr_FileExists(altPath.c_str())) {
-            resolvedPath = altPath;
-            return true;
-        }
-    }
-
-    if (ResourceMgr_FileExists(basePath)) {
-        resolvedPath = basePath;
-        return true;
-    }
-
-    return false;
-}
-
-template <size_t Count>
-static bool ResolveTextureSet(const char* const (&sourcePaths)[Count], std::array<std::string, Count>& resolvedPaths) {
-    for (size_t i = 0; i < Count; i++) {
-        if (!ResolveTexturePath(sourcePaths[i], resolvedPaths[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static void ApplyEyesTextureSet(s32 form, const std::array<std::string, PLAYER_EYES_MAX>& resolvedPaths) {
-    for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
-        sPlayerEyesTextures[form][i] = (TexturePtr)resolvedPaths[i].c_str();
-    }
-}
-
-static void ApplyMouthTextureSet(s32 form, const std::array<std::string, PLAYER_MOUTH_MAX>& resolvedPaths) {
-    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
-        sPlayerMouthTextures[form][i] = (TexturePtr)resolvedPaths[i].c_str();
-    }
-}
-
-static void ApplyPartialHumanTextureSet(void) {
-    if (ResolveTextureSet(sHumanEyesTextures, sResolvedHumanEyesTextures) ||
-        ResolveTextureSet(sHumanEyesTexturesLegacy, sResolvedHumanEyesTextures)) {
-        ApplyEyesTextureSet(PLAYER_FORM_HUMAN, sResolvedHumanEyesTextures);
-    }
-
-    if (ResolveTextureSet(sHumanMouthTextures, sResolvedHumanMouthTextures) ||
-        ResolveTextureSet(sHumanMouthTexturesLegacy, sResolvedHumanMouthTextures)) {
-        ApplyMouthTextureSet(PLAYER_FORM_HUMAN, sResolvedHumanMouthTextures);
-    }
-}
-
-void PlayerCustomFlipbooks_Patch(void) {
-    const s32 altState = ResourceMgr_IsAltAssetsEnabled() ? 1 : 0;
-    if (sFacePatchAltState == altState) {
+static void PlayerCustomFlipbooks_PatchOnce(void) {
+    if (sFacePatchState != 0) {
         return;
     }
 
-    sFacePatchAltState = altState;
+    bool EyesPatch = true;
+    bool MouthPatch = true;
+    bool DekuEyesPatch = true;
+    bool DekuMouthPatch = true;
+    bool GoronMouthPatch = true;
 
-    if (ResolveTextureSet(sFDEyesTextures, sResolvedFDEyesTextures)) {
-        ApplyEyesTextureSet(PLAYER_FORM_FIERCE_DEITY, sResolvedFDEyesTextures);
+    for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
+        if (!ResourceMgr_FileExists(sFDEyesTextures[i])) {
+            EyesPatch = false;
+            break;
+        }
     }
 
-    if (ResolveTextureSet(sFDMouthTextures, sResolvedFDMouthTextures)) {
-        ApplyMouthTextureSet(PLAYER_FORM_FIERCE_DEITY, sResolvedFDMouthTextures);
+    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+        if (!ResourceMgr_FileExists(sFDMouthTextures[i])) {
+            MouthPatch = false;
+            break;
+        }
     }
 
-    if (ResolveTextureSet(sDekuEyesTextures, sResolvedDekuEyesTextures)) {
-        ApplyEyesTextureSet(PLAYER_FORM_DEKU, sResolvedDekuEyesTextures);
+    for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
+        if (!ResourceMgr_FileExists(sDekuEyesTextures[i])) {
+            DekuEyesPatch = false;
+            break;
+        }
     }
 
-    if (ResolveTextureSet(sDekuMouthTextures, sResolvedDekuMouthTextures)) {
-        ApplyMouthTextureSet(PLAYER_FORM_DEKU, sResolvedDekuMouthTextures);
+    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+        if (!ResourceMgr_FileExists(sDekuMouthTextures[i])) {
+            DekuMouthPatch = false;
+            break;
+        }
     }
 
-    if (ResolveTextureSet(sGoronMouthTextures, sResolvedGoronMouthTextures)) {
-        ApplyMouthTextureSet(PLAYER_FORM_GORON, sResolvedGoronMouthTextures);
+    for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+        if (!ResourceMgr_FileExists(sGoronMouthTextures[i])) {
+            GoronMouthPatch = false;
+            break;
+        }
     }
 
-    ApplyPartialHumanTextureSet();
+    if (EyesPatch) {
+        for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
+            sPlayerEyesTextures[PLAYER_FORM_FIERCE_DEITY][i] = (TexturePtr)sFDEyesTextures[i];
+        }
+    }
+
+    if (MouthPatch) {
+        for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+            sPlayerMouthTextures[PLAYER_FORM_FIERCE_DEITY][i] = (TexturePtr)sFDMouthTextures[i];
+        }
+    }
+
+    if (DekuEyesPatch) {
+        for (s32 i = 0; i < PLAYER_EYES_MAX; i++) {
+            sPlayerEyesTextures[PLAYER_FORM_DEKU][i] = (TexturePtr)sDekuEyesTextures[i];
+        }
+    }
+
+    if (DekuMouthPatch) {
+        for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+            sPlayerMouthTextures[PLAYER_FORM_DEKU][i] = (TexturePtr)sDekuMouthTextures[i];
+        }
+    }
+
+    if (GoronMouthPatch) {
+        for (s32 i = 0; i < PLAYER_MOUTH_MAX; i++) {
+            sPlayerMouthTextures[PLAYER_FORM_GORON][i] = (TexturePtr)sGoronMouthTextures[i];
+        }
+    }
+
+    sFacePatchState = 1;
+}
+
+void PlayerCustomFlipbooks_Patch(void) {
+    PlayerCustomFlipbooks_PatchOnce();
 }

@@ -34,9 +34,12 @@
 #include "global.h"
 #include "PR/controller.h"
 #include "PR/os_motor.h"
+
+#include "controller.h"
 #include "fault.h"
 #include <stdio.h>
 #include <string.h>
+#include "z64voice.h"
 // extern FaultMgr gFaultMgr;
 
 #define PADMGR_RETRACE_MSG (1 << 0)
@@ -439,7 +442,7 @@ void PadMgr_AdjustInput(Input* input) {
  * Updates `sPadMgrInstance->inputs` based on the error response of each controller
  */
 void PadMgr_UpdateInputs(void) {
-    u32 diff;
+    s32 diff;
     Input* input = &sPadMgrInstance->inputs[0];
     s32 i;
     OSContPad* pad = &sPadMgrInstance->pads[0];
@@ -497,8 +500,8 @@ void PadMgr_UpdateInputs(void) {
 
         // Calculate pressed and relative inputs
         diff = input->prev.button ^ input->cur.button;
-        input->press.button |= diff & input->cur.button;
-        input->rel.button |= diff & input->prev.button;
+        input->press.button |= (u16)(diff & input->cur.button);
+        input->rel.button |= (u16)(diff & input->prev.button);
 
         if (1) {}
         PadMgr_AdjustInput(input);
@@ -530,7 +533,7 @@ void PadMgr_InitVoice(void) {
             } else {
                 sPadMgrInstance->ctrlrType[i] = PADMGR_CONT_VOICE;
                 sVoiceInitStatus = VOICE_INIT_SUCCESS;
-                func_801A4EB0();
+                AudioVoice_Noop();
             }
         }
     }

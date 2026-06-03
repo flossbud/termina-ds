@@ -3,24 +3,27 @@
 #include <fstream>
 #include <filesystem>
 #include <nlohmann/json.hpp>
-#include <libultraship/libultraship.h>
 
-#include "macros.h"
 #include "BenJsonConversions.hpp"
 #include "BenPort.h"
+#include <ship/window/Window.h>
 
 extern "C" {
+#include "z64save.h"
+#include "macros.h"
 #include "src/overlays/gamestates/ovl_file_choose/z_file_select.h"
 extern FileSelectState* gFileSelectState;
-
-u16 Sram_CalcChecksum(void* data, size_t count);
 }
 
 // This entire thing is temporary until we have a more robust save system that
 // supports backwards compatibility, migrations, threaded saving, save sections, etc.
+
 #define FLASH_SAVE_UNAVAILABLE ((FlashSave)-1)
 
+#undef GET_NEWF
+
 #define GET_NEWF(save, index) (save.saveInfo.playerData.newf[index])
+
 #define IS_VALID_FILE(save)                                                                    \
     ((GET_NEWF(save, 0) == 'Z') && (GET_NEWF(save, 1) == 'E') && (GET_NEWF(save, 2) == 'L') && \
      (GET_NEWF(save, 3) == 'D') && (GET_NEWF(save, 4) == 'A') && (GET_NEWF(save, 5) == '3'))
@@ -103,41 +106,24 @@ int SaveManager_MigrateSave(nlohmann::json& j) {
     }
 }
 
-void SaveManager_WriteSaveFile(std::filesystem::path fileName, nlohmann::json j) {
+void SaveManager_WriteSaveFile(const std::filesystem::path& fileName, nlohmann::json j) {
     const std::filesystem::path savesFolderPath = SaveManager_GetSavesFolderPath();
     const std::filesystem::path filePath = savesFolderPath / fileName;
 
-    try {
-        if (!std::filesystem::exists(savesFolderPath)) {
-            std::filesystem::create_directories(savesFolderPath);
-        }
-
-        std::ofstream o(filePath);
-        if (!o.is_open()) {
-            SPDLOG_ERROR("Failed to open save file for writing: {}", filePath.string());
-            return;
-        }
-
-        o << std::setw(4) << j << std::endl;
-        o.flush();
-        if (!o.good()) {
-            SPDLOG_ERROR("Failed to write save file: {}", filePath.string());
-            return;
-        }
-
-        o.close();
-        if (!o.good()) {
-            SPDLOG_ERROR("Failed to close save file after writing: {}", filePath.string());
-        }
-    } catch (const std::exception& e) {
-        SPDLOG_ERROR("Failed to write save file {}: {}", filePath.string(), e.what());
-    } catch (...) {
-        SPDLOG_ERROR("Failed to write save file: {}", filePath.string());
+    if (!std::filesystem::exists(savesFolderPath)) {
+        std::filesystem::create_directory(savesFolderPath);
     }
+
+    try {
+        std::ofstream o(filePath);
+        o << std::setw(4) << j << std::endl;
+        o.close();
+    } catch (...) { SPDLOG_ERROR("Failed to write save file"); }
 }
 
-void SaveManager_DeleteSaveFile(std::filesystem::path fileName) {
-    const std::filesystem::path filePath = SaveManager_GetSavesFolderPath() / fileName;
+void SaveManager_DeleteSaveFile(const std::filesystem::path& fileName) {
+    const std::filesystem::path savesFolderPath = SaveManager_GetSavesFolderPath();
+    const std::filesystem::path filePath = savesFolderPath / fileName;
 
     try {
         if (std::filesystem::exists(filePath)) {
@@ -146,8 +132,9 @@ void SaveManager_DeleteSaveFile(std::filesystem::path fileName) {
     } catch (...) { SPDLOG_ERROR("Failed to delete save file"); }
 }
 
-int SaveManager_ReadSaveFile(std::filesystem::path fileName, nlohmann::json& j) {
-    const std::filesystem::path filePath = SaveManager_GetSavesFolderPath() / fileName;
+int SaveManager_ReadSaveFile(const std::filesystem::path& fileName, nlohmann::json& j) {
+    const std::filesystem::path savesFolderPath = SaveManager_GetSavesFolderPath();
+    const std::filesystem::path filePath = savesFolderPath / fileName;
 
     if (!std::filesystem::exists(filePath)) {
         return -1;
@@ -164,7 +151,7 @@ int SaveManager_ReadSaveFile(std::filesystem::path fileName, nlohmann::json& j) 
     }
 }
 
-void SaveManager_MoveInvalidSaveFile(std::filesystem::path fileName, std::string message) {
+void SaveManager_MoveInvalidSaveFile(const std::filesystem::path& fileName, const std::string& message) {
     const std::filesystem::path savesFolderPath = SaveManager_GetSavesFolderPath();
     const std::filesystem::path filePath = savesFolderPath / fileName;
     const std::filesystem::path backupFilePath =
@@ -257,10 +244,14 @@ std::string SaveManager_GetFileNameFromFlashSave(FlashSave flashSave) {
             break;
     }
 
+    bool isOwlSave = flashSave == FLASH_SAVE_FILE_1_OWL_SAVE || flashSave == FLASH_SAVE_FILE_1_OWL_SAVE_BACKUP ||
+                     flashSave == FLASH_SAVE_FILE_2_OWL_SAVE || flashSave == FLASH_SAVE_FILE_2_OWL_SAVE_BACKUP ||
+                     flashSave == FLASH_SAVE_FILE_3_OWL_SAVE || flashSave == FLASH_SAVE_FILE_3_OWL_SAVE_BACKUP;
+
     return "file" + std::to_string(fileNum) + (isBackup ? "backup" : "") + ".json";
 }
 
-bool SaveManager_HandleFileDropped(std::string filePath) {
+bool SaveManager_HandleFileDropped(char* filePath) {
     try {
         std::ifstream fileStream(filePath);
 
@@ -294,12 +285,15 @@ bool SaveManager_HandleFileDropped(std::string filePath) {
 
         SaveManager_WriteSaveFile(fileName, j);
 
+        // Reset the file select state to reload the save metadata
         if (gFileSelectState != NULL) {
-            func_801457CC(&gFileSelectState->state, &gFileSelectState->sramCtx);
-            if (gFileSelectState->menuMode == FS_MENU_MODE_CONFIG && gFileSelectState->configMode == CM_MAIN_MENU) {
-                gFileSelectState->configMode = CM_FADE_IN_START;
-            }
+            STOP_GAMESTATE(&gFileSelectState->state);
+            SET_NEXT_GAMESTATE(&gFileSelectState->state, FileSelect_Init, sizeof(FileSelectState));
         }
+
+        SPDLOG_INFO("Successfully imported save into slot {}", saveSlot);
+        auto gui = Ship::Context::GetInstance()->GetWindow()->GetGui();
+        gui->GetGameOverlay()->TextDrawNotification(30.0f, true, "Successfully imported save into slot %d", saveSlot);
 
         return true;
     } catch (std::exception& e) {
@@ -326,11 +320,6 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
     }
 
     if (flashSave == FLASH_SAVE_SRAM_HEADER || flashSave == FLASH_SAVE_SRAM_HEADER_BACKUP) {
-        if (saveBuffer == nullptr) {
-            SPDLOG_ERROR("Skipping global options save write: null save buffer");
-            return;
-        }
-
         SaveOptions saveOptions;
         memcpy(&saveOptions, saveBuffer, sizeof(SaveOptions));
 
@@ -339,7 +328,9 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
     }
 
     // A new cycle save with the "special" page count means that both the regular slot and the backup slot should be
-    // saved together. We replicate that here by running the save again on the matching backup slot
+    // saved together. We replicate that here by running the save again on the matching backup slot.
+    // Note: This is not accounting for the sram header writing a disk backup. It does not feel important to do so.
+    // If we ever feel like we want a global save backup, then we just need to add it to this condition.
     if ((flashSave == FLASH_SAVE_FILE_1_NEW_CYCLE_SAVE || flashSave == FLASH_SAVE_FILE_2_NEW_CYCLE_SAVE ||
          flashSave == FLASH_SAVE_FILE_3_NEW_CYCLE_SAVE) &&
         pageCount == (u32)gFlashSpecialSaveNumPages[flashSave]) {
@@ -356,11 +347,6 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
         case FLASH_SAVE_FILE_1_NEW_CYCLE_SAVE:
         case FLASH_SAVE_FILE_2_NEW_CYCLE_SAVE:
         case FLASH_SAVE_FILE_3_NEW_CYCLE_SAVE: {
-            if (saveBuffer == nullptr) {
-                SPDLOG_ERROR("Skipping new cycle save write: null save buffer");
-                return;
-            }
-
             Save save;
             memcpy(&save, saveBuffer, sizeof(Save));
 
@@ -402,11 +388,6 @@ extern "C" void SaveManager_SysFlashrom_WriteData(u8* saveBuffer, u32 pageNum, u
         case FLASH_SAVE_FILE_1_OWL_SAVE:
         case FLASH_SAVE_FILE_2_OWL_SAVE:
         case FLASH_SAVE_FILE_3_OWL_SAVE: {
-            if (saveBuffer == nullptr) {
-                SPDLOG_ERROR("Skipping owl save write: null save buffer");
-                return;
-            }
-
             SaveContext saveContext;
             memcpy(&saveContext, saveBuffer, offsetof(SaveContext, fileNum));
 
@@ -527,6 +508,11 @@ extern "C" s32 SaveManager_SysFlashrom_ReadData(void* saveBuffer, u32 pageNum, u
             SaveManager_MoveInvalidSaveFile(fileName,
                                             "Failed to parse save json, the original file has been backed up.");
             return -1;
+        } catch (...) {
+            SPDLOG_ERROR("Failed to parse owl save json");
+            SaveManager_MoveInvalidSaveFile(fileName,
+                                            "Failed to parse save json, the original file has been backed up.");
+            return -1;
         }
     } else {
         if (!j.contains("newCycleSave")) {
@@ -544,6 +530,11 @@ extern "C" s32 SaveManager_SysFlashrom_ReadData(void* saveBuffer, u32 pageNum, u
             return 0;
         } catch (nlohmann::json::exception& je) {
             SPDLOG_ERROR("Failed to parse new cycle save json: {}", je.what());
+            SaveManager_MoveInvalidSaveFile(fileName,
+                                            "Failed to parse save json, the original file has been backed up.");
+            return -1;
+        } catch (...) {
+            SPDLOG_ERROR("Failed to parse new cycle save json");
             SaveManager_MoveInvalidSaveFile(fileName,
                                             "Failed to parse save json, the original file has been backed up.");
             return -1;

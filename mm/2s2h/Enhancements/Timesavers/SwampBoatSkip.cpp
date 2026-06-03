@@ -1,9 +1,8 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
 extern "C" {
-#include "variables.h"
 #include "overlays/actors/ovl_Bg_Ingate/z_bg_ingate.h"
 }
 

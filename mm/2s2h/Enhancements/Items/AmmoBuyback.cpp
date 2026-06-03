@@ -1,8 +1,9 @@
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/Enhancements/Enhancements.h"
+#include "message_data_fmt_nes.h"
 
 extern "C" {
 #include "overlays/actors/ovl_En_Fsn/z_en_fsn.h"
@@ -24,14 +25,6 @@ void Player_StopCutscene(Player* player);
 #define STICK_THRESHOLD 30
 #define REPEAT_DELAY_INITIAL 10
 #define REPEAT_DELAY_CONTINUOUS 2
-
-constexpr unsigned char MESSAGE_NEWLINE = 0x11;
-constexpr unsigned char MESSAGE_QUICKTEXT_ENABLE = 0x17;
-constexpr unsigned char MESSAGE_BTN_A = 0xB0;
-constexpr unsigned char MESSAGE_CONTROL_PAD = 0xBB;
-constexpr unsigned char MESSAGE_END = 0xBF;
-constexpr unsigned char MESSAGE_INPUT_BANK = 0xCC;
-constexpr unsigned char MESSAGE_HELD_ITEM_PRICE = 0xDE;
 
 static struct {
     EnFsn* actor = nullptr;
@@ -94,7 +87,7 @@ static const char* GetNameForDialogue(ItemId itemId) {
 
 static s16 GetSalePrice(ItemId itemId, s16 count) {
     s16 totalPrice = count * GetPricePerUnit(itemId);
-    if (CVAR == AMMO_BUYBACK_HALF_PRICE && itemId != ITEM_BOW) {
+    if (CVAR == AMMO_BUYBACK_HALF_PRICE) {
         totalPrice = (totalPrice + 1) / 2;
     }
     return totalPrice;
@@ -182,7 +175,7 @@ static void HandleStart(EnFsn* enFsn, PlayState* play) {
             sAmmoSale.quantity = 1;
             sAmmoSale.price = 0;
             sAmmoSale.isInputActive = true;
-            play->msgCtx.bankRupeesSelected = 10;
+            play->msgCtx.rupeesSelected = 10;
         }
 
         enFsn->actionFunc = EnFsn_MakeOffer;
@@ -198,13 +191,13 @@ static void HandleInput(EnFsn* enFsn, PlayState* play) {
     Input* input = &play->state.input[0];
 
     // Prevent input processing if the message system hasn't loaded our text yet
-    if (msgCtx->currentTextId != TEXT_ID_FSN_OFFER || msgCtx->unk120C0 == 0 || msgCtx->bankRupeesSelected < 10 ||
+    if (msgCtx->currentTextId != TEXT_ID_FSN_OFFER || msgCtx->unk120C0 == 0 || msgCtx->rupeesSelected < 10 ||
         msgCtx->msgMode == MSGMODE_NONE || msgCtx->msgMode == MSGMODE_TEXT_START ||
         msgCtx->msgMode == MSGMODE_TEXT_BOX_GROWING || msgCtx->msgMode == MSGMODE_TEXT_STARTING) {
         return;
     }
 
-    s16 currentQuantity = (s16)(msgCtx->bankRupeesSelected / 10);
+    s16 currentQuantity = (s16)(msgCtx->rupeesSelected / 10);
     s16 newQuantity = currentQuantity;
     s16 maxAllowed = (sAmmoSale.itemId == ITEM_SEAHORSE) ? 1 : MIN(AMMO(sAmmoSale.itemId), MAX_AMMO_SELL_QUANTITY);
 
@@ -260,7 +253,7 @@ static void HandleInput(EnFsn* enFsn, PlayState* play) {
     newQuantity = CLAMP(newQuantity, 1, maxAllowed);
 
     if (newQuantity != currentQuantity) {
-        msgCtx->bankRupeesSelected = newQuantity * 10;
+        msgCtx->rupeesSelected = newQuantity * 10;
         UpdateDigits(play, newQuantity);
     }
 
@@ -334,11 +327,11 @@ static void DrawAmmoSelectionDigits() {
         return;
 
     PlayState* play = gPlayState;
-    if (play->msgCtx.bankRupeesSelected < 10) {
-        play->msgCtx.bankRupeesSelected = 10;
+    if (play->msgCtx.rupeesSelected < 10) {
+        play->msgCtx.rupeesSelected = 10;
         sAmmoSale.lastRupeesSelected = 10;
     }
-    UpdateDigits(play, play->msgCtx.bankRupeesSelected / 10);
+    UpdateDigits(play, play->msgCtx.rupeesSelected / 10);
 }
 
 static void GenerateBuybackDialogue(u16* textId, bool* loadFromMessageTable) {

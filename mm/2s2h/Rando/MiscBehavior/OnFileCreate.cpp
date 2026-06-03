@@ -3,7 +3,7 @@
 #include "Rando/Spoiler/Spoiler.h"
 #include "Rando/Logic/Logic.h"
 #include "2s2h/ShipUtils.h"
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "ClockShuffle.h"
 #include <spdlog/spdlog.h>
 #include "2s2h/BenGui/Notification.h"
@@ -193,7 +193,6 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
             RANDO_SAVE_CHECKS[RC_STARTING_ITEM_DEKU_MASK].eligible = true;
             RANDO_SAVE_CHECKS[RC_STARTING_ITEM_SONG_OF_HEALING].eligible = true;
 
-            Rando::OnSaveLoad(fileNum);
             GameInteractor::Instance->ExecuteHooks<GameInteractor::OnRandoSeedGeneration>();
 
         } catch (const std::exception& e) {
@@ -203,18 +202,6 @@ void Rando::MiscBehavior::OnFileCreate(s16 fileNum) {
                 .prefix = "Seed Failure:",
                 .prefixColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
                 .message = e.what(),
-            });
-            gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_VANILLA;
-            char invalidName[8] = { 18, 23, 31, 10, 21, 18, 13, 62 };
-            memcpy(gSaveContext.save.saveInfo.playerData.playerName, invalidName, sizeof(invalidName));
-            gSaveContext.save.saveInfo.playerData.newf[0] = '\0';
-        } catch (...) {
-            SPDLOG_ERROR("Seed Failure: unknown randomizer error");
-            Audio_PlaySfx(NA_SE_SY_QUIZ_INCORRECT);
-            Notification::Emit({
-                .prefix = "Seed Failure:",
-                .prefixColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f),
-                .message = "Unknown randomizer error",
             });
             gSaveContext.save.shipSaveInfo.saveType = SAVETYPE_VANILLA;
             char invalidName[8] = { 18, 23, 31, 10, 21, 18, 13, 62 };

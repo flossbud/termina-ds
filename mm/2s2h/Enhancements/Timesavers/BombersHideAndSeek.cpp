@@ -1,9 +1,8 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
 extern "C" {
-#include "variables.h"
 #include "overlays/actors/ovl_En_Bomjimb/z_en_bomjimb.h"
 void func_80C02CA4(EnBomjimb* thisx, PlayState* play);
 void func_80C02A14(EnBomjimb* thisx, PlayState* play);

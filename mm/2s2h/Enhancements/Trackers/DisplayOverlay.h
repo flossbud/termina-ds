@@ -1,6 +1,4 @@
-#include <window/gui/GuiWindow.h>
-
-#define CVAR_DISPLAY_OVERLAY_MODE "gDisplayOverlay.Mode"
+#include <ship/window/gui/GuiWindow.h>
 
 void DisplayOverlayInitSettings();
 

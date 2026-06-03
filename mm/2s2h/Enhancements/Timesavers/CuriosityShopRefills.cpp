@@ -1,11 +1,10 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 #include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/Rando/Rando.h"
 
 extern "C" {
-#include "variables.h"
 #include "overlays/actors/ovl_En_Fsn/z_en_fsn.h"
 #include "overlays/actors/ovl_En_GirlA/z_en_girla.h"
 
@@ -17,10 +16,6 @@ void EnGirlA_Restock(PlayState* play, EnGirlA* enGirlA);
 void EnGirlA_Draw(Actor* actor, PlayState* play);
 void EnGirlA_BuyFanfare(PlayState* play, EnGirlA* enGirlA);
 }
-
-#ifndef GET_OWL_STATUE_ACTIVATED
-#define GET_OWL_STATUE_ACTIVATED(owlId) ((gSaveContext.save.saveInfo.playerData.owlActivationFlags >> (owlId)) & 1)
-#endif
 
 #define CVAR_NAME "gEnhancements.Shops.CuriosityShopRefills"
 #define CVAR CVarGetInteger(CVAR_NAME, 0)

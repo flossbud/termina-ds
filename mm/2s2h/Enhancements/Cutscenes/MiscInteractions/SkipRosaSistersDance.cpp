@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/CustomItem/CustomItem.h"
@@ -24,8 +24,8 @@ void RegisterSkipRosaSistersDance() {
                 // The function for yielding the Heart Piece and changing other state information
                 enRz->actionFunc = func_80BFC270;
                 // Queue the item check, as Actor_OfferGetItem won't work normally
-                // WEEKEVENTREG_75_80 is set once the player obtains this Heart Piece.
-                if (!CHECK_WEEKEVENTREG(WEEKEVENTREG_75_80) && !IS_RANDO) {
+                // WEEKEVENTREG_RECEIVED_ROSA_SISTERS_HEART_PIECE is set once the player obtains this Heart Piece.
+                if (!CHECK_WEEKEVENTREG(WEEKEVENTREG_RECEIVED_ROSA_SISTERS_HEART_PIECE) && !IS_RANDO) {
                     GameInteractor::Instance->events.emplace_back(GIEventGiveItem{
                         .showGetItemCutscene = true,
                         .param = GID_HEART_PIECE,

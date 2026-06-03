@@ -1,5 +1,5 @@
 #include "MiscBehavior.h"
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/CustomItem/CustomItem.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
@@ -32,14 +32,9 @@ void Rando::MiscBehavior::CheckQueue() {
     }
 
     for (auto& [randoCheckId, randoStaticCheck] : Rando::StaticData::Checks) {
-        auto& randoSaveCheck = RANDO_SAVE_CHECKS[randoCheckId];
+        auto randoSaveCheck = RANDO_SAVE_CHECKS[randoCheckId];
 
         if (randoSaveCheck.eligible) {
-            if (randoSaveCheck.obtained || randoSaveCheck.cycleObtained) {
-                randoSaveCheck.eligible = false;
-                continue;
-            }
-
             queued = true;
 
             GameInteractor::Instance->events.emplace_back(GIEventGiveItem{

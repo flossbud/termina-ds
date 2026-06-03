@@ -11,15 +11,67 @@
 #include "overlays/gamestates/ovl_opening/z_opening.h"
 #include "misc/nintendo_rogo_static/nintendo_rogo_static.h"
 
+#include "build.h"
 #include "BenPort.h"
+#include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include <stdlib.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 
 #define dgShipLogoDL "__OTR__misc/nintendo_rogo_static/gShipLogoDL"
 static const ALIGN_ASSET(2) char gShipLogoDL[] = dgShipLogoDL;
 
 #define dgLUSLogoTextTex "__OTR__misc/nintendo_rogo_static/gLUSLogoTextTex"
 static const ALIGN_ASSET(2) char gLUSLogoTextTex[] = dgLUSLogoTextTex;
+
+const char* GetGameVersionString() {
+    uint32_t gameVersion = ResourceMgr_GetGameVersion(0);
+    switch (gameVersion) {
+        case MM_NTSC_US_10:
+            return "MM-US 1.0";
+        case MM_NTSC_US_GC:
+            return "MM-US GC";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+void ConsoleLogo_PrintBuildInfo(ConsoleLogoState* this) {
+    GraphicsContext* gfxCtx = this->state.gfxCtx;
+    GfxPrint printer;
+
+    OPEN_DISPS(gfxCtx);
+
+    Gfx_SetupDL28_Opa(gfxCtx);
+
+    GfxPrint_Init(&printer);
+    GfxPrint_Open(&printer, POLY_OPA_DISP);
+    GfxPrint_SetColor(&printer, 131, 154, 255, 255);
+
+    // if tag is empty (not a release build)
+    bool showGitInfo = gGitCommitTag[0] == 0;
+
+    if (showGitInfo) {
+        GfxPrint_SetPos(&printer, 1, 24);
+        GfxPrint_Printf(&printer, "Git Branch: %s", gGitBranch);
+
+        GfxPrint_SetPos(&printer, 1, 25);
+        GfxPrint_Printf(&printer, "Git Commit: %s", gGitCommitHash);
+    } else {
+        GfxPrint_SetPos(&printer, 1, 25);
+        GfxPrint_Printf(&printer, "%s", gBuildVersion);
+    }
+    GfxPrint_SetPos(&printer, 1, 26);
+    GfxPrint_Printf(&printer, "%s", gBuildDate);
+
+    GfxPrint_SetPos(&printer, 29, 26);
+    GfxPrint_Printf(&printer, "%s", GetGameVersionString());
+
+    POLY_OPA_DISP = GfxPrint_Close(&printer);
+    GfxPrint_Destroy(&printer);
+
+    CLOSE_DISPS(gfxCtx);
+}
 
 void ConsoleLogo_UpdateCounters(ConsoleLogoState* this) {
     if ((this->coverAlpha == 0) && (this->visibleDuration != 0)) {
@@ -76,7 +128,13 @@ void ConsoleLogo_Draw(GameState* thisx) {
     char* logoDL = gNintendo64LogoNDL;
     char* logoText = gNintendo64LogoTextTex;
 
-    if (!CVarGetInteger("gEnhancements.Graphics.AuthenticLogo", 0)) {
+#if defined(__ANDROID__)
+    bool authenticLogo = false;
+#else
+    bool authenticLogo = CVarGetInteger("gEnhancements.Graphics.AuthenticLogo", 0);
+#endif
+
+    if (!authenticLogo) {
         logoDL = gShipLogoDL;
         logoText = gLUSLogoTextTex;
     }
@@ -105,7 +163,7 @@ void ConsoleLogo_Draw(GameState* thisx) {
     Matrix_Scale(1.0f, 1.0f, 1.0f, MTXMODE_APPLY);
     Matrix_RotateZYX(0, sTitleRotation, 0, MTXMODE_APPLY);
 
-    gSPMatrix(POLY_OPA_DISP++, Matrix_NewMtx(this->state.gfxCtx), G_MTX_LOAD);
+    MATRIX_FINALIZE_AND_LOAD(POLY_OPA_DISP++, this->state.gfxCtx);
     gSPDisplayList(POLY_OPA_DISP++, logoDL);
 
     Gfx_SetupDL39_Opa(this->state.gfxCtx);
@@ -133,6 +191,12 @@ void ConsoleLogo_Draw(GameState* thisx) {
                             1 << 10, 1 << 10);
     }
 
+#if !defined(__ANDROID__)
+    if (!authenticLogo) {
+        ConsoleLogo_PrintBuildInfo(this);
+    }
+#endif
+
     Environment_FillScreen(this->state.gfxCtx, 0, 0, 0, this->coverAlpha, FILL_SCREEN_XLU);
 
     sTitleRotation += 300;
@@ -150,9 +214,12 @@ void ConsoleLogo_Main(GameState* thisx) {
     gSPSegment(POLY_OPA_DISP++, 0x01, this->staticSegment);
 
     ConsoleLogo_UpdateCounters(this);
+    FrameInterpolation_StartRecord();
     ConsoleLogo_Draw(&this->state);
+    FrameInterpolation_StopRecord();
+
     if (this->exit) {
-        gSaveContext.seqId = (u8)NA_BGM_DISABLED;
+        gSaveContext.seqId = NA_BGM_DISABLED;
         gSaveContext.ambienceId = AMBIENCE_ID_DISABLED;
         gSaveContext.gameMode = GAMEMODE_TITLE_SCREEN;
 

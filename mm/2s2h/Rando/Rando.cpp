@@ -6,10 +6,11 @@
 #include "Rando/Spoiler/Spoiler.h"
 #include "Rando/CheckTracker/CheckTracker.h"
 #include "2s2h/ShipInit.hpp"
-#include <Context.h>
+#include <ship/window/FileDropMgr.h>
+#include <ship/Context.h>
 
 // When a save is loaded, we want to unregister all hooks and re-register them if it's a rando save
-void Rando::OnSaveLoad(s16 fileNum) {
+void OnSaveLoadHandler(s16 fileNum) {
     Rando::MiscBehavior::OnFileLoad();
     Rando::ActorBehavior::OnFileLoad();
     Rando::CheckTracker::OnFileLoad();
@@ -25,8 +26,9 @@ void Rando::Init() {
     Rando::MiscBehavior::Init();
     Rando::ActorBehavior::Init();
     Rando::CheckTracker::Init();
+    Ship::Context::GetInstance()->GetFileDropMgr()->RegisterDropHandler(Rando::Spoiler::HandleFileDropped);
 
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>(Rando::OnSaveLoad);
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSaveLoad>(OnSaveLoadHandler);
 }
 
 RandoCheckId Rando::FindItemPlacement(RandoItemId randoItemId) {

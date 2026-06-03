@@ -1,84 +1,45 @@
-# 2 Ship 2 Harkinian Android
+# 2 Ship 2 Harkinian Android Port
+A port of 2 Ship 2 Harkinian to Android. <br>
 
-An unofficial Android fork of 2 Ship 2 Harkinian, based on Waterdish's Android port and the HarbourMasters upstream project.
+Original Repository: https://github.com/HarbourMasters/2ship2harkinian <br>
+<br>
 
-This fork keeps the Android build moving while preserving the original project's expectations: no copyrighted game assets are included, and users must provide their own legally obtained copy of the game.
+Supported (probably): Android 7+ (OpenGL ES 3.0+ required) <br>
+Tested On: Android 15 <br>
 
-Original Android port: https://github.com/Waterdish/2ship2harkinian-Android  
-Original upstream project: https://github.com/HarbourMasters/2ship2harkinian
+<h3>Installation:</h3>
+1. Install the apk from here: https://github.com/Waterdish/2ship2harkinian-Android/releases. <br>
+2. Open the app once. It will generate the directory for your rom. Allow all file permissions and then close and reopen the app.<br>
+3. Select "Yes" when prompted by the app if you would like to generate an O2R. Select "Yes" when it asks to look for a rom. Navigate to your "MM.z64" and select it. The extraction should start.<br>
+5. It will launch straight into the game on subsequent plays. <br>
+<br>
+  
+Use Back/Select/- controller button, or the Android back button (swipe left if using gesture controls) to open Enhancements menu. Use touch controls to navigate menus. <br>
 
-## Current Release
+<h3>FAQ:</h3>
+Q: Where do I add mods? <br>
+  A: 2S2H folder at root of device. <br> <br>
 
-2 Ship Android 4.0.2-android.3.3
+Q: Why is it immediately crashing? <br>
+  A: Try deleting and re-extracting the O2R file (mm.o2r). <br> <br>
 
-Upstream base: HarbourMasters 4.0.2 / Keiichi Charlie
+Q: The game opened once, but now it's just a black screen. <br>
+  A: Reinstall and don't raise MSAA above 1 in Settings->Graphics <br><br>
 
-Android package id: `com.twoshipfork.mm`  
-App label: `2 Ship 2 Harkinian`
+Q: The GUI scaling is too big/too small. <br>
+  A: There is no GUI scaling option implemented yet. This will come in a future update. <br><br>
 
-## What's Different In This Fork
+Q: Gyro Aim? <br>
+  A: It works. You just need to press any controller button when it asks for input. It will default to your phone's gyro if the controller doesn't support it. <br> <br>
 
-- Restores save compatibility with newer upstream PC, Mac, and Linux 2 Ship 2 Harkinian saves.
-- Adds ability to use up to 3 save files.
-- Improved Android performance and startup behavior.
-- Improved alternate asset texture handling on Android.
-- Adds upstream cheat and enhancement features that were missing from the upstream Android port.
-- Adds modifier button support.
-- Adds support for speed modifier controls.
-- Reduces the Android menu scale so the settings menus are easier to navigate.
-- Builds arm64 release APKs with Android-focused settings.
+Q: My controller is not doing anything. <br>
+  A: Close the Enhancements Menu. If the Enhancements Menu is not open, open it with the Android back button and check if it is detected in Settings->Controller->Controller Mapping. If it is, press refresh. <br><br>
 
-## Installation
+<b>Known Bugs</b>:<br>
+Orientation Lock does not work. https://github.com/libsdl-org/SDL/issues/6090<br>
+Near-plane clipping when the camera is close to walls.<br>
+Picto box images render black. <br>
 
-1. Install the APK from this fork's GitHub Releases.
-2. Open the app once. It will create the folder it needs for your ROM. Allow file permissions, then close and reopen the app.
-3. When prompted, choose to generate an O2R file and select your legally obtained ROM.
-4. After extraction, future launches should go straight into the game.
-
-Use the Back/Select/- controller button, or the Android back gesture/button, to open the Enhancements menu. Use touch controls to navigate menus.
-
-## FAQ
-
-**Where do I add mods?**  
-Use the `2S2H` folder at the root of the device.
-
-**Why is it immediately crashing?**  
-Try deleting and re-extracting the O2R file, usually named `mm.o2r`.
-
-**The game opened once, but now it is just a black screen.**  
-Reinstall and do not raise MSAA above 1 in `Settings -> Graphics`.
-
-**Gyro aim?**  
-It works. Press any controller button when the app asks for input. It will default to the phone's gyro if the controller does not support gyro.
-
-**My controller is not doing anything.**  
-Close the Enhancements menu. If the Enhancements menu is not open, open it with the Android back button and check `Settings -> Controller -> Controller Mapping`. If the controller is detected, press refresh.
-
-## Known Bugs
-
-- Orientation lock does not work because of an upstream SDL issue: https://github.com/libsdl-org/SDL/issues/6090
-- Near-plane clipping can appear when the camera is close to walls.
-- Picto box images may render black.
-
-## Build Notes
-
-1. Open the `Android` project in Android Studio.
-2. Install NDK 26 and CMake 3.30.3 through Android Studio's SDK Manager.
-3. Build the app from Android Studio, or run the Gradle release build.
-
-This repository contains Android fixes inside the `libultraship` submodule. See [PUBLISHING.md](PUBLISHING.md) for the recommended fork setup.
-
-If the submodule fork is not available yet, apply `patches/libultraship-android-fork.patch` after initializing submodules:
-
-```sh
-git submodule update --init --recursive
-git -C libultraship apply ../patches/libultraship-android-fork.patch
-```
-
-## Legal And Credits
-
-This is an unofficial community fork. It is not affiliated with or endorsed by HarbourMasters or Waterdish.
-
-No ROM, ROM-derived O2R/OTR file, extracted game assets, or copyrighted content is included in this repository. Public release assets should only include the Android APK. No piracy is condoned or encouraged.
-
-See [NOTICE.md](NOTICE.md) and the included license files for attribution.
+<h3>Build Instructions:</h3>
+1. Edit the app/build.gradle file to point to your ndk folder. NDK 26+ tested as working.<br>
+2. Open the project in android studio and build.<br>

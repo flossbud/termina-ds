@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -13,7 +13,7 @@ void EnSuttari_TriggerTransition(PlayState* play, u16 entrance);
 void RegisterSkipBombBagTheftCutscene() {
     COND_VB_SHOULD(VB_SAKON_TAKE_DAMAGE, CVAR, {
         EnSuttari* enSuttari = va_arg(args, EnSuttari*);
-    if (enSuttari->actor.colChkInfo.damageEffect == 0xF && enSuttari->unk428 == 4) {
+        if (enSuttari->actor.colChkInfo.damageEffect == 0xF && enSuttari->scheduleResult == 4) {
             // scheduleResult becomes 4 when Sakon steals the bomb bag. damageEffect is 0xF if the player stopped Sakon
             // without killing him. In this scenario, skip ahead to the transition instead of waiting for him flee. N
             // need to alter the scenario where the player kills Sakon, as the Bomb Shop Lady will already trigger the

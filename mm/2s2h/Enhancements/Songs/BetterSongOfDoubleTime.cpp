@@ -1,10 +1,10 @@
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/BenGui/HudEditor.h"
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/ShipInit.hpp"
 #include "2s2h/Rando/MiscBehavior/ClockShuffle.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
-#include "2s2h/ShipInit.hpp"
 
 extern "C" {
 #include "variables.h"
@@ -45,7 +45,7 @@ static const char* sDoWeekTableCopy[] = {
     gClockDayFinalTex,
 };
 
-static HOOK_ID onTimePickerUpdateHookId = 0;
+static HOOK_ID onPlayerUpdateHookId = 0;
 static HOOK_ID onEnTest6KillHookId = 0;
 static HOOK_ID onPlayDestroyHookId = 0;
 
@@ -93,10 +93,10 @@ void UpdateStickDirectionPromptAnim() {
     sArrowAnimColor.a = COL_CHAN_MIX(200, 50.0f, arrowAnimTween);
 }
 
-void OnTimePickerUpdate() {
+void OnPlayerUpdate(Actor* actor) {
     if (!sActivelyChangingTime) {
-        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateMainFinish>(onTimePickerUpdateHookId);
-        onTimePickerUpdateHookId = 0;
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnActorUpdate>(onPlayerUpdateHookId);
+        onPlayerUpdateHookId = 0;
         return;
     }
 
@@ -145,9 +145,9 @@ void OnTimePickerUpdate() {
                 gPlayState->transitionTrigger = TRANS_TRIGGER_START;
                 gPlayState->transitionType = TRANS_TYPE_FADE_BLACK_FAST;
 
-                Play_SetRespawnData(&gPlayState->state, RESPAWN_MODE_RETURN, gSaveContext.save.entrance,
-                                    gPlayState->roomCtx.curRoom.num, PLAYER_PARAMS(0xFF, PLAYER_INITMODE_B),
-                                    &player->unk_3C0, player->unk_3CC);
+                Play_SetRespawnData(gPlayState, RESPAWN_MODE_RETURN, gSaveContext.save.entrance,
+                                    gPlayState->roomCtx.curRoom.num, PLAYER_PARAMS(0xFF, PLAYER_START_MODE_B),
+                                    &player->actor.world.pos, player->actor.world.rot.y);
                 gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK;
                 gSaveContext.respawnFlag = 2;
 
@@ -175,12 +175,9 @@ void OnTimePickerUpdate() {
 
     static s8 sDPadRepeatState = 0;
     static s8 sDPadRepeatTimer = 0;
-    bool leftHeld = CHECK_BTN_ALL(input->cur.button, BTN_DLEFT) || CHECK_BTN_ALL(input->cur.button, BTN_CLEFT);
-    bool rightHeld = CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT) || CHECK_BTN_ALL(input->cur.button, BTN_CRIGHT);
 
-    // Check for DPad/C-button movement first, inheriting full speed. Android's touch overlay sends its visible
-    // directional buttons through the C/right-stick path, so accept both while preserving upstream DPad behavior.
-    if (leftHeld && !rightHeld) {
+    // Check for DPad movement first, inheriting full speed
+    if (CHECK_BTN_ALL(input->cur.button, BTN_DLEFT)) {
         if (sDPadRepeatState == -1) {
             sDPadRepeatTimer--;
             if (sDPadRepeatTimer < 0) {
@@ -194,7 +191,7 @@ void OnTimePickerUpdate() {
             sDPadRepeatState = -1;
             adjustMode = ADJUST_DIRECTION_REVERSE;
         }
-    } else if (rightHeld && !leftHeld) {
+    } else if (CHECK_BTN_ALL(input->cur.button, BTN_DRIGHT)) {
         if (sDPadRepeatState == 1) {
             sDPadRepeatTimer--;
             if (sDPadRepeatTimer < 0) {
@@ -212,18 +209,13 @@ void OnTimePickerUpdate() {
         sDPadRepeatState = 0;
     }
 
-    // Then analog stick direction, clamped to 30 minutes. Android touch controls can arrive through either stick.
-    s8 stickX = input->rel.stick_x;
-    if (ABS(input->cur.right_stick_x) > ABS(stickX)) {
-        stickX = input->cur.right_stick_x;
-    }
-
-    if (stickX < -5) {
+    // Then analog stick direction, clamped to 30 minutes
+    if (input->rel.stick_x < -5) {
         adjustMode = ADJUST_DIRECTION_REVERSE;
-        interval = CLOCK_TIME_MINUTE_F * CLAMP_MIN(stickX / -2, -30);
-    } else if (stickX > 5) {
+        interval = CLOCK_TIME_MINUTE_F * CLAMP_MIN(input->rel.stick_x / -2, -30);
+    } else if (input->rel.stick_x > 5) {
         adjustMode = ADJUST_DIRECTION_FORWARD;
-        interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(stickX / 2, 30);
+        interval = CLOCK_TIME_MINUTE_F * CLAMP_MAX(input->rel.stick_x / 2, 30);
     }
 
     if (CHECK_BTN_ALL(input->cur.button, BTN_Z)) { // Holding Z slows the interval
@@ -349,29 +341,32 @@ void RegisterBetterSongOfDoubleTime() {
         sSelectedTime = CLOCK_TIME(0, 0);
         sSelectedDay = 0;
 
-        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnGameStateMainFinish>(onTimePickerUpdateHookId);
         GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnActorKill>(onEnTest6KillHookId);
         GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPlayDestroy>(onPlayDestroyHookId);
 
-        onTimePickerUpdateHookId = 0;
         onEnTest6KillHookId = 0;
         onPlayDestroyHookId = 0;
     });
 
-    // Temporarily point the HUD clock at the selected value so the picker visibly moves while choosing a time.
+    // Hijack the time and day values on the save before drawing the clock so that it renders our selected time
     COND_HOOK(BeforeInterfaceClockDraw, CVAR, []() {
         if (sActivelyChangingTime) {
             gSaveContext.save.time = sSelectedTime;
             gSaveContext.save.day = sSelectedDay;
             UpdateDayTexture(gPlayState, CURRENT_DAY);
+
+            HudEditor_OverrideNextElementMode(HUD_EDITOR_ELEMENT_MODE_VANILLA);
         }
     });
 
+    // Return everything back to normal after drawing the clock
     COND_HOOK(AfterInterfaceClockDraw, CVAR, []() {
         if (sActivelyChangingTime) {
             gSaveContext.save.time = sOriginalTime;
             gSaveContext.save.day = sOriginalDay;
             UpdateDayTexture(gPlayState, CURRENT_DAY);
+
+            HudEditor_OverrideNextElementMode(HUD_EDITOR_ELEMENT_MODE_NONE);
         }
     });
 
@@ -395,13 +390,13 @@ void RegisterBetterSongOfDoubleTime() {
 
         gPlayState->msgCtx.ocarinaMode = OCARINA_MODE_PROCESS_DOUBLE_TIME;
         sActivelyChangingTime = true;
-        sOriginalTime = gSaveContext.save.time;
+        sOriginalTime = CURRENT_TIME;
         sOriginalDay = gSaveContext.save.day;
-        sSelectedTime = gSaveContext.save.time;
+        sSelectedTime = CURRENT_TIME;
         sSelectedDay = gSaveContext.save.day;
 
-        onTimePickerUpdateHookId =
-            GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateMainFinish>(OnTimePickerUpdate);
+        onPlayerUpdateHookId = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::OnActorUpdate>(
+            ACTOR_PLAYER, OnPlayerUpdate);
     });
 
     COND_VB_SHOULD(VB_PREVENT_CLOCK_DISPLAY, CVAR, {

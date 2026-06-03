@@ -1,8 +1,8 @@
 #include "AudioCollection.h"
 #include "sequence.h"
-#include <utils/StringHelper.h>
-#include <bridge/consolevariablebridge.h>
-#include <window/Window.h>
+#include <ship/utils/StringHelper.h>
+#include <libultraship/bridge/consolevariablebridge.h>
+#include <ship/window/Window.h>
 #include <2s2h/BenPort.h>
 #include <locale>
 #include <filesystem>
@@ -300,7 +300,7 @@ void AudioCollection::RemoveFromShufflePool(SequenceInfo* seqInfo) {
     excludedSequences.insert(seqInfo);
     includedSequences.erase(seqInfo);
     CVarSetInteger(cvarKey.c_str(), 1);
-    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
 }
 
 void AudioCollection::AddToShufflePool(SequenceInfo* seqInfo) {
@@ -308,7 +308,7 @@ void AudioCollection::AddToShufflePool(SequenceInfo* seqInfo) {
     includedSequences.insert(seqInfo);
     excludedSequences.erase(seqInfo);
     CVarClear(cvarKey.c_str());
-    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
 }
 
 void AudioCollection::InitializeShufflePool() {

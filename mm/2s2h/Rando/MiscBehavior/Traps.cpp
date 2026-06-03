@@ -1,5 +1,5 @@
 #include "Traps.h"
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "MiscBehavior.h"
 #include "Rando/ActorBehavior/ActorBehavior.h"
 #include "2s2h/DeveloperTools/SaveEditor.h"
@@ -13,10 +13,6 @@ void func_80833B18(PlayState* play, Player* thisx, s32 arg2, f32 speed, f32 velo
                    s32 invincibilityTimer);
 void EnTimeTag_KickOut_Transition(EnTimeTag* enTimeTag, PlayState* play);
 }
-
-#define bodyFlameTimers flameTimers
-#define speedXZ linearVelocity
-#define yaw currentYaw
 
 extern void UpdateGameTime(u16 gameTime);
 
@@ -177,6 +173,7 @@ void Rando::MiscBehavior::OfferTrapItem() {
                 for (int i = 0; i < 18; i++) {
                     player->bodyFlameTimers[i] = static_cast<uint8_t>(Rand_S16Offset(0, 200));
                 }
+                player->bodyIsBurning = true;
                 func_80833B18(gPlayState, player, 0, 0, 0, 0, 0);
             } });
             break;
@@ -262,7 +259,7 @@ void Rando::MiscBehavior::OfferTrapItem() {
                         UpdateGameTime(new_time);
                         Interface_NewDay(gPlayState, CURRENT_DAY);
                         // Load environment values for new day
-                        func_800FEAF4(&gPlayState->envCtx);
+                        Environment_NewDay(&gPlayState->envCtx);
                         // Clear weather from day 2
                         gWeatherMode = WEATHER_MODE_CLEAR;
                         gPlayState->envCtx.lightningState = LIGHTNING_OFF;

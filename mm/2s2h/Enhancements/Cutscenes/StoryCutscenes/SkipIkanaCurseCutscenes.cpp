@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/CustomMessage/CustomMessage.h"
 #include "2s2h/CustomItem/CustomItem.h"
@@ -58,7 +58,7 @@ void RegisterSkipIkanaCurseCutscenes() {
                 *should = false;
 
                 Player* player = GET_PLAYER(gPlayState);
-                player->actor.speed = 0.0f;
+                player->speedXZ = 0.0f;
                 player->actor.freezeTimer = 20;
             } else if (*csId == 10 || *csId == 12) { // Failed to heal Pamela's father
                 /*

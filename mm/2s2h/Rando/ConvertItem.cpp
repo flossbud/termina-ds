@@ -147,7 +147,6 @@ static RegisterShipInitFunc refreshInitFunc(
         });
 
         if (IS_RANDO) {
-            allTrapItems.clear();
             for (auto& [randoCheckId, _] : Rando::StaticData::Checks) {
                 RandoSaveCheck saveCheck = RANDO_SAVE_CHECKS[randoCheckId];
                 if (saveCheck.shuffled &&
@@ -161,7 +160,7 @@ static RegisterShipInitFunc refreshInitFunc(
     { "IS_RANDO" });
 
 RandoItemId Rando::CurrentJunkItem(RandoCheckId randoCheckId) {
-    if (CVarGetInteger("gRando.JunkItems", 1) == 0) {
+    if (CVarGetInteger("gRando.JunkItems", 0) == 0) {
         Ship_Random_Seed(gSaveContext.save.shipSaveInfo.rando.finalSeed + randoCheckId +
                          (gPlayState->gameplayFrames / 30));
         return obtainableJunkItems[Ship_Random(0, obtainableJunkItems.size() - 1)];
@@ -172,7 +171,7 @@ RandoItemId Rando::CurrentJunkItem(RandoCheckId randoCheckId) {
 }
 
 RandoItemId Rando::CurrentTrapItem(RandoCheckId randoCheckId) {
-    if (CVarGetInteger("gRando.TrapItems", 1) == 0) {
+    if (CVarGetInteger("gRando.TrapItems", 0) == 0) {
         if (obtainableTrapItems.size() == 0) {
             return RI_RUPEE_SILVER;
         }
@@ -212,10 +211,6 @@ bool Rando::IsItemObtainable(RandoItemId randoItemId, RandoCheckId randoCheckId)
         case RI_PROGRESSIVE_WALLET:
             if (hasObtainedCheck) {
                 return false;
-            } else if (RANDO_SAVE_OPTIONS[RO_SHUFFLE_TYCOON_WALLET] == RO_GENERIC_YES) {
-                if (CUR_UPG_VALUE(UPG_WALLET) >= 3) {
-                    return false;
-                }
             } else if (CUR_UPG_VALUE(UPG_WALLET) >= 2) {
                 return false;
             }
@@ -227,11 +222,6 @@ bool Rando::IsItemObtainable(RandoItemId randoItemId, RandoCheckId randoCheckId)
             break;
         case RI_WALLET_GIANT:
             if (CUR_UPG_VALUE(UPG_WALLET) >= 2) {
-                return false;
-            }
-            break;
-        case RI_WALLET_TYCOON:
-            if (CUR_UPG_VALUE(UPG_WALLET) >= 3) {
                 return false;
             }
             break;
@@ -728,8 +718,6 @@ RandoItemId Rando::ConvertItem(RandoItemId randoItemId, RandoCheckId randoCheckI
                     return RI_WALLET_ADULT;
                 } else if (CUR_UPG_VALUE(UPG_WALLET) == 1) {
                     return RI_WALLET_GIANT;
-                } else if (CUR_UPG_VALUE(UPG_WALLET) == 2) {
-                    return RI_WALLET_TYCOON;
                 }
                 // Shouldn't happen, just in case
                 assert(false);

@@ -2,7 +2,7 @@
 #include "2s2h/Rando/StaticData/StaticData.h"
 #include "2s2h/ShipUtils.h"
 #include <libultraship/libultraship.h>
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 
 // Starting items is a dynamically sized list of strings, so we can't store it with the other options because it can't
 // fit in a CVar. We have to store it in various places
@@ -99,8 +99,6 @@ void GrantStartingItems() {
 
     if (RANDO_SAVE_OPTIONS[RO_STARTING_RUPEES]) {
         gSaveContext.save.saveInfo.playerData.rupees = CUR_CAPACITY(UPG_WALLET);
-        // Clear any accumulator from starting wallet items since rupees are set directly.
-        gSaveContext.rupeeAccumulator = 0;
     }
 }
 
@@ -173,7 +171,7 @@ std::vector<RandoItemId> GetStartingItemsFromConfig() {
             }
         } else if (allConfig["CVars"]["gRando"]["StartingItems"].is_string()) {
             CVarClear("gRando.StartingItems");
-            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         } else if (allConfig["CVars"]["gRando"]["StartingItems"].is_null()) {
             startingItems.clear();
         }

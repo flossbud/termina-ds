@@ -1,4 +1,4 @@
-#include <libultraship/bridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -21,16 +21,16 @@ static bool ShouldStartMayorsOfficeCutscene(s16 csId) {
         (EnDt*)Actor_FindNearby(gPlayState, &GET_PLAYER(gPlayState)->actor, ACTOR_EN_DT, ACTORCAT_NPC, 99999.9f);
     if (enDt != nullptr) {
         if (csId == 17) { // Argument scenes without Couples Mask
-            enDt->unk_26E = 26; // csIdIndex
-            enDt->unk_270 = 2; // cutsceneState: EN_DT_CS_STATE_PLAYING
-            enDt->unk_256 = 8; // textIdIndex
+            enDt->csIdIndex = 26;
+            enDt->cutsceneState = 2; // EN_DT_CS_STATE_PLAYING
+            enDt->textIdIndex = 8;
             Message_BombersNotebookQueueEvent(gPlayState, BOMBERS_NOTEBOOK_PERSON_MAYOR_DOTOUR);
             return false;
         } else if (csId == 21) { // Couples Mask scene
             // Set flags to trigger scene transition and reward
-            enDt->unk_244 = 0; // timer
-            enDt->unk_256 = 20; // textIdIndex
-            enDt->unk_270 = 0; // cutsceneState: EN_DT_CS_STATE_NONE
+            enDt->timer = 0;
+            enDt->textIdIndex = 20;
+            enDt->cutsceneState = 0; // EN_DT_CS_STATE_NONE
             return false;
         }
     }

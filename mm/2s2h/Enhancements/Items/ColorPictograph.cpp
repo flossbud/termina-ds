@@ -1,8 +1,8 @@
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include <libultraship/libultraship.h>
 #include "2s2h/GameInteractor/GameInteractor.h"
-#include "2s2h/ShipInit.hpp"
 #include "2s2h/Enhancements/FrameInterpolation/FrameInterpolation.h"
+#include "2s2h/ShipInit.hpp"
 #include <cstring>
 #include <ctime>
 #include <filesystem>
@@ -52,14 +52,11 @@ void SaveRgba16Png(const std::string& path, const u16* source, s32 sourceWidth, 
     }
 
     png_init_io(png, fp);
-
     png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                  PNG_FILTER_TYPE_BASE);
-
     png_write_info(png, info);
 
     std::vector<uint8_t> buffer(width * height * 4);
-
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             uint16_t px = source[(pixelTop + y) * sourceWidth + pixelLeft + x];
@@ -79,7 +76,6 @@ void SaveRgba16Png(const std::string& path, const u16* source, s32 sourceWidth, 
 
     png_write_image(png, rows.data());
     png_write_end(png, nullptr);
-
     png_destroy_write_struct(&png, &info);
     fclose(fp);
 }
@@ -120,7 +116,6 @@ void SavePictographAlbumPng(PreRender* prerender) {
 
 void LoadPictoPng() {
     std::string path = GetCurrentPictoPath();
-
     FILE* fp = fopen(path.c_str(), "rb");
     if (!fp) {
         std::memset(pictoPhotoRGBABuffer, 0, sizeof(pictoPhotoRGBABuffer));
@@ -172,11 +167,9 @@ void LoadPictoPng() {
 
     std::vector<uint8_t> buffer(width * height * 4);
     std::vector<png_bytep> rows(height);
-
     for (size_t y = 0; y < height; ++y) {
         rows[y] = &buffer[y * width * 4];
     }
-
     png_read_image(png, rows.data());
 
     for (size_t i = 0; i < width * height; ++i) {
@@ -207,7 +200,6 @@ void DrawPicto(s16 sp2CC) {
     OPEN_DISPS(gPlayState->state.gfxCtx);
 
     gDPSetCombineMode(OVERLAY_DISP++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-
     gSPInvalidateTexCache(OVERLAY_DISP++, (uintptr_t)(pictoPhotoRGBABuffer) + (0xA00 * sp2CC));
     gDPLoadTextureBlock(OVERLAY_DISP++, (u16*)(pictoPhotoRGBABuffer) + (0x500 * sp2CC), G_IM_FMT_RGBA, G_IM_SIZ_16b,
                         PICTO_PHOTO_WIDTH, 8, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

@@ -58,7 +58,7 @@ void RegisterJPGrottos() {
             gSaveContext.respawn[RESPAWN_MODE_DOWN].pos.y = 80.0f;
             gSaveContext.respawn[RESPAWN_MODE_DOWN].pos.z = 765.4f;
             gSaveContext.respawn[RESPAWN_MODE_DOWN].yaw = 1349;
-            gSaveContext.respawn[RESPAWN_MODE_DOWN].playerParams = PLAYER_PARAMS(0xFF, PLAYER_INITMODE_D);
+            gSaveContext.respawn[RESPAWN_MODE_DOWN].playerParams = PLAYER_PARAMS(0xFF, PLAYER_START_MODE_D);
             gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK_FAST;
             gSaveContext.respawnFlag = -8;
         }
@@ -66,7 +66,7 @@ void RegisterJPGrottos() {
 
     COND_ID_HOOK(AfterRoomSceneCommands, SCENE_22DEKUCITY, CVAR, [](s8 sceneId, s8 roomNum) {
         isSpawningJPGrottos = true;
-        bool lightTorches = (gSaveContext.save.time > CLOCK_TIME(18, 0)) || (gSaveContext.save.time < CLOCK_TIME(6, 0));
+        bool lightTorches = (CURRENT_TIME > CLOCK_TIME(18, 0)) || (CURRENT_TIME < CLOCK_TIME(6, 0));
         u16 torchParams = lightTorches ? 10367 : 8319;
         if (roomNum == 1) {
             Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_DOOR_ANA, 0x01A7, 0x0000, 0x053C, 0x0007, 0x0011,

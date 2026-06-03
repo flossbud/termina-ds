@@ -1,6 +1,6 @@
 #include "ActorBehavior.h"
 #include "Souls.h"
-#include <public/bridge/consolevariablebridge.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 #include "Rando/DrawFuncs.h"
 #include "Rando/Logic/Logic.h"
 

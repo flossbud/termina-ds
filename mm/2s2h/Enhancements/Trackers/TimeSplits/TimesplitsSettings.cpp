@@ -1,9 +1,9 @@
 
 #include "TimesplitsSettings.h"
 #include "Timesplits.h"
-#include "public/bridge/consolevariablebridge.h"
-#include "Context.h"
-#include "Window.h"
+#include <libultraship/bridge/consolevariablebridge.h>
+#include <ship/Context.h>
+#include <ship/window/Window.h>
 #include "2s2h/BenGui/UIWidgets.hpp"
 
 extern "C" {
@@ -269,9 +269,9 @@ std::map<uint32_t, std::vector<uint32_t>> itemSubMenuList = {
     { ITEM_MOONS_TEAR,      { ITEM_MOONS_TEAR, ITEM_DEED_LAND, ITEM_DEED_SWAMP, ITEM_DEED_MOUNTAIN, ITEM_DEED_OCEAN } },
     { ITEM_ROOM_KEY,        { ITEM_ROOM_KEY, ITEM_LETTER_MAMA } },
     { ITEM_LETTER_TO_KAFEI, { ITEM_LETTER_TO_KAFEI, ITEM_PENDANT_OF_MEMORIES } },
-    { ITEM_BOTTLE,          { ITEM_POTION_RED, ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_FAIRY, ITEM_DEKU_PRINCESS,
-                              ITEM_MILK_BOTTLE, ITEM_MILK_HALF, ITEM_FISH, ITEM_BUG, ITEM_BLUE_FIRE, ITEM_POE,
-                              ITEM_BIG_POE, ITEM_SPRING_WATER, ITEM_HOT_SPRING_WATER, ITEM_ZORA_EGG, ITEM_GOLD_DUST,
+    { ITEM_BOTTLE,          { ITEM_POTION_RED, ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_FAIRY, ITEM_DEKU_PRINCESS, 
+                              ITEM_MILK_BOTTLE, ITEM_MILK_HALF, ITEM_FISH, ITEM_BUG, ITEM_BLUE_FIRE, ITEM_POE, 
+                              ITEM_BIG_POE, ITEM_SPRING_WATER, ITEM_HOT_SPRING_WATER, ITEM_ZORA_EGG, ITEM_GOLD_DUST, 
                               ITEM_MUSHROOM, ITEM_SEAHORSE, ITEM_CHATEAU } },
     { ITEM_SONG_LULLABY,    { ITEM_SONG_LULLABY_INTRO, ITEM_SONG_LULLABY } },
     { ITEM_SWORD_KOKIRI,    { ITEM_SWORD_KOKIRI, ITEM_SWORD_RAZOR, ITEM_SWORD_GILDED } },

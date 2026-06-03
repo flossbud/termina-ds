@@ -12,10 +12,10 @@
 #include "2s2h/ShipUtils.h"
 #include "2s2h/ShipInit.hpp"
 #include "DeveloperTools/SaveEditor.h"
-#include <window/gui/GuiWindow.h>
-#include <Context.h>
-#include <public/bridge/consolevariablebridge.h>
-#include <window/Window.h>
+#include <ship/window/gui/GuiWindow.h>
+#include <ship/Context.h>
+#include <libultraship/bridge/consolevariablebridge.h>
+#include <ship/window/Window.h>
 
 namespace UIWidgets {
 
@@ -43,6 +43,13 @@ std::string WrappedText(const std::string& text, unsigned int charactersPerLine 
 void PaddedSeparator(bool padTop = true, bool padBottom = true, float extraVerticalTopPadding = 0.0f,
                      float extraVerticalBottomPadding = 0.0f);
 void Tooltip(const char* text);
+
+typedef enum ColorPickerModifiers {
+    ColorPickerResetButton = 1,
+    ColorPickerRandomButton = 2,
+    ColorPickerRainbowCheck = 4,
+    ColorPickerLockCheck = 8,
+} ColorPickerModifiers;
 
 // mostly in order for colors usable by the menu without custom text color
 enum Colors {
@@ -233,11 +240,6 @@ struct CheckboxOptions : WidgetOptions {
 
     CheckboxOptions& Color(Colors color_) {
         WidgetOptions::color = color = color_;
-        return *this;
-    }
-
-    CheckboxOptions& Disabled(bool disabled_) {
-        WidgetOptions::disabled = disabled_;
         return *this;
     }
 
@@ -1016,7 +1018,7 @@ bool CVarCombobox(const char* label, const char* cvarName, const std::unordered_
     int32_t value = CVarGetInteger(cvarName, options.defaultIndex);
     if (Combobox<T>(label, &value, comboMap, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -1030,7 +1032,7 @@ bool CVarCombobox(const char* label, const char* cvarName, const std::vector<std
     int32_t value = CVarGetInteger(cvarName, options.defaultIndex);
     if (Combobox<T>(label, &value, comboVector, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         dirty = true;
     }
     return dirty;
@@ -1043,7 +1045,7 @@ bool CVarCombobox(const char* label, const char* cvarName, const std::vector<con
     int32_t value = CVarGetInteger(cvarName, options.defaultIndex);
     if (Combobox<T>(label, &value, comboVector, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -1161,7 +1163,7 @@ bool CVarCombobox(const char* label, const char* cvarName, const char* (&comboAr
     int32_t value = CVarGetInteger(cvarName, options.defaultIndex);
     if (Combobox<T>(label, &value, comboArray, options)) {
         CVarSetInteger(cvarName, value);
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         ShipInit::Init(cvarName);
         dirty = true;
     }
@@ -1178,16 +1180,14 @@ bool InputString(const char* label, std::string* value, const InputOptions& opti
 bool CVarInputString(const char* label, const char* cvarName, const InputOptions& options = {});
 bool InputInt(const char* label, int32_t* value, const InputOptions& options = {});
 bool CVarInputInt(const char* label, const char* cvarName, const InputOptions& options = {});
-bool CVarColorPicker(const char* label, const char* valueCvar, Color_RGBA8 defaultColor, bool hasAlpha = false,
-                     const char* lockedCvar = nullptr,
-                     UIWidgets::Colors themeColor = UIWidgets::Colors::LightBlue);
+bool CVarColorPicker(const char* label, const char* cvarName, Color_RGBA8 defaultColor, bool hasAlpha = false,
+                     uint8_t modifiers = 0, UIWidgets::Colors themeColor = UIWidgets::Colors::LightBlue);
 bool RadioButton(const char* label, bool active);
 bool CVarRadioButton(const char* text, const char* cvarName, int32_t id, const RadioButtonsOptions& options);
 bool StateButton(const char* str_id, const char* label, ImVec2 size, UIWidgets::ButtonOptions options,
                  ImGuiButtonFlags flags = ImGuiButtonFlags_None);
 void DrawFlagArray32(const std::string& name, uint32_t& flags, Colors color = Colors::LightBlue);
 void DrawFlagArray16(const std::string& name, uint16_t& flags, Colors color = Colors::LightBlue);
-void DrawFlagArray8(const std::string& name, uint8_t& flags, Colors color = Colors::LightBlue);
 void DrawFlagTableArray16(const FlagTable& flagTable, uint16_t& flags);
 void DrawFlagTableArray8(const FlagTable& flagTable, uint16_t row, uint8_t& flags);
 void DrawFlagTableArray8Mask(const FlagTable& flagTable, uint16_t row, uint8_t& flags);
