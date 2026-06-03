@@ -64,6 +64,24 @@ jobs:
           cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release
           cmake --build build-cmake --config Release --target Generate2ShipOtr -j3
 
+      - name: Bundle generated support archive
+        run: |
+          support_archive=""
+          for candidate in 2ship.o2r build-cmake/mm/2ship.o2r build-cmake/2ship.o2r; do
+            if [ -f "$candidate" ]; then
+              support_archive="$candidate"
+              break
+            fi
+          done
+          if [ -z "$support_archive" ]; then
+            echo "Generated 2ship.o2r support archive was not found."
+            find . -name '2ship.o2r' -print
+            exit 1
+          fi
+          mkdir -p Android/app/src/main/assets
+          cp "$support_archive" Android/app/src/main/assets/2ship.o2r
+          ls -lh Android/app/src/main/assets/2ship.o2r
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
