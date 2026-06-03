@@ -16,6 +16,7 @@ on:
       - "mm/**"
       - ".github/workflows/android-release.yml"
       - ".github/workflows/apt-deps.txt"
+      - ".github/patches/**"
 
 jobs:
   build-android:
@@ -24,6 +25,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+
+      - name: Apply Android libultraship patches
+        run: git -C libultraship apply ../.github/patches/android-gles-framebuffer-readback.patch
 
       - name: Install dependencies
         run: |
