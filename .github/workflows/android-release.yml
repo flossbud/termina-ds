@@ -15,6 +15,7 @@ on:
       - "libultraship/**"
       - "mm/**"
       - ".github/workflows/android-release.yml"
+      - ".github/workflows/apt-deps.txt"
 
 jobs:
   build-android:
