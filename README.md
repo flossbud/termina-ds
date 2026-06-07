@@ -27,6 +27,12 @@ Mods and user preset files should be placed in the relevant folders inside the s
 
 ## FAQs
 
+**What is different with this fork?**
+Special attention to Android specific needs.
+ - Move data fodler to SD Card
+ - Turn touch controls on or off
+ - Scalable menu sizes
+
 **Why is it immediately crashing?**
 
 Try deleting and regenerating `mm.o2r` from your own ROM.
