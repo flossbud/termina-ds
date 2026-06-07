@@ -4,6 +4,8 @@ Android port of 2 Ship 2 Harkinian, based on the HarbourMasters project and fork
 
 Original repository: https://github.com/HarbourMasters/2ship2harkinian
 
+Original port: https://github.com/Waterdish/2ship2harkinian-Android
+
 Current Android release: **v4.0.2-android.3.4**
 
 Supported: Android 7+ with OpenGL ES 3.0+
@@ -55,6 +57,3 @@ Orientation lock is limited by SDL behavior on Android: https://github.com/libsd
 
 Near-plane clipping can occur when the camera is close to walls.
 
-## Build Notes
-
-Android builds are produced through GitHub Actions. The APK bundles `2ship.o2r` support data, but does not bundle game assets; users must provide their own legally obtained ROM.
