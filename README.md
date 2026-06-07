@@ -1,6 +1,6 @@
 # 2 Ship 2 Harkinian Android
 
-Android port of 2 Ship 2 Harkinian, based on the HarbourMasters project.
+Android port of 2 Ship 2 Harkinian, based on the HarbourMasters project and forked from Waterdish's original Android port.
 
 Original repository: https://github.com/HarbourMasters/2ship2harkinian
 
@@ -8,7 +8,7 @@ Current Android release: **v4.0.2-android.3.4**
 
 Supported: Android 7+ with OpenGL ES 3.0+
 
-Tested on: Android 15
+Tested on: Android 13
 
 ## Installation
 
@@ -25,7 +25,7 @@ The app stores user data in the selected 2S2H data folder. You can view the curr
 
 Mods and user preset files should be placed in the relevant folders inside the selected data folder.
 
-## FAQ
+## FAQs
 
 **Why is it immediately crashing?**
 
