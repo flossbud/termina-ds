@@ -57,4 +57,4 @@ Near-plane clipping can occur when the camera is close to walls.
 
 ## Build Notes
 
-Android builds are produced through GitHub Actions. The APK bundles `2ship.o2r` support data, but does not bundle `mm.o2r`; users generate `mm.o2r` from their own ROM.
+Android builds are produced through GitHub Actions. The APK bundles `2ship.o2r` support data, but does not bundle game assets; users must provide their own legally obtained ROM.
