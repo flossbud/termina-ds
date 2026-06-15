@@ -1082,6 +1082,9 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Instant Putaway", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Player.InstantPutaway")
         .Options(CheckboxOptions().Tooltip("Allows Link to instantly puts away held item without waiting."));
+    AddWidget(path, "Unsheathe Sword Without Slashing", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Player.UnsheatheWithoutSlashing")
+        .Options(CheckboxOptions().Tooltip("Allows Link to unsheathe his sword without immediately slashing."));
     AddWidget(path, "Fierce Deity Putaway", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Player.FierceDeityPutaway")
         .Options(CheckboxOptions().Tooltip("Allows Fierce Deity Link to put away his sword."));
