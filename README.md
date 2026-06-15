@@ -6,7 +6,7 @@ Original repository: https://github.com/HarbourMasters/2ship2harkinian
 
 Original port: https://github.com/Waterdish/2ship2harkinian-Android
 
-Current Android release: **v4.0.2-android.3.4**
+Current Android release: **v4.0.2-android.3.5**
 
 Supported: Android 7+ with OpenGL ES 3.0+
 
@@ -56,4 +56,3 @@ Yes. Use Settings > General > Menu Scale.
 Orientation lock is limited by SDL behavior on Android: https://github.com/libsdl-org/SDL/issues/6090
 
 Near-plane clipping can occur when the camera is close to walls.
-
