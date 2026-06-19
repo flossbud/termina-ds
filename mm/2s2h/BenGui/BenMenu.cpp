@@ -1356,8 +1356,8 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip("Makes item drops 3D"));
     AddWidget(path, "Authentic Logo", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Graphics.AuthenticLogo")
-        .Options(CheckboxOptions().Tooltip("Hide the game version and build details and display the authentic "
-                                           "model and texture on the boot logo start screen."));
+        .Options(CheckboxOptions().Tooltip("Skips the libultraship startup logo and displays the authentic "
+                                           "Nintendo 64 logo."));
     AddWidget(path, "Disable Black Bar Letterboxes", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Graphics.DisableBlackBars")
         .Options(CheckboxOptions().Tooltip(

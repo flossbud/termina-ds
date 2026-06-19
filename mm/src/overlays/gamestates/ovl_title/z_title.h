@@ -17,6 +17,7 @@ typedef struct {
     /* 0x240 */ s16 ult;
     /* 0x242 */ s16 uls;
     /* 0x244 */ u8 exit;
+    /* 0x245 */ u8 logoPhase;
 } ConsoleLogoState; // size = 0x248
 
 void ConsoleLogo_Init(GameState* thisx);
