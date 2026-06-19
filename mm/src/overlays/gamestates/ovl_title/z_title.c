@@ -128,11 +128,7 @@ void ConsoleLogo_Draw(GameState* thisx) {
     char* logoDL = gNintendo64LogoNDL;
     char* logoText = gNintendo64LogoTextTex;
 
-#if defined(__ANDROID__)
-    bool authenticLogo = false;
-#else
     bool authenticLogo = CVarGetInteger("gEnhancements.Graphics.AuthenticLogo", 0);
-#endif
 
     if (!authenticLogo) {
         logoDL = gShipLogoDL;
