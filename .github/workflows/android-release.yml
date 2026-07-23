@@ -1,0 +1,139 @@
+name: Android Release APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - android
+    paths:
+      - "Android/**"
+      - "CMake/**"
+      - "CMakeLists.txt"
+      - "OTRExporter/**"
+      - "ZAPDTR/**"
+      - "libultraship"
+      - "libultraship/**"
+      - "mm/**"
+      - ".github/workflows/android-release.yml"
+      - ".github/workflows/apt-deps.txt"
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $(cat .github/workflows/apt-deps.txt) libzip-dev zipcmp zipmerge ziptool file
+
+      - name: Install latest SDL
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          if [ ! -d "SDL2-2.28.5" ]; then
+            wget https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5.tar.gz
+            tar -xzf SDL2-2.28.5.tar.gz
+          fi
+          cd SDL2-2.28.5
+          ./configure --enable-hidapi-libusb
+          make -j 10
+          sudo make install
+          sudo cp -av /usr/local/lib/libSDL* /lib/x86_64-linux-gnu/
+
+      - name: Install latest tinyxml2
+        run: |
+          sudo apt-get remove -y libtinyxml2-dev
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          if [ ! -d "tinyxml2-10.0.0" ]; then
+            wget https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz
+            tar -xzf 10.0.0.tar.gz
+          fi
+          cd tinyxml2-10.0.0
+          mkdir -p build
+          cd build
+          cmake ..
+          make
+          sudo make install
+
+      - name: Generate bundled support archive
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release
+          cmake --build build-cmake --config Release --target Generate2ShipOtr -j3
+
+      - name: Bundle generated support archive
+        run: |
+          support_archive=""
+          for candidate in 2ship.o2r build-cmake/mm/2ship.o2r build-cmake/2ship.o2r; do
+            if [ -f "$candidate" ]; then
+              support_archive="$candidate"
+              break
+            fi
+          done
+          if [ -z "$support_archive" ]; then
+            echo "Generated 2ship.o2r support archive was not found."
+            find . -name '2ship.o2r' -print
+            exit 1
+          fi
+          mkdir -p Android/app/src/main/assets
+          cp "$support_archive" Android/app/src/main/assets/2ship.o2r
+          ls -lh Android/app/src/main/assets/2ship.o2r
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android build tools
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;26.0.10792818" "cmake;3.30.3"
+
+      - name: Install Android vcpkg dependencies
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/build/vcpkg
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/26.0.10792818"
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+          mkdir -p build
+          if [ ! -d "$VCPKG_ROOT" ]; then
+            git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT" --depth 1
+          fi
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh"
+          "$VCPKG_ROOT/vcpkg" install --triplet arm64-android zlib libpng libogg libvorbis opus opusfile
+
+      - name: Prepare release signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "ANDROID_KEYSTORE_BASE64 is not configured; APK will use debug signing."
+            exit 0
+          fi
+          if [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
+            echo "Release signing is partially configured. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD."
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > Android/app/release-keystore.jks
+
+      - name: Build release APK
+        working-directory: Android
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/build/vcpkg
+          ANDROID_KEYSTORE_PATH: release-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: app-release.apk
+          path: Android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
