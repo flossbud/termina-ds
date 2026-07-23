@@ -23,6 +23,15 @@ enum TdsSnapshotIndex {
     TDS_SNAP_IDX_FRAME_COUNTER,
     TDS_SNAP_IDX_FLAGS,
 
+    // Everything from here through TDS_SNAP_IDX_BTN_AMMO_C_RIGHT is read out of
+    // gSaveContext unconditionally, every frame -- including on the title
+    // screen and at file select, where gSaveContext holds no meaningful save.
+    // There is no flag for "a save is loaded"; the only signal a consumer has
+    // is TDS_SNAP_FLAG_PLAY_STATE_VALID, which these slots do not depend on
+    // and can be set or clear independently of them. Do not render this range
+    // as a real HUD unless PLAY_STATE_VALID (and, ideally, PLAYER_VALID) is
+    // also set, or boot/menu screens will show a plausible-looking but
+    // meaningless health/magic/rupee readout.
     TDS_SNAP_IDX_HEALTH,
     TDS_SNAP_IDX_HEALTH_CAPACITY,
     TDS_SNAP_IDX_MAGIC,
@@ -72,6 +81,12 @@ extern "C" {
  * Returns false if `out` is null, if `count` < TDS_SNAP_COUNT, or if the
  * seqlock retry budget was exhausted (a transient collision -- the caller
  * should keep whatever it had). Never blocks the publishing thread.
+ *
+ * When this returns false, `out` may already have been partially overwritten
+ * with a torn read (the seqlock writes optimistically before validating the
+ * sequence number). The contents of `out` are unspecified in that case and
+ * must not be used -- callers must check the return value before consuming
+ * `out`, not just before deciding whether to keep a previous copy.
  *
  * Before the first publish this succeeds and returns TDS_SNAP_SCHEMA_VERSION in
  * slot 0 with every other slot zero, so TDS_SNAP_IDX_FRAME_COUNTER == 0 means

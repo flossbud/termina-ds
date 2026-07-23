@@ -45,9 +45,12 @@ std::atomic<uint32_t> sSeq{ 0 };
 // Slot 0 is seeded with the schema version because that is a property of this
 // binary, not of any one frame: a read landing before the first publish must
 // decode cleanly and report FRAME_COUNTER == 0, not a bogus mismatch against
-// version 0. Constant-initialised, so no static-init ordering to reason about.
+// version 0. `constinit` enforces that this stays constant-initialised -- if a
+// later edit made the initializer dynamic, this would fail to compile instead
+// of silently reintroducing a window where an early reader could observe slot
+// 0 unseeded.
 static_assert(TDS_SNAP_IDX_SCHEMA_VERSION == 0, "slot 0 must be the schema version");
-std::atomic<int32_t> sValues[TDS_SNAP_COUNT] = { TDS_SNAP_SCHEMA_VERSION };
+constinit std::atomic<int32_t> sValues[TDS_SNAP_COUNT] = { TDS_SNAP_SCHEMA_VERSION };
 
 // Touched only by the game thread inside Publish().
 uint32_t sFrameCounter = 0;
@@ -123,13 +126,13 @@ void Publish() {
     // Everything below here is pointer-guarded. When a guard fails the
     // corresponding slots stay zero -- never stale -- so the UI cannot present
     // a previous scene's position as current.
-    PlayState* play = gPlayState;
+    const PlayState* play = gPlayState;
     if (play != NULL) {
         flags |= TDS_SNAP_FLAG_PLAY_STATE_VALID;
         v[TDS_SNAP_IDX_SCENE_ID] = play->sceneId;
         v[TDS_SNAP_IDX_ROOM_NUM] = play->roomCtx.curRoom.num;
 
-        Player* player = GET_PLAYER(play);
+        const Player* player = GET_PLAYER(play);
         if (player != NULL) {
             flags |= TDS_SNAP_FLAG_PLAYER_VALID;
             v[TDS_SNAP_IDX_PLAYER_X] = FloatBits(player->actor.world.pos.x);
