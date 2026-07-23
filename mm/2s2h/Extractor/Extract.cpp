@@ -92,7 +92,7 @@ void openFilePickerFromC(JNIEnv* env, jobject javaObject) {
     env->CallVoidMethod(javaObject, openFilePickerMethod);
 }
 // Define the native method to handle the selected file path
-extern "C" void JNICALL Java_com_twoshipfork_mm_MainActivity_nativeHandleSelectedFile(JNIEnv* env, jobject obj,
+extern "C" void JNICALL Java_com_terminads_mm_MainActivity_nativeHandleSelectedFile(JNIEnv* env, jobject obj,
                                                                                  jstring filePath) {
     const char* filePathStr = env->GetStringUTFChars(filePath, 0);
     javaRomPath = strdup(filePathStr); // save filepath to string

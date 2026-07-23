@@ -1,5 +1,5 @@
 
-package com.twoshipfork.mm;
+package com.terminads.mm;
 import org.libsdl.app.SDLActivity;
 
 import android.app.AlertDialog;
@@ -52,7 +52,7 @@ public class MainActivity extends SDLActivity{
 
     SharedPreferences preferences;
     private static final CountDownLatch setupLatch = new CountDownLatch(1);
-    private static String currentDataRootPath = "/storage/emulated/0/2S2H";
+    private static String currentDataRootPath = "/storage/emulated/0/TerminaDS";
     private static final String PREF_DATA_ROOT_PATH = "dataRootPath";
     private static final String PREF_LEGACY_DATA_MIGRATION_COMPLETE = "legacyDataMigrationComplete";
     private static final String PREF_TOUCH_CONTROLS_DISABLED = "touchControlsDisabled";
@@ -65,7 +65,7 @@ public class MainActivity extends SDLActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        preferences = getSharedPreferences("com.twoshipfork.mm.prefs",Context.MODE_PRIVATE);
+        preferences = getSharedPreferences("com.terminads.mm.prefs",Context.MODE_PRIVATE);
 
         updateCurrentDataRootPath();
 
@@ -249,7 +249,7 @@ public class MainActivity extends SDLActivity{
     }
 
     private File getDefaultDataRootFolder() {
-        return new File(Environment.getExternalStorageDirectory(), "2S2H");
+        return new File(Environment.getExternalStorageDirectory(), "TerminaDS");
     }
 
     private void updateCurrentDataRootPath() {
@@ -294,7 +294,7 @@ public class MainActivity extends SDLActivity{
                     continue;
                 }
 
-                File sdFolder = new File(volumeRoot, "2S2H");
+                File sdFolder = new File(volumeRoot, "TerminaDS");
                 options.put(sdFolder.getAbsolutePath(),
                         new DataRootOption("SD card: " + sdFolder.getAbsolutePath(), sdFolder));
             }

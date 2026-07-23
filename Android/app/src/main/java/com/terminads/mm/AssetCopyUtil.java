@@ -1,4 +1,4 @@
-package com.twoshipfork.mm;
+package com.terminads.mm;
 
 import android.content.Context;
 import android.content.res.AssetManager;

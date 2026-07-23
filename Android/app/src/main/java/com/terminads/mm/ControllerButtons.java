@@ -1,4 +1,4 @@
-package com.twoshipfork.mm;
+package com.terminads.mm;
 
 public class ControllerButtons {
     // Xbox Buttons

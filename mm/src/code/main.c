@@ -53,7 +53,7 @@ size_t gSystemHeapSize = 0;
 extern void Android_SetDataRootPath(const char* path);
 
 static void update_native_data_root_path(JNIEnv* env) {
-    jclass mainActivityClass = (*env)->FindClass(env, "com/twoshipfork/mm/MainActivity");
+    jclass mainActivityClass = (*env)->FindClass(env, "com/terminads/mm/MainActivity");
     if (mainActivityClass == NULL) {
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionClear(env);
@@ -92,7 +92,7 @@ static void update_native_data_root_path(JNIEnv* env) {
 
 void wait_for_java_setup() {
     JNIEnv* env = SDL_AndroidGetJNIEnv();
-    jclass mainActivityClass = (*env)->FindClass(env, "com/twoshipfork/mm/MainActivity");
+    jclass mainActivityClass = (*env)->FindClass(env, "com/terminads/mm/MainActivity");
     if (mainActivityClass == NULL) {
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionClear(env);
