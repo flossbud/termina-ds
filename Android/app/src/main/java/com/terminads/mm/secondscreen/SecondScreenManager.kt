@@ -31,6 +31,7 @@ class SecondScreenManager(private val activity: Activity) {
     private val handler = Handler(Looper.getMainLooper())
 
     private var presentation: SecondScreenPresentation? = null
+    private var shownInfo: DisplayInfo? = null
     private var started = false
 
     private val displayListener = object : DisplayManager.DisplayListener {
@@ -77,22 +78,28 @@ class SecondScreenManager(private val activity: Activity) {
             return
         }
 
+        // Re-show when the target display changes OR when the same display's
+        // properties change (e.g. a refresh-rate / mode switch): compare the full
+        // DisplayInfo, not just the id, so the UI reflects the current mode.
+        // onDisplayChanged fires for mode changes with the same displayId.
         val current = presentation
-        if (current != null && current.display?.displayId == chosen.displayId && current.isShowing) {
+        if (current != null && current.isShowing && shownInfo == chosen) {
             return
         }
 
         dismiss()
 
         val target = displays.firstOrNull { it.displayId == chosen.displayId } ?: return
-        Log.i(TAG, "Showing second screen on display ${chosen.displayId} (${chosen.name}).")
+        Log.i(TAG, "Showing second screen on display ${chosen.displayId} (${chosen.name}) @ ${chosen.refreshRate}Hz.")
 
         try {
             presentation = SecondScreenPresentation(activity, target, chosen).also { it.show() }
+            shownInfo = chosen
         } catch (e: Exception) {
             // A display can disappear between enumeration and show().
             Log.w(TAG, "Failed to show second screen on display ${chosen.displayId}", e)
             presentation = null
+            shownInfo = null
         }
     }
 
@@ -101,6 +108,7 @@ class SecondScreenManager(private val activity: Activity) {
             if (it.isShowing) it.dismiss()
         }
         presentation = null
+        shownInfo = null
     }
 
     private fun readOverride(): Int? {
@@ -118,7 +126,9 @@ class SecondScreenManager(private val activity: Activity) {
             name = name ?: "display-$displayId",
             widthPx = metrics.widthPixels,
             heightPx = metrics.heightPixels,
-            refreshRate = refreshRate,
+            // Display.getRefreshRate() reports an unreliable value for secondary /
+            // presentation displays; the active Mode's rate is the source of truth.
+            refreshRate = mode.refreshRate,
             isDefault = displayId == Display.DEFAULT_DISPLAY,
         )
     }
