@@ -1,14 +1,21 @@
 # Upstream Tracking Ledger
 
-Termina DS tracks `linkzenic/2ship2harkinian-Android` (`android` branch), which
-tracks `HarbourMasters/2ship2harkinian`. Rebase debt is the principal long-term
-cost of this fork (spec §11).
+The game/Android layer (`mm/`, `Android/`) derives from
+`linkzenic/2ship2harkinian-Android` (`android` branch), which tracks
+`HarbourMasters/2ship2harkinian`. Those remotes remain available for reference
+and cherry-picking, but Termina DS is diverging deliberately and does not aim to
+stay mergeable long-term (spec §11).
+
+The engine and asset tooling are **no longer submodules** — they have been
+vendored into this repo as first-class source (see "Vendored engine & tooling"
+below), so the project is self-contained and clones + builds with no
+`.gitmodules` and no external submodule hosting.
 
 ## Remotes
 
 | Remote | URL | Use |
 |---|---|---|
-| `upstream-android` | https://github.com/linkzenic/2ship2harkinian-Android.git | primary upstream |
+| `upstream-android` | https://github.com/linkzenic/2ship2harkinian-Android.git | reference / cherry-pick |
 | `upstream-core` | https://github.com/HarbourMasters/2ship2harkinian.git | reference only |
 
 ## Merging upstream
@@ -48,44 +55,41 @@ resolving mechanically.
 Prefer new files over edits to inherited ones. When an inherited file must
 change, keep the change to a single obvious call site and record it here.
 
-## libultraship fork (Task 4)
+## Vendored engine & tooling
 
-The `libultraship` submodule is itself an unofficial fork
-(`Jameriquiah/libultraship`), pinned in `.gitmodules` in detached-HEAD form.
-It contains five JNI entry points in
-`src/ship/port/mobile/MobileImpl.cpp` — `attachController`, `setCameraState`,
-`setButton`, `setAxis`, `detachController` — named after the Java package
-that calls them (`Java_com_twoshipfork_mm_MainActivity_*`). These are declared
-`native` in `MainActivity.java` and bound to the shared library by symbol name
-at runtime, not at link time, so a mismatch between the Java package and the
-`.so` symbol names compiles and links cleanly and only fails with
-`UnsatisfiedLinkError` the first time a controller is touched or the camera
-moves.
+The three former submodules were vendored into the repo as regular tracked
+source and `.gitmodules` was removed, making the project self-contained (no
+external submodule hosting, `git clone` alone is buildable):
 
-The main-repo rebrand (this commit) moved the Java package to
-`com.terminads.mm`, so the submodule's five symbols had to move in lockstep.
-Because the submodule was in detached HEAD at `6c5a562`, the rename was
-committed inside the submodule on a new local branch, `termina-ds`:
+| Was (submodule) | Now (vendored path) | Notes |
+|---|---|---|
+| `libultraship` (`Jameriquiah/libultraship`) | **`engine/`** | renamed folder |
+| `OTRExporter` (`Jameriquiah/OTRExporter`) | `OTRExporter/` | asset-build tool |
+| `ZAPDTR` (`Jameriquiah/ZAPDTR`) | `ZAPDTR/` | asset-build tool |
 
-- Submodule commit: `62945178154e9c0dde77d120e3b0fd1b7a652e73`
-  ("Rename Android JNI symbols com.twoshipfork.mm -> com.terminads.mm for
-  Termina DS"), on branch `termina-ds`, one commit ahead of `6c5a562`.
-- The superproject's submodule pointer (`libultraship` gitlink) was bumped to
-  that commit in the same commit as the main-repo rebrand.
+The engine folder was renamed `libultraship/` → `engine/`. All **directory-path**
+references were updated: `CMakeLists.txt`, `mm/CMakeLists.txt`,
+`CMake/lus-cvars.cmake`, `.github/workflows/android-release.yml`,
+`OTRExporter/CMakeLists.txt`, `OTRExporter/OTRExporter/CMakeLists.txt`,
+`ZAPDTR/ZAPD/CMakeLists.txt`.
 
-**This fork commit exists only in this local clone.** `.gitmodules` still
-points `libultraship` at `Jameriquiah/libultraship`, and we have no push
-access to create a fork there. Consequently:
+**Intentionally left as `libultraship` (internal, invisible):** the CMake target
+name (`libultraship`), the C++ namespace (`Ship`/`LUS`, 173 files), and the
+`#include <libultraship/…>` header prefix (390 files) and the
+`engine/src/libultraship/` internal source dir. Renaming these is a separate
+500+ file operation, to be done deliberately and incrementally as the engine
+diverges — not bundled with vendoring.
 
-- A fresh `git clone --recursive` (or `git submodule update --init`) of this
-  repo will **not** resolve the new submodule SHA — it will fail to find
-  `62945178...` on the configured remote.
-- **Hosting a `libultraship` fork containing this commit (or cherry-picking
-  it onto a hosted fork) is a prerequisite for anyone but this workspace to
-  build Termina DS from a clean checkout.** Until then, treat this submodule
-  state as workspace-local, and do not attempt to push it — there is nowhere
-  to push it to yet.
-- End-to-end verification that the rename propagated through compilation,
-  linking, and APK packaging was done via `llvm-nm -D` on the packaged
-  `arm64-v8a` `.so` files: all 5 new `Java_com_terminads_mm_MainActivity_*`
-  symbols are present and 0 old `Java_com_twoshipfork_mm_*` symbols remain.
+`.gitattributes` marks `engine/`, `OTRExporter/`, `ZAPDTR/` as `-text`
+(byte-preserved, no line-ending normalization) so vendored patches and build
+scripts stay identical to what upstream built (notably
+`engine/cmake/dependencies/patches/stormlib-optimizations.patch`).
+
+The five Android JNI entry points in
+`engine/src/ship/port/mobile/MobileImpl.cpp` (`attachController`,
+`setCameraState`, `setButton`, `setAxis`, `detachController`) carry the
+`Java_com_terminads_mm_MainActivity_*` names (renamed from `…twoshipfork…` when
+the app package moved). These bind by symbol name at runtime, so a mismatch
+would only fail with `UnsatisfiedLinkError` when a control is used — verified on
+the packaged `.so` via `llvm-nm -D`: all renamed symbols present, 0 old symbols,
+confirmed on hardware.

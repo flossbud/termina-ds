@@ -1,2 +1,7 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Vendored third-party engine and asset-tooling trees: preserve upstream bytes
+# exactly (no line-ending normalization), so patches and build scripts stay
+# byte-identical to what upstream built and tested. Renormalize deliberately
+# if/when these are absorbed as first-class Termina DS source.
+/engine/** -text
+/OTRExporter/** -text
+/ZAPDTR/** -text

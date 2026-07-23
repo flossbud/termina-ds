@@ -56,7 +56,7 @@ docker run --rm \
         # it compiles green but ships without the code. Removing the .cxx config dir
         # forces a full CMake reconfigure + re-glob every build, which reliably picks
         # up new files. (CONFIGURE_DEPENDS and mtime-touching do NOT work here because
-        # AGP's own up-to-date check short-circuits before ninja's glob check runs.)
+        # The AGP up-to-date check short-circuits before the ninja glob check runs.)
         # Cost: native objects recompile each build; correctness over speed.
         rm -rf Android/app/.cxx
 
