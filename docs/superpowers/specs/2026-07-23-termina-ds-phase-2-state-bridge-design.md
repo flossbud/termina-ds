@@ -120,7 +120,7 @@ ten updates a second.
 
 ## 6. Components
 
-Seven files: four new, three modified. **No inherited file is touched** — every
+Eight files: four new, four modified. **No inherited file is touched** — every
 modified file is one Termina DS already owns.
 
 ### Native — `mm/2s2h/TerminaDS/`
@@ -169,6 +169,11 @@ Remains the only file in the Kotlin layer permitted to call native.
 
 **`secondscreen/SecondScreenHost.kt`** (modified) — placeholder body replaced by
 the debug readout. Signature stays state-in, events-out.
+
+**`secondscreen/SecondScreenPresentation.kt`** (modified) — constructs the
+poller and passes it to the host, replacing the `uptimeMillisProvider` lambda it
+passes today. This is the single wiring point; it remains the only place that
+knows both `NativeBridge` and the Compose host exist.
 
 ## 7. Payload
 
