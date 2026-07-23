@@ -1520,12 +1520,28 @@ Expected: ends with `==> APK: .../app-release.apk`. Takes 8–19 minutes; backgr
 - [ ] **Step 2: Re-verify the native symbol**
 
 ```bash
-cd /tmp && rm -rf apkcheck2 && mkdir apkcheck2 && cd apkcheck2
-unzip -o -q /srv/projects/2ship2hark/Android/app/build/outputs/apk/release/app-release.apk 'lib/arm64-v8a/*'
-llvm-nm -D lib/arm64-v8a/*.so 2>/dev/null | grep 'Java_com_terminads_mm_NativeBridge_native'
+**`llvm-nm` is NOT installed on the build host.** It ships inside the NDK in the
+`termina-ds-build:latest` image, so the check must run there. Running it bare on
+the host prints nothing and, with stderr suppressed, looks exactly like the
+symbol being missing — a false alarm indistinguishable from the real
+`GLOB_RECURSE` failure this step exists to catch. Never suppress stderr here.
+
+The packaged arm64 library is `lib/arm64-v8a/lib2ship.so`.
+
+```bash
+docker run --rm -v "$(pwd):/workspace" -w /workspace termina-ds-build:latest bash -c '
+  rm -rf /tmp/apkcheck && mkdir -p /tmp/apkcheck && cd /tmp/apkcheck
+  unzip -o -q /workspace/Android/app/build/outputs/apk/release/app-release.apk "lib/arm64-v8a/*"
+  NM=$(find /opt -name llvm-nm -type f 2>/dev/null | head -1)
+  echo "using: $NM"
+  "$NM" -D lib/arm64-v8a/lib2ship.so | grep Java_com_terminads_mm_NativeBridge_native
+'
 ```
 
 Expected: two lines — `nativeGetUptimeMillis` and `nativeReadSnapshot`.
+
+(Host `nm -D` on the extracted `lib2ship.so` also works and is a valid
+cross-check if Docker is inconvenient.)
 
 - [ ] **Step 3: Confirm the device is connected**
 
