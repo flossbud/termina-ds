@@ -14,6 +14,7 @@ IMAGE="${TERMINA_BUILD_IMAGE:-termina-ds-build:latest}"
 docker run --rm \
     -v "${REPO_ROOT}:/workspace" \
     -v "termina-ds-gradle:/root/.gradle" \
+    -v "termina-ds-android-home:/root/.android" \
     -e ANDROID_KEYSTORE_PATH="${ANDROID_KEYSTORE_PATH:-}" \
     -e ANDROID_KEYSTORE_PASSWORD="${ANDROID_KEYSTORE_PASSWORD:-}" \
     -e ANDROID_KEY_ALIAS="${ANDROID_KEY_ALIAS:-}" \
