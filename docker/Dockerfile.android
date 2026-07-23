@@ -89,4 +89,11 @@ RUN git clone https://github.com/microsoft/vcpkg.git ${VCPKG_ROOT} \
     && ${VCPKG_ROOT}/vcpkg install --triplet arm64-android \
         zlib libpng libogg libvorbis opus opusfile
 
+# lsb_release is required by CMake/Utils.cmake (get_linux_lsb_release_information,
+# a hard FATAL_ERROR if missing). It is NOT in apt-deps.txt; CI only works because
+# GitHub's ubuntu-latest runners preinstall it. Install it explicitly so our image
+# does not depend on that accident.
+RUN apt-get update && apt-get install -y --no-install-recommends lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /workspace
