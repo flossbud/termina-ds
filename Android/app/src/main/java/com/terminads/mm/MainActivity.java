@@ -47,6 +47,8 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.terminads.mm.secondscreen.SecondScreenManager;
+
 //This class is the main SDLActivity and just sets up a bunch of default files and the input overlay
 public class MainActivity extends SDLActivity{
 
@@ -61,6 +63,7 @@ public class MainActivity extends SDLActivity{
     private static final String SUPPORT_FILES_VERSION_MARKER = ".android_support_files_version";
     private AlertDialog dataRootMigrationDialog;
     private AlertDialog setupProgressDialog;
+    private SecondScreenManager secondScreenManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,12 +83,28 @@ public class MainActivity extends SDLActivity{
         setupControllerOverlay();
         applyImmersiveFullscreen();
         attachController();
+
+        // Termina DS: bring up the second screen. Safe when no secondary display exists.
+        secondScreenManager = new SecondScreenManager(this);
+        secondScreenManager.start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         applyImmersiveFullscreen();
+        if (secondScreenManager != null) {
+            secondScreenManager.onActivityResume();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (secondScreenManager != null) {
+            secondScreenManager.stop();
+            secondScreenManager = null;
+        }
+        super.onDestroy();
     }
 
     @Override

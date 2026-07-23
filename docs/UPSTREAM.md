@@ -32,6 +32,7 @@ resolving mechanically.
 | `mm/src/code/main.c` | `FindClass` path ×2 renamed to `com/terminads/mm/MainActivity` | rebrand (Task 4) |
 | `mm/2s2h/Extractor/Extract.cpp` | JNI symbol renamed to `Java_com_terminads_mm_MainActivity_nativeHandleSelectedFile` | rebrand (Task 4) |
 | `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | `offerLegacy2S2HImport()` + one call site in `beginSetupIfStorageReady()` | data import (Task 6) |
+| `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | `secondScreenManager` field + start in `onCreate`, resume hook, `onDestroy` override | second screen (Task 12) |
 | `Android/build.gradle` | Kotlin + Compose compiler classpath | Compose toolchain (Task 7) |
 | `Android/app/build.gradle` | compileSdk 34, Kotlin/Compose plugins, deps, test options | Compose toolchain (Task 7) |
 | `Android/gradle.properties` | `org.gradle.jvmargs` 1536m → 4096m | Compose toolchain (Task 7) |
