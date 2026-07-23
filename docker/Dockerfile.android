@@ -1,0 +1,80 @@
+# Termina DS Android build environment.
+# Mirrors .github/workflows/android-release.yml so local builds match CI.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    ANDROID_HOME=/opt/android-sdk \
+    ANDROID_SDK_ROOT=/opt/android-sdk \
+    ANDROID_NDK_HOME=/opt/android-sdk/ndk/26.0.10792818 \
+    ANDROID_NDK_ROOT=/opt/android-sdk/ndk/26.0.10792818 \
+    VCPKG_ROOT=/opt/vcpkg \
+    JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+
+ENV PATH=${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}
+
+# Base tooling. Package list after `cmake ninja-build` is .github/workflows/apt-deps.txt verbatim.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget curl git unzip zip ca-certificates gnupg file pkg-config \
+        build-essential cmake ninja-build python3 \
+        libzip-dev zipcmp zipmerge ziptool \
+        libusb-dev libusb-1.0-0-dev libsdl2-dev libsdl2-net-dev libpng-dev \
+        libglew-dev libogg-dev libvorbis-dev libopus-dev libopusfile-dev \
+        nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# JDK 17 (Temurin), per spec Global Constraints.
+RUN mkdir -p /etc/apt/keyrings \
+    && wget -qO- https://packages.adoptium.net/artifactory/api/gpg/key/public \
+        | gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb noble main" \
+        > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update && apt-get install -y --no-install-recommends temurin-17-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# SDL 2.28.5 from source (host tools only; the APK uses its own SDL via CMake).
+RUN cd /tmp \
+    && wget -q https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5.tar.gz \
+    && tar -xzf SDL2-2.28.5.tar.gz \
+    && cd SDL2-2.28.5 \
+    && ./configure --enable-hidapi-libusb \
+    && make -j"$(nproc)" \
+    && make install \
+    && cp -av /usr/local/lib/libSDL* /lib/x86_64-linux-gnu/ \
+    && ldconfig \
+    && rm -rf /tmp/SDL2-2.28.5 /tmp/SDL2-2.28.5.tar.gz
+
+# tinyxml2 10.0.0 from source. The apt package must go first — CI does the same.
+RUN apt-get update && apt-get remove -y libtinyxml2-dev && rm -rf /var/lib/apt/lists/* \
+    && cd /tmp \
+    && wget -q https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz \
+    && tar -xzf 10.0.0.tar.gz \
+    && cd tinyxml2-10.0.0 && mkdir -p build && cd build \
+    && cmake .. && make -j"$(nproc)" && make install \
+    && ldconfig \
+    && rm -rf /tmp/tinyxml2-10.0.0 /tmp/10.0.0.tar.gz
+
+# Android SDK command-line tools.
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
+    && cd /tmp \
+    && wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip \
+    && unzip -q cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
+    && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
+    && rm cmdline-tools.zip
+
+# SDK packages. compileSdk moves 33 -> 34 in Task 7, so both platforms are installed.
+RUN yes | sdkmanager --licenses > /dev/null \
+    && sdkmanager --install \
+        "platform-tools" \
+        "platforms;android-33" \
+        "platforms;android-34" \
+        "build-tools;34.0.0" \
+        "ndk;26.0.10792818" \
+        "cmake;3.30.3"
+
+# vcpkg with Android deps pre-built, so app/build.gradle finds them via VCPKG_ROOT.
+RUN git clone --depth 1 https://github.com/microsoft/vcpkg.git ${VCPKG_ROOT} \
+    && ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics \
+    && ${VCPKG_ROOT}/vcpkg install --triplet arm64-android \
+        zlib libpng libogg libvorbis opus opusfile
+
+WORKDIR /workspace
