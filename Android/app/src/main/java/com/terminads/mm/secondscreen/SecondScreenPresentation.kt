@@ -3,12 +3,14 @@ package com.terminads.mm.secondscreen
 import android.app.Presentation
 import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Display
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.terminads.mm.GameSnapshotPoller
 import com.terminads.mm.NativeBridge
 
 /**
@@ -33,11 +35,18 @@ class SecondScreenPresentation(
 
         lifecycleOwner.onCreate()
 
+        // One poller per Presentation: it owns the reusable payload array and
+        // the staleness bookkeeping, both of which must not be shared.
+        val poller = GameSnapshotPoller(
+            read = NativeBridge::readSnapshot,
+            nowMillis = SystemClock::uptimeMillis,
+        )
+
         val composeView = ComposeView(context).apply {
             setContent {
                 SecondScreenHost(
                     displayInfo = displayInfo,
-                    uptimeMillisProvider = { NativeBridge.uptimeMillis() },
+                    pollBridge = poller::poll,
                 )
             }
         }
