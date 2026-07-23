@@ -496,6 +496,40 @@ public class MainActivity extends SDLActivity{
         }
     }
 
+    /**
+     * Termina DS: offer a one-time import of an existing 2 Ship 2 Harkinian data
+     * folder, so users need not re-extract their ROM. Shown only when our root is
+     * empty and a legacy root exists.
+     *
+     * @return true if a dialog was shown and normal setup should be deferred.
+     */
+    private boolean offerLegacy2S2HImport(File targetRoot) {
+        File legacyRoot = new File(Environment.getExternalStorageDirectory(), "2S2H");
+        if (!legacyRoot.isDirectory() || isDirectoryEmpty(legacyRoot)) {
+            return false;
+        }
+        if (targetRoot.isDirectory() && !isDirectoryEmpty(targetRoot)) {
+            return false;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Import existing 2S2H data?")
+                .setMessage("An existing 2 Ship 2 Harkinian data folder was found. "
+                        + "Copy it into Termina DS so you do not have to extract your ROM again? "
+                        + "Your saves come across too, and the original folder is left unchanged.")
+                .setPositiveButton("Import", (dialog, which) ->
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            showSetupProgressDialog("Importing 2S2H Data",
+                                    "Copying your existing data into Termina DS. This may take a moment.");
+                            migrateExistingRootIfNeeded(legacyRoot, targetRoot);
+                            dismissSetupProgressDialog();
+                            runOnUiThread(this::checkAndSetupFiles);
+                        }))
+                .setNegativeButton("Skip", (dialog, which) -> checkAndSetupFiles())
+                .setCancelable(false)
+                .show();
+        return true;
+    }
+
     private boolean shouldMigrateExistingRoot(File sourceRoot, File targetRoot) {
         return sourceRoot != null && targetRoot != null &&
                 !sourceRoot.getAbsolutePath().equals(targetRoot.getAbsolutePath()) &&
@@ -517,6 +551,11 @@ public class MainActivity extends SDLActivity{
         }
 
         doVersionCheck();
+
+        // Termina DS: one-time import offer from a legacy 2S2H data root.
+        if (offerLegacy2S2HImport(getTargetRootFolder())) {
+            return;
+        }
         checkAndSetupFiles();
     }
 
