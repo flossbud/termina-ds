@@ -54,6 +54,12 @@ RUN apt-get update && apt-get remove -y libtinyxml2-dev && rm -rf /var/lib/apt/l
     && rm -rf /tmp/tinyxml2-10.0.0 /tmp/10.0.0.tar.gz
 
 # Android SDK command-line tools.
+# Pinned to commandlinetools-linux-11076708_latest.zip. Google periodically
+# retires old numbered builds from dl.google.com/android/repository/, which
+# would break this download outright with no redirect. There is no durable
+# official URL to depend on instead; this is accepted, documented risk. If the
+# download starts failing, find the current build number at
+# https://developer.android.com/studio#command-line-tools-only and update it.
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
     && cd /tmp \
     && wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip \
@@ -72,7 +78,13 @@ RUN yes | sdkmanager --licenses > /dev/null \
         "cmake;3.30.3"
 
 # vcpkg with Android deps pre-built, so app/build.gradle finds them via VCPKG_ROOT.
-RUN git clone --depth 1 https://github.com/microsoft/vcpkg.git ${VCPKG_ROOT} \
+# No vcpkg.json in this repo, so `vcpkg install` runs in classic mode: package
+# versions float with whatever commit of the vcpkg registry we check out. Pinned
+# deliberately to a known-good commit so builds are reproducible; move this SHA
+# forward only intentionally (verify all six ports still build with the pinned
+# NDK before bumping it).
+RUN git clone https://github.com/microsoft/vcpkg.git ${VCPKG_ROOT} \
+    && git -C ${VCPKG_ROOT} checkout 2475cc332a47b3a63bb3de58293bdab7726613ca \
     && ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics \
     && ${VCPKG_ROOT}/vcpkg install --triplet arm64-android \
         zlib libpng libogg libvorbis opus opusfile
