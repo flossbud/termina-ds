@@ -47,6 +47,19 @@ docker run --rm \
         ls -lh Android/app/src/main/assets/2ship.o2r
 
         echo "==> Stage 2: assembling release APK"
+
+        # mm/CMakeLists.txt collects native sources with file(GLOB_RECURSE ...) and
+        # no CONFIGURE_DEPENDS, so the source list is frozen at CMake configure time.
+        # AGP re-runs the native build only when a CMakeLists/gradle input changes --
+        # NOT when a new .cpp appears on disk -- so a newly added native file (e.g.
+        # under mm/2s2h/TerminaDS/) is silently dropped from an incremental build:
+        # it compiles green but ships without the code. Removing the .cxx config dir
+        # forces a full CMake reconfigure + re-glob every build, which reliably picks
+        # up new files. (CONFIGURE_DEPENDS and mtime-touching do NOT work here because
+        # AGP's own up-to-date check short-circuits before ninja's glob check runs.)
+        # Cost: native objects recompile each build; correctness over speed.
+        rm -rf Android/app/.cxx
+
         cd Android
         ./gradlew --no-daemon :app:assembleRelease
     '
