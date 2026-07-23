@@ -90,6 +90,32 @@ class GameSnapshotPollerTest {
     }
 
     @Test
+    fun staysLiveAtOneMillisecondUnderTheThreshold() {
+        val reader = FakeReader()
+        val clock = FakeClock()
+        val subject = poller(reader, clock)
+
+        subject.poll()
+        clock.advance(999) // just under the 1000 ms threshold
+        val state = subject.poll()
+
+        assertTrue("was $state", state is BridgeState.Live)
+    }
+
+    @Test
+    fun reportsStalledAtExactlyTheThreshold() {
+        val reader = FakeReader()
+        val clock = FakeClock()
+        val subject = poller(reader, clock)
+
+        subject.poll()
+        clock.advance(1_000) // exactly the 1000 ms threshold
+        val state = subject.poll()
+
+        assertTrue("was $state", state is BridgeState.Stalled)
+    }
+
+    @Test
     fun reportsStalledWhenTheFrameCounterStopsAdvancing() {
         val reader = FakeReader()
         val clock = FakeClock()
@@ -117,7 +143,10 @@ class GameSnapshotPollerTest {
 
         reader.frameCounter = 2
         clock.advance(100)
-        assertTrue(subject.poll() is BridgeState.Live)
+        val state = subject.poll()
+
+        assertTrue("was $state", state is BridgeState.Live)
+        assertEquals(2, (state as BridgeState.Live).snapshot.frameCounter)
     }
 
     @Test

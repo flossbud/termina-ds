@@ -43,7 +43,9 @@ class GameSnapshotPoller(
     private val nowMillis: () -> Long,
     private val stalenessThresholdMillis: Long = 1_000L,
 ) {
-    // Reused across polls: nothing allocates on the main thread at 10 Hz.
+    // The raw payload buffer is reused across polls; the decoded GameSnapshot
+    // below is not -- decodeSnapshot allocates a new model (and two lists) on
+    // every successful poll.
     private val buffer = IntArray(GameSnapshotLayout.SLOT_COUNT)
 
     private var lastSnapshot: GameSnapshot? = null
@@ -74,12 +76,7 @@ class GameSnapshotPoller(
         }
         lastSnapshot = snapshot
 
-        val sinceChange = now - lastChangeMillis
-        return if (sinceChange >= stalenessThresholdMillis) {
-            BridgeState.Stalled(snapshot, sinceChange)
-        } else {
-            BridgeState.Live(snapshot)
-        }
+        return classify(snapshot, now)
     }
 
     /**
@@ -89,11 +86,16 @@ class GameSnapshotPoller(
      */
     private fun carryForward(): BridgeState {
         val previous = lastSnapshot ?: return BridgeState.NoFramesYet
-        val sinceChange = nowMillis() - lastChangeMillis
+        return classify(previous, nowMillis())
+    }
+
+    /** Staleness classification shared by [poll] and [carryForward]. */
+    private fun classify(snapshot: GameSnapshot, now: Long): BridgeState {
+        val sinceChange = now - lastChangeMillis
         return if (sinceChange >= stalenessThresholdMillis) {
-            BridgeState.Stalled(previous, sinceChange)
+            BridgeState.Stalled(snapshot, sinceChange)
         } else {
-            BridgeState.Live(previous)
+            BridgeState.Live(snapshot)
         }
     }
 }
