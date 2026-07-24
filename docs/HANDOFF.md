@@ -213,3 +213,10 @@ templates).
   remotes are reference-only and push-disabled.
 - `adb devices` — is the Thor connected? If not, the user re-pairs it.
 - `docker images | grep termina-ds-build` — is the build image present?
+- **If `docker` or `adb` is missing entirely**, the session is on a host that
+  never had the toolchain (this happened when wheelhouse migrated VMs on
+  2026-07-24: the repo migrates, the toolchain does not). Fix it with
+  `./tools/bootstrap-build-host.sh` — one idempotent command that installs
+  docker + adb and rebuilds the image from `docker/Dockerfile.android`. Do
+  not go hunting for the old host's toolchain; the image is fully
+  reproducible from the repo.
