@@ -92,6 +92,11 @@ private fun statusLine(state: BridgeState): String = when (state) {
     is BridgeState.SchemaMismatch ->
         "SCHEMA MISMATCH native=${state.nativeVersion} expected=${state.expected}"
     is BridgeState.NoFramesYet -> "NO FRAMES YET (publisher has not run)"
+    is BridgeState.BufferTooSmall ->
+        "BUFFER TOO SMALL kotlin=${state.kotlinSlots} slots < native payload " +
+            "(GameSnapshotLayout must mirror GameSnapshot.h)"
+    is BridgeState.UnknownReadStatus ->
+        "UNKNOWN READ STATUS (native is newer than this build's Kotlin)"
     is BridgeState.Stalled -> "STALLED ${state.millisSinceChange}ms  frame=${state.snapshot.frameCounter}"
     is BridgeState.Live -> "LIVE  frame=${state.snapshot.frameCounter}"
 }

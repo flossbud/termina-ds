@@ -34,30 +34,39 @@ Java_com_terminads_mm_NativeBridge_nativeGetUptimeMillis(JNIEnv* env, jobject th
 
 /*
  * Copy the latest published snapshot into `out`, which must have at least
- * TDS_SNAP_COUNT elements. Returns JNI_FALSE if it is too short or if the
- * seqlock retry budget was exhausted; the caller keeps its previous snapshot.
+ * TDS_SNAP_COUNT elements.
+ *
+ * Returns a TdsSnapshotStatus (see GameSnapshot.h) rather than a boolean,
+ * because the two failures are opposites: TDS_SNAP_STATUS_RETRY_EXHAUSTED is a
+ * transient seqlock collision the caller rides out by keeping its previous
+ * snapshot, while TDS_SNAP_STATUS_BUFFER_TOO_SMALL means this build's Kotlin
+ * mirror is shorter than the native payload and every future call will fail the
+ * same way. Collapsed into one `false` they were indistinguishable, and the
+ * caller's only sane default -- assume transient -- rendered the permanent case
+ * as "publisher has not run".
  *
  * Allocates nothing: SetIntArrayRegion writes into the caller's reusable array,
  * so there are no local references to leak at 10 Hz.
  */
-extern "C" JNIEXPORT jboolean JNICALL
+extern "C" JNIEXPORT jint JNICALL
 Java_com_terminads_mm_NativeBridge_nativeReadSnapshot(JNIEnv* env, jobject thiz, jintArray out) {
     (void)thiz;
 
     if (out == nullptr) {
-        return JNI_FALSE;
+        return static_cast<jint>(TDS_SNAP_STATUS_BUFFER_TOO_SMALL);
     }
     if (env->GetArrayLength(out) < TDS_SNAP_COUNT) {
-        return JNI_FALSE;
+        return static_cast<jint>(TDS_SNAP_STATUS_BUFFER_TOO_SMALL);
     }
 
     int32_t values[TDS_SNAP_COUNT];
-    if (!TerminaDS_ReadSnapshot(values, TDS_SNAP_COUNT)) {
-        return JNI_FALSE;
+    const int32_t status = TerminaDS_ReadSnapshot(values, TDS_SNAP_COUNT);
+    if (status != TDS_SNAP_STATUS_OK) {
+        return static_cast<jint>(status);
     }
 
     env->SetIntArrayRegion(out, 0, TDS_SNAP_COUNT, reinterpret_cast<const jint*>(values));
-    return JNI_TRUE;
+    return static_cast<jint>(TDS_SNAP_STATUS_OK);
 }
 
 #endif // __ANDROID__

@@ -120,14 +120,19 @@ not proof the symbol shipped.
 > `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
 > here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
 
-**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 34 fast JVM
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 39 fast JVM
 tests (display policy, lifecycle owner, snapshot decoder, poller). No NDK, no
-device, about a minute.
+device, about a minute. Extra arguments still reach Gradle, so
+`./tools/run-unit-tests.sh --tests '*PollerTest*'` works.
 
 > ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testReleaseUnitTest UP-TO-DATE`
-> **while running no tests at all.** Console text is not evidence. Pass
-> `--rerun-tasks` and read counts from
-> `Android/app/build/test-results/testReleaseUnitTest/*.xml`.
+> **while running no tests at all.** Console text is not evidence. The script
+> now defends against this itself: it forces `--rerun-tasks`, wipes the previous
+> results, takes its counts from
+> `Android/app/build/test-results/testReleaseUnitTest/*.xml`, and exits non-zero
+> on any failure, error, or missing XML. Trust its `PASS`/`FAIL` line and the
+> counts it prints — not Gradle's. Anything invoking Gradle directly still has
+> to apply the guard by hand.
 
 **⚠️ You cannot screenshot the second screen.** Both Thor displays are
 `FLAG_SECURE`, so `screencap` returns black/empty. Logcat can prove the

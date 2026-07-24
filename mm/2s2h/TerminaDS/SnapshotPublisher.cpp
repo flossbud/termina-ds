@@ -170,14 +170,32 @@ void Publish() {
 }
 
 static RegisterShipInitFunc sRegisterSnapshotPublisher([]() {
+    // ShipInit::Init("*") is NOT called only once at startup. Besides
+    // ShipInit::InitAll() from BenPort.cpp:725, PresetManager.cpp:374 calls it
+    // again on every preset load. Without this guard each preset load would add
+    // another Publish handler to the OnGameStateUpdate hook list, so Publish
+    // would run N times per engine frame and sFrameCounter would advance by N.
+    // FRAME_COUNTER is the diagnostic that separates "the bridge is broken"
+    // from "the game loop stopped"; N frames per frame silently destroys it,
+    // and on a FLAG_SECURE screen there is no second opinion. Do not delete
+    // this as redundant -- same idiom, same reason, as PlayAsKafei.cpp:71-78.
+    static bool registered = false;
+    if (registered) {
+        return;
+    }
+    registered = true;
+
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateUpdate>(Publish);
 });
 
 } // namespace
 
-extern "C" bool TerminaDS_ReadSnapshot(int32_t* out, int count) {
+extern "C" int32_t TerminaDS_ReadSnapshot(int32_t* out, int count) {
+    // A short buffer is a build skew, not a transient condition: it fails every
+    // call forever. It gets its own status so the caller cannot mistake it for
+    // a seqlock collision and sit there retrying.
     if (out == NULL || count < TDS_SNAP_COUNT) {
-        return false;
+        return TDS_SNAP_STATUS_BUFFER_TOO_SMALL;
     }
 
     // Four attempts is generous: the writer holds the array for well under a
@@ -194,9 +212,9 @@ extern "C" bool TerminaDS_ReadSnapshot(int32_t* out, int count) {
 
         std::atomic_thread_fence(std::memory_order_acquire);
         if (sSeq.load(std::memory_order_relaxed) == before) {
-            return true;
+            return TDS_SNAP_STATUS_OK;
         }
     }
 
-    return false;
+    return TDS_SNAP_STATUS_RETRY_EXHAUSTED;
 }

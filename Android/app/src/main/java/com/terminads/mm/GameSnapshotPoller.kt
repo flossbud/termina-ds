@@ -17,6 +17,28 @@ sealed interface BridgeState {
     /** Native is answering, but the publisher has never run. */
     data object NoFramesYet : BridgeState
 
+    /**
+     * Native refused the read outright: its payload has more slots than this
+     * build's Kotlin mirror allocates.
+     *
+     * Permanent, and deliberately distinct from [NoFramesYet]. The documented
+     * way to extend the payload is to add slots to
+     * mm/2s2h/TerminaDS/GameSnapshot.h, so "native grew and Kotlin did not" is
+     * the likeliest future fault here -- and while the underlying read returned
+     * a bare boolean it rendered as [NoFramesYet], i.e. as a dead publisher, on
+     * a screen nobody can screenshot to check.
+     *
+     * @param kotlinSlots slots this build asked native to fill; native needs more.
+     */
+    data class BufferTooSmall(val kotlinSlots: Int) : BridgeState
+
+    /**
+     * Native returned a status code this build does not recognise, so the
+     * native half is newer than the Kotlin half. Permanent, like
+     * [BufferTooSmall], and reported separately rather than guessed at.
+     */
+    data object UnknownReadStatus : BridgeState
+
     /** The game loop is stepping and the snapshot is current. */
     data class Live(val snapshot: GameSnapshot) : BridgeState
 
@@ -55,6 +77,13 @@ class GameSnapshotPoller(
     fun poll(): BridgeState {
         when (read(buffer)) {
             SnapshotReadResult.UNAVAILABLE -> return BridgeState.NativeUnavailable
+            // Permanent faults: reported every poll, and never routed through
+            // carryForward(), whose no-previous-snapshot answer is NoFramesYet.
+            // That would report a layout mismatch as a dead publisher.
+            SnapshotReadResult.BUFFER_TOO_SMALL ->
+                return BridgeState.BufferTooSmall(GameSnapshotLayout.SLOT_COUNT)
+            SnapshotReadResult.UNKNOWN_STATUS -> return BridgeState.UnknownReadStatus
+            // Transient: the game thread was mid-publish, so keep what we had.
             SnapshotReadResult.RETRY_EXHAUSTED -> return carryForward()
             SnapshotReadResult.OK -> Unit
         }

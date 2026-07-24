@@ -1,6 +1,7 @@
 package com.terminads.mm
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -169,6 +170,67 @@ class GameSnapshotPollerTest {
         val reader = FakeReader().apply { result = SnapshotReadResult.RETRY_EXHAUSTED }
         val state = poller(reader, FakeClock()).poll()
         assertTrue("was $state", state is BridgeState.NoFramesYet)
+    }
+
+    @Test
+    fun reportsBufferTooSmallDistinctlyAndNeverAsADeadPublisher() {
+        // The whole point of the status split. If a future payload grows past
+        // this build's SLOT_COUNT, native refuses every call -- and the old
+        // boolean read reported that as NoFramesYet, the message reserved for
+        // "the publisher never registered". Both Thor displays are FLAG_SECURE,
+        // so that line is the only evidence anyone gets.
+        val reader = FakeReader().apply { result = SnapshotReadResult.BUFFER_TOO_SMALL }
+        val state: BridgeState = poller(reader, FakeClock()).poll()
+
+        assertFalse("must not masquerade as a dead publisher", state is BridgeState.NoFramesYet)
+        assertTrue("was $state", state is BridgeState.BufferTooSmall)
+        assertEquals(
+            GameSnapshotLayout.SLOT_COUNT,
+            (state as BridgeState.BufferTooSmall).kotlinSlots,
+        )
+    }
+
+    @Test
+    fun bufferTooSmallIsPermanentAndDoesNotDecayIntoACarriedSnapshot() {
+        // It must not behave like RETRY_EXHAUSTED, which keeps the previous
+        // snapshot and reports Live. A short buffer can never clear.
+        val reader = FakeReader()
+        val clock = FakeClock()
+        val subject = poller(reader, clock)
+
+        assertTrue(subject.poll() is BridgeState.Live) // a good snapshot now exists
+
+        reader.result = SnapshotReadResult.BUFFER_TOO_SMALL
+        clock.advance(100)
+        val first = subject.poll()
+        clock.advance(100)
+        val second = subject.poll()
+
+        assertTrue("was $first", first is BridgeState.BufferTooSmall)
+        assertTrue("was $second", second is BridgeState.BufferTooSmall)
+    }
+
+    @Test
+    fun reportsUnknownStatusDistinctlyAndNeverAsADeadPublisher() {
+        // A status code from a native half newer than this Kotlin. Permanent,
+        // so it must not be guessed at as a transient collision either.
+        val reader = FakeReader().apply { result = SnapshotReadResult.UNKNOWN_STATUS }
+        val state: BridgeState = poller(reader, FakeClock()).poll()
+
+        assertFalse("must not masquerade as a dead publisher", state is BridgeState.NoFramesYet)
+        assertTrue("was $state", state is BridgeState.UnknownReadStatus)
+    }
+
+    @Test
+    fun mapsNativeStatusCodesToResultsAndTreatsUnknownOnesAsPermanent() {
+        // Mirrors enum TdsSnapshotStatus in mm/2s2h/TerminaDS/GameSnapshot.h.
+        // The literals are deliberate: this is the test that fails if the
+        // Kotlin mirror drifts from the header's numbering.
+        assertEquals(SnapshotReadResult.OK, NativeBridge.statusToResult(0))
+        assertEquals(SnapshotReadResult.RETRY_EXHAUSTED, NativeBridge.statusToResult(1))
+        assertEquals(SnapshotReadResult.BUFFER_TOO_SMALL, NativeBridge.statusToResult(2))
+        assertEquals(SnapshotReadResult.UNKNOWN_STATUS, NativeBridge.statusToResult(3))
+        assertEquals(SnapshotReadResult.UNKNOWN_STATUS, NativeBridge.statusToResult(-1))
     }
 
     @Test

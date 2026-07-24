@@ -100,6 +100,24 @@ class GameSnapshotTest {
     }
 
     @Test
+    fun decodesTheOtherTwoFlagsWhenOnlyThoseAreSet() {
+        // The complement of decodesFlags. Without it, bits 1 (PLAYER_VALID) and
+        // 3 (DOUBLE_DEFENSE) are only ever asserted false, so swapping them
+        // would pass the suite. hasPlayer is what Phase 3's HUD gates world
+        // rendering on, so a swap there would not stay cosmetic for long.
+        val values = emptyPayload()
+        values[GameSnapshotLayout.IDX_FLAGS] =
+            GameSnapshotLayout.FLAG_PLAYER_VALID or GameSnapshotLayout.FLAG_DOUBLE_DEFENSE
+
+        val snapshot = decodeOk(values)
+
+        assertFalse(snapshot.hasPlayState)
+        assertTrue(snapshot.hasPlayer)
+        assertFalse(snapshot.isNight)
+        assertTrue(snapshot.doubleDefense)
+    }
+
+    @Test
     fun decodesButtonItemsAndAmmoInOrder() {
         val values = emptyPayload()
         values[GameSnapshotLayout.IDX_BTN_ITEM_B] = 10
