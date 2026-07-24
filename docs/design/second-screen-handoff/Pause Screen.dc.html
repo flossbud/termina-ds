@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&amp;family=Barlow:wght@400;500;600;700;800&amp;family=Chivo+Mono:wght@500;700&amp;display=swap">
+  <style>
+    body{margin:0;background:#111009;}
+    a{color:#b48ce8;text-decoration:none;} a:hover{color:#d3b9f5;}
+    *{box-sizing:border-box;}
+    @keyframes pzIn{0%{opacity:0}100%{opacity:1}}
+    @keyframes pzWordIn{0%{opacity:0;letter-spacing:.42em;filter:blur(9px)}100%{opacity:1;letter-spacing:.18em;filter:blur(0)}}
+    @keyframes pzSweep{0%{background-position:-70% 0}100%{background-position:170% 0}}
+    @keyframes pzGlow{0%,100%{filter:drop-shadow(0 0 18px rgba(180,140,232,.30))}50%{filter:drop-shadow(0 0 44px rgba(180,140,232,.62))}}
+    @keyframes pzRule{0%{width:0;opacity:0}100%{width:420px;opacity:1}}
+    @keyframes pzRise{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+    @keyframes pzBreathe{0%,100%{opacity:.4}50%{opacity:1}}
+    @keyframes pzHand{0%,100%{transform:translate(-50%,-100%) rotate(26.6deg)}50%{transform:translate(-50%,-100%) rotate(29.4deg)}}
+    @keyframes pzMenuIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
+  </style>
+</helmet>
+
+<div style="min-height:100%;background:#111009;display:flex;flex-direction:column;align-items:center;gap:14px;padding:36px 40px 48px;font-family:'Barlow',sans-serif;color:#8d7f5e">
+
+  <div style="width:1056px;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase">Top screen · 1920×1080 · dimmed while paused</span><span style="font-size:11px;color:#5f553f">Termina DS · pause state</span></div>
+
+  <div style="zoom:.55">
+    <div data-screen-label="Top screen" style="width:1920px;height:1080px;position:relative;overflow:hidden;border-radius:10px;background:#000;outline:1px solid rgba(180,140,232,.28)">
+      <img src="uploads/pasted-1784906312069-0.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.32);transform-origin:50% 54%" />
+
+      <div style="position:absolute;left:32px;bottom:40px;width:224px;height:224px">
+        <img src="assets/dpad.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.92;filter:drop-shadow(6px 9px 8px rgba(0,0,0,.45))" />
+        <img src="assets/icons/hookshot.png" style="position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))" />
+        <img src="assets/icons/lens.png" style="position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))" />
+        <img src="assets/icons/maskFierce.png" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))" />
+        <img src="assets/icons/bottle.png" style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))" />
+      </div>
+
+      <div style="position:absolute;right:20px;bottom:18px;width:310px;height:250px">
+        <div style="position:absolute;left:90px;top:36px;width:76px;height:76px;border-radius:999px;border:5px solid #cfa53d;background:radial-gradient(circle at 50% 30%,#2c313d,#0f1218 76%);box-shadow:inset 0 0 0 2px #f0dc9a,0 4px 10px rgba(0,0,0,.55)">
+          <img src="assets/icons/bomb.png" style="position:absolute;left:50%;top:50%;width:60%;height:60%;transform:translate(-50%,-50%);object-fit:contain" />
+          <span style="position:absolute;left:1px;bottom:-4px;font-family:'Chivo Mono',monospace;font-size:16px;font-weight:800;color:#c6ff6a;text-shadow:1px 1px 0 #0c2b00,-1px 1px 0 #0c2b00,1px -1px 0 #0c2b00,-1px -1px 0 #0c2b00">20</span>
+        </div>
+        <div style="position:absolute;left:26px;top:100px;width:76px;height:76px;border-radius:999px;border:5px solid #cfa53d;background:radial-gradient(circle at 50% 30%,#2c313d,#0f1218 76%);box-shadow:inset 0 0 0 2px #f0dc9a,0 4px 10px rgba(0,0,0,.55)">
+          <img src="assets/icons/bow.png" style="position:absolute;left:50%;top:50%;width:60%;height:60%;transform:translate(-50%,-50%);object-fit:contain" />
+          <span style="position:absolute;left:1px;bottom:-4px;font-family:'Chivo Mono',monospace;font-size:16px;font-weight:800;color:#c6ff6a;text-shadow:1px 1px 0 #0c2b00,-1px 1px 0 #0c2b00,1px -1px 0 #0c2b00,-1px -1px 0 #0c2b00">30</span>
+        </div>
+        <div style="position:absolute;left:204px;top:14px;width:84px;height:44px;border-radius:8px 20px 20px 8px;border:3px solid #cfa53d;background:radial-gradient(120% 140% at 50% 28%,#2c313d,#0f1218);box-shadow:inset 0 0 0 2px #f0dc9a,0 3px 8px rgba(0,0,0,.5)">
+          <img src="assets/icons/ocarina.png" style="position:absolute;left:50%;top:50%;width:32px;height:32px;transform:translate(-50%,-50%);object-fit:contain" />
+        </div>
+        <div style="position:absolute;left:156px;top:101px;width:74px;height:74px;border-radius:999px;border:1px solid #3d6db3;background:radial-gradient(circle at 42% 28%,#dceeff,#8ec2f5 45%,#5a92dd 78%,#4478c4);box-shadow:0 4px 10px rgba(0,0,0,.5),inset 0 3px 5px rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center">
+          <span style="font-weight:800;font-size:18px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)">Grab</span>
+        </div>
+        <div style="position:absolute;left:90px;top:166px;width:76px;height:76px;border-radius:999px;border:1px solid #3a7d35;background:radial-gradient(circle at 42% 28%,#d7f3bd,#8bd06f 45%,#54a648 78%,#3a7d35);box-shadow:0 4px 10px rgba(0,0,0,.5),inset 0 3px 5px rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center">
+          <img src="assets/icons/swordRazor.png" style="width:58%;height:58%;object-fit:contain" />
+        </div>
+      </div>
+
+      <!-- ══ PAUSE VEIL ══ -->
+      <sc-if value="{{ paused }}" hint-placeholder-val="{{ yes }}">
+      <div style="position:absolute;inset:0;z-index:5;backdrop-filter:blur(7px) saturate(.42) brightness(.34);-webkit-backdrop-filter:blur(7px) saturate(.42) brightness(.34);background:radial-gradient(105% 82% at 50% 44%,rgba(26,14,44,.42),rgba(0,0,0,.86) 76%);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:pzIn .42s ease both">
+
+        <sc-if value="{{ showWord }}" hint-placeholder-val="{{ yes }}">
+        <div style="display:flex;flex-direction:column;align-items:center">
+        <div style="display:flex;align-items:center;gap:22px;animation:pzRise .5s .1s ease both">
+          <span style="width:120px;height:1px;background:linear-gradient(90deg,transparent,rgba(180,140,232,.7))"></span>
+          <span style="position:relative;width:44px;height:44px;border-radius:999px;border:1.5px solid rgba(180,140,232,.55)">
+            <span style="position:absolute;left:50%;top:50%;width:2px;height:15px;border-radius:2px;background:#cbb0f2;transform-origin:50% 100%;animation:pzHand 5.4s ease-in-out infinite"></span>
+            <span style="position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:999px;background:#cbb0f2;transform:translate(-50%,-50%)"></span>
+          </span>
+          <span style="width:120px;height:1px;background:linear-gradient(90deg,rgba(180,140,232,.7),transparent)"></span>
+        </div>
+
+        <div style="margin-top:26px;animation:pzGlow 4.4s ease-in-out infinite">
+          <sc-if value="{{ effShimmer }}" hint-placeholder-val="{{ yes }}">
+            <span style="display:inline-block;font-family:'Cinzel',serif;font-size:176px;font-weight:800;line-height:.95;letter-spacing:.18em;padding:0 .1em;background-image:linear-gradient(100deg,#5b3f92 0%,#8f68c9 24%,#f6ecff 46%,#b48ce8 58%,#5b3f92 92%);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pzSweep 5.2s linear infinite,pzWordIn .8s .06s cubic-bezier(.2,.8,.2,1) both">PAUSED</span>
+          </sc-if>
+          <sc-if value="{{ effMoonlight }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-block;font-family:'Cinzel',serif;font-size:176px;font-weight:800;line-height:.95;letter-spacing:.18em;padding:0 .1em;background-image:linear-gradient(100deg,#6d7295 0%,#b9c2e4 26%,#ffffff 46%,#c3cbe8 58%,#6d7295 92%);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pzSweep 5.2s linear infinite,pzWordIn .8s .06s cubic-bezier(.2,.8,.2,1) both">PAUSED</span>
+          </sc-if>
+          <sc-if value="{{ effEmber }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-block;font-family:'Cinzel',serif;font-size:176px;font-weight:800;line-height:.95;letter-spacing:.18em;padding:0 .1em;background-image:linear-gradient(100deg,#7a4a17 0%,#c8912f 24%,#fff4d2 46%,#e0bd66 58%,#7a4a17 92%);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pzSweep 5.2s linear infinite,pzWordIn .8s .06s cubic-bezier(.2,.8,.2,1) both">PAUSED</span>
+          </sc-if>
+        </div>
+
+        <div style="margin-top:14px;font-family:'Chivo Mono',monospace;font-size:21px;font-weight:500;letter-spacing:9px;color:#9d8dbe;animation:pzRise .6s .34s ease both">THE CLOCK HOLDS ITS BREATH</div>
+
+        <div style="margin-top:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(180,140,232,.45),transparent);animation:pzRule .9s .3s cubic-bezier(.2,.8,.2,1) both"></div>
+
+        <div style="margin-top:34px;display:flex;align-items:center;gap:14px;animation:pzRise .6s .5s ease both">
+          <span style="width:9px;height:9px;border-radius:2px;background:#b48ce8;transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+          <span style="font-family:'Barlow',sans-serif;font-size:22px;font-weight:600;letter-spacing:2.5px;color:#c9bfe0">CONTINUE ON THE BOTTOM SCREEN</span>
+        </div>
+        </div>
+        </sc-if>
+
+        <!-- ══ ASSIGN OVERVIEW (inventory open on the bottom screen) ══ -->
+        <sc-if value="{{ atInventory }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;animation:pzIn .32s ease both">
+
+          <div style="position:absolute;left:370px;top:0;width:1180px;height:770px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+
+            <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:8px;color:#7d6f9c">{{ showcaseTab }}</span>
+
+            <!-- item showcase: icon stands in for the eventual 3D render -->
+            <div style="position:relative;width:100%;height:496px;display:flex;align-items:center;justify-content:center">
+              <span style="position:absolute;left:50%;top:46%;width:720px;height:720px;transform:translate(-50%,-50%);border-radius:999px;background:radial-gradient(closest-side,rgba(180,140,232,.19),rgba(180,140,232,0) 70%)"></span>
+              <sc-if value="{{ selImg }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ selImg }}" style="position:relative;width:424px;height:424px;object-fit:contain;filter:drop-shadow(0 20px 24px rgba(0,0,0,.85)) drop-shadow(0 0 42px rgba(180,140,232,.26));animation:pzRise .4s ease both" />
+              </sc-if>
+              <span style="position:absolute;left:50%;bottom:10px;width:320px;height:18px;transform:translateX(-50%);border-radius:999px;background:radial-gradient(closest-side,rgba(180,140,232,.28),transparent 74%)"></span>
+              <span style="position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:4px;color:#4e4664">ICON PLACEHOLDER · 3D RENDER LATER</span>
+            </div>
+
+          </div>
+
+          <!-- description plate: sits between the two control clusters -->
+            <div style="position:absolute;left:440px;bottom:74px;width:1040px;border-radius:22px;border:1px solid rgba(180,140,232,.26);background:linear-gradient(180deg,rgba(23,16,40,.9),rgba(8,7,12,.92));box-shadow:0 20px 54px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.05);padding:26px 30px 30px;min-height:236px;display:flex;gap:26px;align-items:flex-start;animation:pzRise .45s .06s ease both">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:9px">
+                <span style="display:flex;align-items:baseline;gap:16px">
+                  <span style="font-family:'Cinzel',serif;font-size:40px;font-weight:700;letter-spacing:1px;line-height:1.1;color:#e0bd66;text-shadow:0 0 26px rgba(224,189,102,.3)">{{ selName }}</span>
+                  <sc-if value="{{ selCount }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Chivo Mono',monospace;font-size:24px;font-weight:700;color:#c6ff6a">×{{ selCount }}</span></sc-if>
+                  <span style="flex:1"></span>
+                  <span style="flex:none;border:1px solid rgba(180,140,232,.34);border-radius:10px;padding:8px 14px;font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:3px;color:#c9a2ff">{{ selAssigned }}</span>
+                </span>
+                <span style="flex:1;font-size:27px;font-weight:400;line-height:1.5;color:#a79cbd;text-wrap:pretty">{{ selDesc }}</span>
+                <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:4px;color:#655b7f">{{ assignHint }}</span>
+              </span>
+            </div>
+
+          <div style="position:absolute;left:56px;right:56px;bottom:30px;display:flex;justify-content:space-between;align-items:flex-end">
+
+            <!-- D-PAD -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:18px;zoom:.7;transform-origin:0 100%">
+              <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:6px;color:#7d6f9c">D-PAD · QUICK ITEMS</span>
+              <div style="position:relative;width:384px;height:384px">
+                <span style="position:absolute;left:50%;top:50%;width:330px;height:330px;transform:translate(-50%,-50%);border-radius:999px;background:radial-gradient(closest-side,rgba(180,140,232,.16),rgba(180,140,232,0) 78%)"></span>
+                <img src="assets/dpad.png" style="position:absolute;left:50%;top:50%;width:286px;height:286px;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(10px 14px 16px rgba(0,0,0,.6))" />
+                <sc-for list="{{ dpadSlots }}" as="s" hint-placeholder-count="4">
+                  <button onClick="{{ s.onClick }}" title="{{ s.name }}" style="position:absolute;left:{{ s.left }};top:{{ s.top }};width:124px;height:124px;margin:-62px 0 0 -62px;border:none;background:transparent;padding:0;cursor:pointer;border-radius:999px" style-hover="filter:brightness(1.14)">
+                    <span style="position:absolute;inset:0;border-radius:999px;border:5px {{ s.edge }} {{ s.rim }};background:radial-gradient(circle at 50% 28%,#2c313d,#0f1218 74%);box-shadow:{{ s.glow }}, inset 0 0 0 2px rgba(240,220,154,.55), inset 0 4px 10px rgba(0,0,0,.7)"></span>
+                    <sc-if value="{{ s.img }}" hint-placeholder-val="{{ false }}"><img src="{{ s.img }}" style="position:absolute;left:50%;top:48%;width:74px;height:74px;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.9))" /></sc-if>
+                    <span style="position:absolute;left:{{ s.badgeL }};top:{{ s.badgeT }};width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:999px;background:#1a1408;border:2px solid #e7c35a;color:#ffdf7a;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.7)">{{ s.key }}</span>
+                    <sc-if value="{{ s.count }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:8px;bottom:2px;font-family:'Chivo Mono',monospace;font-size:20px;font-weight:800;color:#c6ff6a;text-shadow:2px 2px 0 #0c2b00,-2px 2px 0 #0c2b00,2px -2px 0 #0c2b00,-2px -2px 0 #0c2b00">{{ s.count }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- FACE BUTTONS -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:18px;zoom:.7;transform-origin:100% 100%">
+              <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:6px;color:#7d6f9c">BUTTONS</span>
+              <div style="position:relative;width:452px;height:384px">
+                <span style="position:absolute;left:44%;top:50%;width:340px;height:340px;transform:translate(-50%,-50%);border-radius:999px;background:radial-gradient(closest-side,rgba(180,140,232,.14),rgba(180,140,232,0) 78%)"></span>
+
+                <!-- R -->
+                <button onClick="{{ rSlot.onClick }}" title="{{ rSlot.name }}" style="position:absolute;left:312px;top:26px;width:168px;height:80px;margin:0 0 0 -84px;border:none;background:transparent;padding:0;cursor:pointer" style-hover="filter:brightness(1.14)">
+                  <span style="position:absolute;inset:0;border-radius:10px 34px 34px 10px;border:5px {{ rSlot.edge }} {{ rSlot.rim }};background:radial-gradient(120% 150% at 50% 26%,#2c313d,#0f1218);box-shadow:{{ rSlot.glow }}, inset 0 0 0 2px rgba(240,220,154,.55), inset 0 4px 9px rgba(0,0,0,.7)"></span>
+                  <sc-if value="{{ rSlot.img }}" hint-placeholder-val="{{ false }}"><img src="{{ rSlot.img }}" style="position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 3px 5px rgba(0,0,0,.9))" /></sc-if>
+                  <span style="position:absolute;right:-10px;top:-12px;min-width:32px;height:30px;padding:0 8px;border-radius:9px;background:#1a1408;border:2px solid #e7c35a;color:#ffdf7a;font-family:'Cinzel',serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.7)">R</span>
+                </button>
+
+                <!-- X -->
+                <button onClick="{{ xSlot.onClick }}" title="{{ xSlot.name }}" style="position:absolute;left:186px;top:66px;width:132px;height:132px;margin:-66px 0 0 -66px;border:none;background:transparent;padding:0;cursor:pointer;border-radius:999px" style-hover="filter:brightness(1.14)">
+                  <span style="position:absolute;inset:0;border-radius:999px;border:6px {{ xSlot.edge }} {{ xSlot.rim }};background:radial-gradient(circle at 50% 28%,#2c313d,#0f1218 74%);box-shadow:{{ xSlot.glow }}, inset 0 0 0 3px rgba(240,220,154,.55), inset 0 5px 12px rgba(0,0,0,.72)"></span>
+                  <sc-if value="{{ xSlot.img }}" hint-placeholder-val="{{ false }}"><img src="{{ xSlot.img }}" style="position:absolute;left:50%;top:48%;width:78px;height:78px;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.9))" /></sc-if>
+                  <span style="position:absolute;left:50%;top:-14px;width:36px;height:36px;margin:0 0 0 -18px;border-radius:999px;background:#1a1408;border:2px solid #e7c35a;color:#ffdf7a;font-family:'Cinzel',serif;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.7)">X</span>
+                  <sc-if value="{{ xSlot.count }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:8px;bottom:0;font-family:'Chivo Mono',monospace;font-size:21px;font-weight:800;color:#c6ff6a;text-shadow:2px 2px 0 #0c2b00,-2px 2px 0 #0c2b00,2px -2px 0 #0c2b00,-2px -2px 0 #0c2b00">{{ xSlot.count }}</span></sc-if>
+                </button>
+
+                <!-- Y -->
+                <button onClick="{{ ySlot.onClick }}" title="{{ ySlot.name }}" style="position:absolute;left:76px;top:196px;width:132px;height:132px;margin:-66px 0 0 -66px;border:none;background:transparent;padding:0;cursor:pointer;border-radius:999px" style-hover="filter:brightness(1.14)">
+                  <span style="position:absolute;inset:0;border-radius:999px;border:6px {{ ySlot.edge }} {{ ySlot.rim }};background:radial-gradient(circle at 50% 28%,#2c313d,#0f1218 74%);box-shadow:{{ ySlot.glow }}, inset 0 0 0 3px rgba(240,220,154,.55), inset 0 5px 12px rgba(0,0,0,.72)"></span>
+                  <sc-if value="{{ ySlot.img }}" hint-placeholder-val="{{ false }}"><img src="{{ ySlot.img }}" style="position:absolute;left:50%;top:48%;width:78px;height:78px;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.9))" /></sc-if>
+                  <span style="position:absolute;left:-14px;top:50%;width:36px;height:36px;margin:-18px 0 0 0;border-radius:999px;background:#1a1408;border:2px solid #e7c35a;color:#ffdf7a;font-family:'Cinzel',serif;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.7)">Y</span>
+                  <sc-if value="{{ ySlot.count }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:8px;bottom:0;font-family:'Chivo Mono',monospace;font-size:21px;font-weight:800;color:#c6ff6a;text-shadow:2px 2px 0 #0c2b00,-2px 2px 0 #0c2b00,2px -2px 0 #0c2b00,-2px -2px 0 #0c2b00">{{ ySlot.count }}</span></sc-if>
+                </button>
+
+                <!-- A (locked) -->
+                <div style="position:absolute;left:314px;top:196px;width:126px;height:126px;margin:-63px 0 0 -63px;border-radius:999px;border:1px solid #3d6db3;background:radial-gradient(circle at 42% 26%,#dceeff,#8ec2f5 45%,#5a92dd 78%,#4478c4);box-shadow:0 6px 14px rgba(0,0,0,.55),inset 0 4px 7px rgba(255,255,255,.7),inset 0 -5px 10px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;opacity:.62">
+                  <span style="font-weight:800;font-size:26px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.45)">Grab</span>
+                  <span style="position:absolute;right:-6px;bottom:-2px;width:32px;height:32px;border-radius:999px;background:#2f66c0;border:2px solid #fff;color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center">A</span>
+                </div>
+
+                <!-- B (locked) -->
+                <div style="position:absolute;left:186px;top:322px;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:999px;border:1px solid #3a7d35;background:radial-gradient(circle at 42% 26%,#d7f3bd,#8bd06f 45%,#54a648 78%,#3a7d35);box-shadow:0 6px 14px rgba(0,0,0,.55),inset 0 4px 7px rgba(255,255,255,.55),inset 0 -5px 10px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;opacity:.62">
+                  <img src="assets/icons/swordRazor.png" style="width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))" />
+                  <span style="position:absolute;left:-6px;bottom:-2px;width:32px;height:32px;border-radius:999px;background:#3f9a3f;border:2px solid #fff;color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center">B</span>
+                </div>
+              </div>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:3px;color:#5d5570">A AND B ARE FIXED · ACTION AND SWORD</span>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <div style="position:absolute;left:34px;top:30px;display:flex;align-items:center;gap:12px;animation:pzRise .6s .2s ease both">
+          <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:5px;color:#7d6f9c">{{ dayName }}</span>
+          <span style="width:1px;height:15px;background:rgba(180,140,232,.4)"></span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:2px;color:#7d6f9c">{{ hrsLabel }} LEFT</span>
+        </div>
+        <div style="position:absolute;right:34px;top:30px;font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:4px;color:#7d6f9c;animation:pzRise .6s .2s ease both">TERMINA FIELD</div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="width:1054px;display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase">Bottom screen · 1240×1080 · pause menu</span><span style="font-size:11px;color:#5f553f">↑ ↓ navigate · Enter select · Esc back · P pause</span></div>
+
+  <div style="zoom:.85">
+    <div data-screen-label="Bottom screen" style="width:1240px;height:1080px;position:relative;overflow:hidden;border-radius:10px;background:#000;outline:1px solid rgba(180,140,232,.4);font-family:'Barlow',sans-serif">
+
+      <!-- ══ ROOT MENU (1d) ══ -->
+      <sc-if value="{{ atMenu }}" hint-placeholder-val="{{ yes }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:pzIn .3s ease both">
+
+        <div style="position:absolute;top:34px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:14px">
+          <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:5px;color:#4f4763">{{ dayName }} · {{ timeStr }} {{ ampm }}</span>
+          <span style="width:1px;height:13px;background:rgba(180,140,232,.3)"></span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:5px;color:#4f4763">{{ hrsLabel }} LEFT</span>
+        </div>
+
+        <div style="width:760px;display:flex;flex-direction:column;gap:4px;animation:pzMenuIn .4s ease both">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+            <button onClick="{{ r.onClick }}" style="position:relative;min-height:106px;border:none;background:none;cursor:pointer;padding:6px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px" style-hover="filter:brightness(1.45)">
+              <span style="display:flex;align-items:center;justify-content:center;gap:24px">
+                <span style="width:9px;height:9px;border-radius:2px;background:{{ r.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:42px;font-weight:700;letter-spacing:7px;color:{{ r.color }};text-shadow:{{ r.shadow }}">{{ r.label }}</span>
+                <span style="width:9px;height:9px;border-radius:2px;background:{{ r.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+              </span>
+              <sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:4px;color:#6f6288">{{ r.sub }}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="position:absolute;bottom:38px;left:0;right:0;display:flex;justify-content:center">
+          <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:3px;color:#3f3950">Ⓐ SELECT&nbsp;&nbsp;·&nbsp;&nbsp;Ⓑ RESUME</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══ SUBSCREEN CHROME ══ -->
+      <sc-if value="{{ inSub }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;animation:pzIn .28s ease both">
+
+        <div style="flex:none;height:96px;padding:0 40px;display:flex;align-items:center;gap:20px;border-bottom:1px solid rgba(180,140,232,.14)">
+          <button onClick="{{ back }}" style="width:46px;height:52px;flex:none;border:none;background:none;color:#a58ed0;font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:#efe6ff">‹</button>
+          <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:5px;color:#d7c6f4">{{ subTitle }}</span>
+          <span style="flex:1"></span>
+          <span style="display:flex;align-items:center;gap:8px;border:1px solid rgba(180,140,232,.4);border-radius:7px;padding:4px 11px"><span style="width:7px;height:7px;border-radius:2px;background:#b48ce8;transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span><span style="font-family:'Chivo Mono',monospace;font-size:12px;font-weight:700;letter-spacing:3px;color:#c9a2ff">PAUSED</span></span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:15px;letter-spacing:3px;color:#6f6288">{{ dayName }} · {{ timeStr }} {{ ampm }}</span>
+          <span style="border:1px solid #a06ee0;border-radius:7px;padding:4px 10px;font-family:'Chivo Mono',monospace;font-size:14px;font-weight:700;color:#c9a2ff">{{ hrsLabel }}</span>
+        </div>
+
+        <!-- INVENTORY -->
+        <sc-if value="{{ atInventory }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+          <div style="flex:none;padding:22px 44px 0;display:flex;align-items:center;justify-content:center;gap:24px">
+            <button onClick="{{ goItems }}" style="height:60px;padding:0 3px;border:none;border-bottom:2px solid {{ itemsBorder }};background:{{ itemsBg }};color:{{ itemsFg }};font-family:'Cinzel',serif;font-size:27px;font-weight:700;letter-spacing:6px;cursor:pointer" style-hover="filter:brightness(1.2)">ITEMS</button>
+            <span style="width:8px;height:8px;flex:none;border-radius:2px;background:rgba(180,140,232,.45);transform:rotate(45deg)"></span>
+            <button onClick="{{ goMasks }}" style="height:60px;padding:0 3px;border:none;border-bottom:2px solid {{ masksBorder }};background:{{ masksBg }};color:{{ masksFg }};font-family:'Cinzel',serif;font-size:27px;font-weight:700;letter-spacing:6px;cursor:pointer" style-hover="filter:brightness(1.2)">MASKS</button>
+          </div>
+          <div style="flex:none;display:flex;justify-content:center;padding-top:8px"><span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:4px;color:#5d5570">{{ invCount }}</span></div>
+          <div style="flex:1;padding:16px 44px 0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);gap:10px;min-height:0">
+            <sc-for list="{{ cells }}" as="c" hint-placeholder-count="24">
+              <button onClick="{{ c.onClick }}" title="{{ c.name }}" style="position:relative;border:1px solid {{ c.border }};border-radius:0;background:{{ c.bg }};cursor:{{ c.cursor }};padding:0;box-shadow:{{ c.glow }}" style-hover="filter:brightness(1.25)">
+                <sc-if value="{{ c.img }}" hint-placeholder-val="{{ false }}"><img src="{{ c.img }}" style="position:absolute;left:50%;top:50%;width:62%;height:62%;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 3px 5px rgba(0,0,0,.9))" /></sc-if>
+                <sc-if value="{{ c.count }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:9px;bottom:6px;font-family:'Chivo Mono',monospace;font-size:14px;font-weight:700;letter-spacing:1px;color:#c6ff6a">×{{ c.count }}</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="flex:none;height:136px;margin:14px 44px 0;padding:0 4px;display:flex;align-items:center;gap:22px;border-top:1px solid rgba(180,140,232,.13)">
+            <sc-if value="{{ selImg }}" hint-placeholder-val="{{ false }}">
+              <span style="width:76px;height:76px;flex:none;border-radius:0;border:1px solid rgba(180,140,232,.24);background:transparent;display:flex;align-items:center;justify-content:center"><img src="{{ selImg }}" style="width:50px;height:50px;object-fit:contain" /></span>
+            </sc-if>
+            <span style="flex:1;min-width:0"><span style="display:block;font-family:'Cinzel',serif;font-size:32px;font-weight:700;letter-spacing:3px;color:#e0bd66">{{ selName }}</span><span style="display:block;font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;margin-top:6px">{{ selSlot }}</span></span>
+            <button style="height:62px;padding:0 6px;border:none;border-bottom:2px solid #e0bd66;background:none;color:#f0d488;font-family:'Cinzel',serif;font-size:22px;font-weight:700;letter-spacing:5px;cursor:pointer;display:flex;align-items:center;gap:12px" style-hover="filter:brightness(1.18)"><span style="width:26px;height:26px;border-radius:999px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:'Barlow',sans-serif;font-size:13px;font-weight:800;letter-spacing:0">A</span>{{ assignLabel }}</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- MAP -->
+        <sc-if value="{{ atMap }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;position:relative;min-height:0">
+          <div style="position:absolute;inset:0;-webkit-mask:radial-gradient(108% 94% at 50% 48%,#000 54%,transparent 96%);mask:radial-gradient(108% 94% at 50% 48%,#000 54%,transparent 96%)">
+            <img src="uploads/pasted-1784906025303-0.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+          </div>
+          <div style="position:absolute;left:40px;top:26px;font-family:'Cinzel',serif;font-size:22px;font-weight:700;letter-spacing:3px;color:#e4d9f2;text-shadow:0 2px 8px #000">TERMINA FIELD</div>
+          <div style="position:absolute;left:40px;top:60px;font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:2px;color:#a396bb;text-shadow:0 2px 6px #000">CENTRAL · 68% EXPLORED · 5 OF 10 OWL STATUES</div>
+          <div style="position:absolute;right:34px;bottom:30px;display:flex;flex-direction:column;gap:10px">
+            <button style="width:60px;height:60px;border:1px solid rgba(180,140,232,.45);border-radius:14px;background:rgba(10,8,16,.82);color:#dcccf7;font-size:26px;font-weight:700;cursor:pointer" style-hover="filter:brightness(1.25)">＋</button>
+            <button style="width:60px;height:60px;border:1px solid rgba(180,140,232,.45);border-radius:14px;background:rgba(10,8,16,.82);color:#dcccf7;font-size:26px;font-weight:700;cursor:pointer" style-hover="filter:brightness(1.25)">－</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- SONG OF TIME -->
+        <sc-if value="{{ atSong }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 120px;min-height:0">
+          <img src="assets/mm/ocarina.png" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.9))" />
+          <span style="font-family:'Cinzel',serif;font-size:38px;font-weight:700;letter-spacing:3px;color:#e0bd66;text-align:center">Return to the first dawn?</span>
+          <span style="font-size:18px;line-height:1.6;color:#9b8f6f;text-align:center;max-width:720px;text-wrap:pretty">The cycle rewinds twelve hours of progress. Masks, heart pieces, and songs stay with you — rupees and consumables do not.</span>
+          <div style="display:flex;gap:14px;margin-top:6px">
+            <span style="border:1px solid rgba(224,189,102,.3);border-radius:12px;padding:14px 22px;font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:2px;color:#c9b17a">KEEPS · MASKS · HEARTS · SONGS</span>
+            <span style="border:1px solid rgba(224,189,102,.18);border-radius:12px;padding:14px 22px;font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:2px;color:#8a7647">LOSES · 218 RUPEES · AMMO</span>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:14px">
+            <button onClick="{{ back }}" style="height:68px;padding:0 34px;border:1px solid rgba(180,140,232,.28);border-radius:13px;background:#0c0a11;color:#8a819c;font-family:'Cinzel',serif;font-size:19px;font-weight:700;letter-spacing:3px;cursor:pointer" style-hover="border-color:rgba(180,140,232,.6);color:#cfc4e6">Ⓑ NOT YET</button>
+            <button onClick="{{ back }}" style="height:68px;padding:0 40px;border:1px solid rgba(224,189,102,.65);border-radius:13px;background:linear-gradient(180deg,rgba(224,189,102,.2),rgba(224,189,102,.05));color:#f0d488;font-family:'Cinzel',serif;font-size:19px;font-weight:700;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;gap:12px" style-hover="filter:brightness(1.18)"><span style="width:24px;height:24px;border-radius:999px;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;letter-spacing:0">A</span>PLAY THE SONG</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- OPTIONS · GRAPHICS -->
+        <sc-if value="{{ atOptions }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;padding:22px 44px 0;display:flex;align-items:center;justify-content:center;gap:24px">
+          <button onClick="{{ goSettings }}" style="height:60px;padding:0 3px;border:none;border-bottom:2px solid {{ setBorder }};background:{{ setBg }};color:{{ setFg }};font-family:'Cinzel',serif;font-size:27px;font-weight:700;letter-spacing:6px;cursor:pointer" style-hover="filter:brightness(1.2)">SETTINGS</button>
+          <span style="width:8px;height:8px;flex:none;border-radius:2px;background:rgba(180,140,232,.45);transform:rotate(45deg)"></span>
+          <button onClick="{{ goEnhancements }}" style="height:60px;padding:0 3px;border:none;border-bottom:2px solid {{ enhBorder }};background:{{ enhBg }};color:{{ enhFg }};font-family:'Cinzel',serif;font-size:27px;font-weight:700;letter-spacing:6px;cursor:pointer" style-hover="filter:brightness(1.2)">ENHANCEMENTS</button>
+        </div>
+
+        <div style="flex:none;padding:14px 44px 6px;display:flex;align-items:center;justify-content:center;gap:28px">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.onClick }}" style="height:42px;padding:0 2px;border:none;border-bottom:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-family:'Chivo Mono',monospace;font-size:14px;font-weight:700;letter-spacing:4px;cursor:pointer" style-hover="filter:brightness(1.3)">{{ c.label }}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ showGfxRows }}" hint-placeholder-val="{{ yes }}">
+        <div style="flex:1;padding:4px 44px 18px;display:flex;flex-direction:column;gap:0;min-height:0">
+
+          <!-- INTERNAL RESOLUTION -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ r0.border }};background:{{ r0.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r0.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Internal Resolution</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Renders above native, then downsamples · default 100%</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:16px">
+              <button onClick="{{ resDown }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:#a58ed0;font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:#efe6ff">‹</button>
+              <span style="position:relative;width:300px;height:2px;background:rgba(180,140,232,.24);border:none">
+                <span style="position:absolute;left:33.3%;top:-9px;bottom:-9px;width:1px;background:rgba(180,140,232,.35)"></span>
+                <span style="position:absolute;left:0;top:0;bottom:0;width:{{ resFill }};background:linear-gradient(90deg,rgba(180,140,232,.55),#cbb0f2)"></span>
+                <span style="position:absolute;top:50%;left:{{ resFill }};width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:2px;transform:rotate(45deg);background:#e7dcfa;box-shadow:0 0 14px rgba(180,140,232,.55)"></span>
+              </span>
+              <button onClick="{{ resUp }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:#a58ed0;font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:#efe6ff">›</button>
+              <span style="width:132px;text-align:right;font-family:'Cinzel',serif;font-size:34px;font-weight:700;letter-spacing:1px;color:#e0bd66">{{ resLabel }}</span>
+            </span>
+          </div>
+
+          <!-- ANTI-ALIASING -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ r1.border }};background:{{ r1.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r1.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Anti-Aliasing <span style="font-family:'Chivo Mono',monospace;font-size:15px;font-weight:500;letter-spacing:2px;color:#7d6f9c">MSAA</span></span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Smooths polygon edges · higher levels cost fill rate</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ msaaOpts }}" as="m" hint-placeholder-count="6">
+                <button onClick="{{ m.onClick }}" style="width:78px;height:58px;border:none;border-bottom:2px solid {{ m.border }};background:{{ m.bg }};color:{{ m.color }};font-family:'Cinzel',serif;font-size:23px;font-weight:700;letter-spacing:2px;cursor:pointer" style-hover="filter:brightness(1.25)">{{ m.label }}</button>
+              </sc-for>
+            </span>
+          </div>
+
+          <!-- CURRENT FPS -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ r2.border }};background:{{ r2.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r2.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:{{ fpsLabelC }}">Current FPS</span>
+                <span style="border:1px solid rgba(180,140,232,.22);flex:none;white-space:nowrap;border-radius:0;padding:4px 10px;font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:3px;color:#6f6288">MAX {{ hzLabel }}</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">{{ fpsHint }}</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:16px">
+              <button onClick="{{ fpsDown }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:{{ fpsBtnC }};font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:{{ fpsCursor }};display:flex;align-items:center;justify-content:center">‹</button>
+              <span style="position:relative;width:300px;height:2px;background:rgba(180,140,232,.24);border:none">
+                <span style="position:absolute;left:0;top:0;bottom:0;width:{{ fpsFill }};background:{{ fpsTrackFill }}"></span>
+                <span style="position:absolute;top:50%;left:{{ fpsFill }};width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:2px;transform:rotate(45deg);background:{{ fpsKnob }};box-shadow:{{ fpsGlow }}"></span>
+              </span>
+              <button onClick="{{ fpsUp }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:{{ fpsBtnC }};font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:{{ fpsCursor }};display:flex;align-items:center;justify-content:center">›</button>
+              <span style="width:132px;text-align:right;font-family:'Cinzel',serif;font-size:34px;font-weight:700;letter-spacing:1px;color:{{ fpsText }}">{{ fpsLabel }}</span>
+            </span>
+          </div>
+
+          <!-- MATCH REFRESH RATE -->
+          <button onClick="{{ toggleMatch }}" style="flex:1;display:flex;align-items:center;gap:26px;text-align:left;padding:0 28px;border:none;border-top:1px solid {{ r3.border }};background:{{ r3.bg }};cursor:pointer" style-hover="border-color:rgba(180,140,232,.5)">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r3.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Match Refresh Rate</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Follows the display at {{ hzLabel }} and locks the FPS cap</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:18px">
+              <span style="font-family:'Chivo Mono',monospace;font-size:14px;font-weight:700;letter-spacing:3px;color:{{ matchTextC }}">{{ matchLabel }}</span>
+              <span style="width:46px;height:46px;flex:none;border-radius:0;border:1px solid {{ matchBoxBorder }};background:{{ matchBoxBg }};display:flex;align-items:center;justify-content:center">
+                <sc-if value="{{ matchOn }}" hint-placeholder-val="{{ false }}">
+                  <span style="width:15px;height:15px;border-radius:2px;background:#e0bd66;transform:rotate(45deg)"></span>
+                </sc-if>
+              </span>
+            </span>
+          </button>
+
+          <!-- TEXTURE FILTER -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ r4.border }};background:{{ r4.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r4.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Texture Filter</span>
+                <span style="border:1px solid rgba(224,189,102,.4);flex:none;white-space:nowrap;border-radius:0;padding:4px 10px;font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:3px;color:#c9b17a">NEEDS RELOAD</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Three-Point matches the original hardware blur</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ texOpts }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.onClick }}" style="height:60px;padding:0 24px;border:none;border-bottom:2px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-family:'Cinzel',serif;font-size:21px;font-weight:700;letter-spacing:3px;cursor:pointer" style-hover="filter:brightness(1.25)">{{ t.label }}</button>
+              </sc-for>
+            </span>
+          </div>
+
+        </div>
+        </sc-if>
+
+        <!-- ENHANCEMENTS -->
+        <sc-if value="{{ showEnhRows }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;padding:4px 44px 18px;display:flex;flex-direction:column;gap:0;min-height:0">
+
+          <!-- WIDESCREEN -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ e0.border }};background:{{ e0.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ e0.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Widescreen</span>
+                <span style="border:1px solid rgba(224,189,102,.4);flex:none;white-space:nowrap;border-radius:0;padding:4px 10px;font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:3px;color:#c9b17a">NEEDS RELOAD</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Widens the camera frustum · some cutscenes still letterbox</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ wideOpts }}" as="w" hint-placeholder-count="3">
+                <button onClick="{{ w.onClick }}" style="height:60px;padding:0 26px;border:none;border-bottom:2px solid {{ w.border }};background:{{ w.bg }};color:{{ w.color }};font-family:'Cinzel',serif;font-size:23px;font-weight:700;letter-spacing:2px;cursor:pointer" style-hover="filter:brightness(1.25)">{{ w.label }}</button>
+              </sc-for>
+            </span>
+          </div>
+
+          <!-- HIGH-RES TEXTURES -->
+          <button onClick="{{ toggleHiRes }}" style="flex:1;display:flex;align-items:center;gap:26px;text-align:left;padding:0 28px;border:none;border-top:1px solid {{ e1.border }};background:{{ e1.bg }};cursor:pointer" style-hover="border-color:rgba(180,140,232,.5)">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ e1.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">High-Res Texture Pack</span>
+                <span style="border:1px solid rgba(180,140,232,.22);flex:none;white-space:nowrap;border-radius:0;padding:4px 10px;font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:3px;color:#6f6288">{{ packLabel }}</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Loads replacement textures from the pack folder</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:18px">
+              <span style="font-family:'Chivo Mono',monospace;font-size:14px;font-weight:700;letter-spacing:3px;color:{{ hiResTextC }}">{{ hiResLabel }}</span>
+              <span style="width:46px;height:46px;flex:none;border-radius:0;border:1px solid {{ hiResBoxBorder }};background:{{ hiResBoxBg }};display:flex;align-items:center;justify-content:center">
+                <sc-if value="{{ hiResOn }}" hint-placeholder-val="{{ false }}">
+                  <span style="width:15px;height:15px;border-radius:2px;background:#e0bd66;transform:rotate(45deg)"></span>
+                </sc-if>
+              </span>
+            </span>
+          </button>
+
+          <!-- ANISOTROPIC FILTERING -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ e2.border }};background:{{ e2.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ e2.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Anisotropic Filtering</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Sharpens ground textures viewed at a shallow angle</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ anisoOpts }}" as="a" hint-placeholder-count="5">
+                <button onClick="{{ a.onClick }}" style="width:82px;height:58px;border:none;border-bottom:2px solid {{ a.border }};background:{{ a.bg }};color:{{ a.color }};font-family:'Cinzel',serif;font-size:23px;font-weight:700;letter-spacing:2px;cursor:pointer" style-hover="filter:brightness(1.25)">{{ a.label }}</button>
+              </sc-for>
+            </span>
+          </div>
+
+          <!-- POST SHARPENING -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ e3.border }};background:{{ e3.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ e3.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Post Sharpening</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Contrast-adaptive pass after upscaling · 0% disables it</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:16px">
+              <button onClick="{{ sharpDown }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:#a58ed0;font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:#efe6ff">‹</button>
+              <span style="position:relative;width:300px;height:2px;background:rgba(180,140,232,.24);border:none">
+                <span style="position:absolute;left:0;top:0;bottom:0;width:{{ sharpFill }};background:linear-gradient(90deg,rgba(180,140,232,.55),#cbb0f2)"></span>
+                <span style="position:absolute;top:50%;left:{{ sharpFill }};width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:2px;transform:rotate(45deg);background:#e7dcfa;box-shadow:0 0 14px rgba(180,140,232,.55)"></span>
+              </span>
+              <button onClick="{{ sharpUp }}" style="width:50px;height:54px;flex:none;border:none;background:none;color:#a58ed0;font-family:'Cinzel',serif;font-size:32px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:#efe6ff">›</button>
+              <span style="width:132px;text-align:right;font-family:'Cinzel',serif;font-size:34px;font-weight:700;letter-spacing:1px;color:#e0bd66">{{ sharpLabel }}</span>
+            </span>
+          </div>
+
+          <!-- FOG -->
+          <div style="flex:1;display:flex;align-items:center;gap:26px;padding:0 22px;border-top:1px solid {{ e4.border }};background:{{ e4.bg }}">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ e4.dot }};transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+                <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#e2d6f6">Draw Distance Fog</span>
+              </span>
+              <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5f85;padding-left:22px">Extended pushes the fog wall back past the original clip plane</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ fogOpts }}" as="f" hint-placeholder-count="3">
+                <button onClick="{{ f.onClick }}" style="height:60px;padding:0 24px;border:none;border-bottom:2px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-family:'Cinzel',serif;font-size:21px;font-weight:700;letter-spacing:3px;cursor:pointer" style-hover="filter:brightness(1.25)">{{ f.label }}</button>
+              </sc-for>
+            </span>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ showStub }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;margin:14px 40px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-top:1px solid rgba(180,140,232,.13);border-bottom:1px solid rgba(180,140,232,.13);background:transparent;min-height:0">
+          <span style="font-family:'Cinzel',serif;font-size:30px;font-weight:700;letter-spacing:4px;color:#4f4763">{{ stubTitle }}</span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:3px;color:#3f3950">{{ stubLine }}</span>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ needsReload }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;height:60px;margin:0 40px 22px;display:flex;align-items:center;gap:16px;padding:0 24px;border-top:1px solid rgba(224,189,102,.34);border-bottom:1px solid rgba(224,189,102,.34);background:linear-gradient(180deg,rgba(224,189,102,.12),rgba(224,189,102,.02))">
+          <span style="width:9px;height:9px;flex:none;border-radius:2px;background:#e0bd66;transform:rotate(45deg);animation:pzBreathe 2.1s ease-in-out infinite"></span>
+          <span style="flex:1;font-family:'Chivo Mono',monospace;font-size:14px;letter-spacing:2px;color:#c9b17a">{{ reloadMsg }}</span>
+          <button onClick="{{ applyReload }}" style="height:42px;padding:0 22px;border:none;border-bottom:1px solid rgba(224,189,102,.6);background:rgba(224,189,102,.1);color:#f0d488;font-family:'Cinzel',serif;font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer" style-hover="filter:brightness(1.2)">RELOAD NOW</button>
+        </div>
+        </sc-if>
+        </sc-if>
+
+        <div style="flex:none;height:80px;padding:0 40px;display:flex;align-items:center;gap:18px;border-top:1px solid rgba(180,140,232,.14)">
+          <span style="font-family:'Chivo Mono',monospace;font-size:13px;letter-spacing:3px;color:#4f4763">{{ subHint }}</span>
+          <span style="flex:1"></span>
+          <button onClick="{{ resume }}" style="flex:none;white-space:nowrap;height:52px;padding:0 4px;border:none;border-bottom:2px solid rgba(180,140,232,.45);background:none;color:#a99cc0;font-family:'Cinzel',serif;font-size:19px;font-weight:700;letter-spacing:5px;cursor:pointer" style-hover="border-color:#c9a2ff;color:#efe6ff">RESUME PLAY</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══ RUNNING ══ -->
+      <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0">
+        <div style="position:absolute;top:64px;bottom:104px;left:0;right:0;overflow:hidden">
+          <img src="uploads/pasted-1784906025303-0.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+        </div>
+
+        <!-- VITALS BAR -->
+        <div style="position:absolute;top:0;left:0;right:0;height:64px;padding:0 30px;display:flex;align-items:center;gap:18px">
+          <span style="display:flex;align-items:center;gap:3px">
+            <sc-for list="{{ hearts }}" as="ht" hint-placeholder-count="10">
+              <sc-if value="{{ ht.full }}" hint-placeholder-val="{{ yes }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d5e"><path d="M12 21s-7.5-4.7-10-9.3C.2 8.1 2 4.5 5.5 4.5c2 0 3.4 1.1 4.5 2.6 1.1-1.5 2.5-2.6 4.5-2.6 3.5 0 5.3 3.6 3.5 7.2C19.5 16.3 12 21 12 21z"/></svg></sc-if>
+              <sc-if value="{{ ht.empty }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="#17161c" stroke="#3b3846" stroke-width="1.4"><path d="M12 21s-7.5-4.7-10-9.3C.2 8.1 2 4.5 5.5 4.5c2 0 3.4 1.1 4.5 2.6 1.1-1.5 2.5-2.6 4.5-2.6 3.5 0 5.3 3.6 3.5 7.2C19.5 16.3 12 21 12 21z"/></svg></sc-if>
+            </sc-for>
+          </span>
+          <span style="position:relative;display:block;width:130px;height:5px;flex:none;border-radius:999px;background:#1e1c24;margin-left:12px">
+            <span style="position:absolute;left:0;top:0;bottom:0;width:{{ magicPct }}%;border-radius:999px;background:#4ade80"></span>
+          </span>
+          <span style="display:flex;align-items:center;gap:8px;margin-left:14px">
+            <span style="width:11px;height:11px;border-radius:2px;background:#5ec46f;transform:rotate(45deg)"></span>
+            <span style="font-family:'Chivo Mono',monospace;font-size:17px;font-weight:700;color:#eaeaea">{{ rupees }}</span>
+          </span>
+          <span style="flex:1"></span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:13px;font-weight:700;letter-spacing:4px;color:#a58ed0">{{ dayName }}</span>
+          <span style="font-family:'Chivo Mono',monospace;font-size:18px;font-weight:700;color:#f0eef5">{{ timeStr }} <span style="font-size:11px;letter-spacing:2px;color:#6f6288">{{ ampm }}</span></span>
+          <span style="border:1px solid rgba(203,176,242,.45);border-radius:6px;padding:3px 10px;font-family:'Chivo Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;color:#cbb0f2">{{ hrsLabel }}</span>
+        </div>
+
+        <!-- AREA LABEL -->
+        <div style="position:absolute;left:30px;top:78px;font-family:'Cinzel',serif;font-size:20px;font-weight:700;letter-spacing:3px;color:#f0eef5;text-shadow:0 2px 10px rgba(0,0,0,.9)">TERMINA FIELD</div>
+
+        <!-- SCREEN NAV -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:104px;display:flex;align-items:center;justify-content:center;gap:56px">
+          <sc-for list="{{ navTabs }}" as="n" hint-placeholder-count="3">
+            <button onClick="{{ n.onClick }}" style="height:46px;padding:0 4px;border:none;border-bottom:2px solid {{ n.border }};background:none;color:{{ n.color }};font-family:'Cinzel',serif;font-size:23px;font-weight:700;letter-spacing:7px;cursor:pointer" style-hover="filter:brightness(1.3)">{{ n.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:1760},&quot;paused&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pause&quot;},&quot;pauseEffect&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Shimmer&quot;,&quot;options&quot;:[&quot;Shimmer&quot;,&quot;Moonlight&quot;,&quot;Ember&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pause&quot;},&quot;refreshRate&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;60&quot;,&quot;options&quot;:[&quot;60&quot;,&quot;75&quot;,&quot;120&quot;,&quot;144&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Graphics&quot;},&quot;heartsFull&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:8,&quot;min&quot;:0,&quot;max&quot;:10,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Vitals&quot;},&quot;magicPct&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:62,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Vitals&quot;},&quot;rupees&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:218,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Vitals&quot;},&quot;hoursRemaining&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:60,&quot;min&quot;:0,&quot;max&quot;:72,&quot;step&quot;:1,&quot;unit&quot;:&quot;h&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Clock&quot;}}">
+class Component extends DCLogic {
+  state = {
+    paused: this.props.paused ?? true,
+    view: 'menu',           // menu | inventory | map | song | options
+    sel: 0,
+    invTab: 'items',
+    pick: 0,
+    optSel: 0,
+    optTab: 'settings',
+    setCat: 'Graphics',
+    enhCat: 'Graphics',
+    gfx: { res: 100, msaa: 2, fps: 60, matchHz: false, tex: 'Three-Point', texApplied: 'Three-Point' },
+    enh: { wide: '16:9', wideApplied: '16:9', hiRes: false, aniso: 4, sharp: 25, fog: 'Original' },
+    slots: {
+      up:    { name: 'Hookshot', img: 'assets/mm/hookshot.png', count: '' },
+      left:  { name: 'Lens of Truth', img: 'assets/mm/lens.png', count: '' },
+      right: { name: "Fierce Deity's Mask", img: 'assets/mm/maskFierce.png', count: '' },
+      down:  { name: 'Milk', img: 'assets/mm/milk.png', count: '3' },
+      X:     { name: 'Bomb', img: 'assets/mm/bomb.png', count: '20' },
+      Y:     { name: "Hero's Bow", img: 'assets/mm/bow.png', count: '30' },
+      R:     { name: 'Ocarina of Time', img: 'assets/mm/ocarina.png', count: '' },
+    },
+  };
+
+  assign(slot) {
+    const p = this._picked;
+    if (!p || !p.img) return;
+    this.setState((s) => ({ slots: { ...s.slots, [slot]: { name: p.name, img: p.img, count: p.count || '' } } }));
+  }
+
+  get hz() { return parseInt(String(this.props.refreshRate ?? '60'), 10) || 60; }
+
+  setGfx(patch, sel) {
+    this.setState((s) => ({ gfx: { ...s.gfx, ...patch }, optSel: sel == null ? s.optSel : sel }));
+  }
+
+  gfxAdjust(row, d) {
+    const g = this.state.gfx;
+    const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    if (row === 0) this.setGfx({ res: cl(g.res + d * 5, 50, 200) }, 0);
+    else if (row === 1) this.setGfx({ msaa: cl(g.msaa + d, 0, 5) }, 1);
+    else if (row === 2) { if (!g.matchHz) this.setGfx({ fps: cl(g.fps + d * 5, 20, this.hz) }, 2); }
+    else if (row === 3) this.setGfx({ matchHz: !g.matchHz }, 3);
+    else if (row === 4) {
+      const t = ['Three-Point', 'Linear', 'None'];
+      this.setGfx({ tex: t[(t.indexOf(g.tex) + (d > 0 ? 1 : 2)) % 3] }, 4);
+    }
+  }
+
+  setEnh(patch, sel) {
+    this.setState((s) => ({ enh: { ...s.enh, ...patch }, optSel: sel == null ? s.optSel : sel }));
+  }
+
+  enhAdjust(row, d) {
+    const e = this.state.enh;
+    const cyc = (list, cur) => list[(list.indexOf(cur) + (d > 0 ? 1 : list.length - 1)) % list.length];
+    if (row === 0) this.setEnh({ wide: cyc(['4:3', '16:9', '21:9'], e.wide) }, 0);
+    else if (row === 1) this.setEnh({ hiRes: !e.hiRes }, 1);
+    else if (row === 2) { const a = [0, 2, 4, 8, 16]; this.setEnh({ aniso: cyc(a, e.aniso) }, 2); }
+    else if (row === 3) this.setEnh({ sharp: Math.max(0, Math.min(100, e.sharp + d * 5)) }, 3);
+    else if (row === 4) this.setEnh({ fog: cyc(['Original', 'Extended', 'Off'], e.fog) }, 4);
+  }
+
+  componentDidMount() {
+    this._key = (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'p' || k === '+') { this.setState((s) => ({ paused: !s.paused, view: 'menu' })); e.preventDefault(); return; }
+      if (!this.state.paused) return;
+      if (this.state.view === 'menu') {
+        if (k === 'arrowdown') { this.move(1); e.preventDefault(); }
+        else if (k === 'arrowup') { this.move(-1); e.preventDefault(); }
+        else if (k === 'enter' || k === ' ') { this.choose(this.state.sel); e.preventDefault(); }
+        else if (k === 'escape' || k === 'backspace') { this.setState({ paused: false }); }
+      } else if (this.state.view === 'options' && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'enter', ' '].includes(k)) {
+        const adj = (d) => (this.state.optTab === 'settings' ? this.gfxAdjust(this.state.optSel, d) : this.enhAdjust(this.state.optSel, d));
+        if (k === 'arrowdown') this.setState((s) => ({ optSel: (s.optSel + 1) % 5 }));
+        else if (k === 'arrowup') this.setState((s) => ({ optSel: (s.optSel + 4) % 5 }));
+        else if (k === 'arrowleft') adj(-1);
+        else adj(1);
+        e.preventDefault();
+      } else if (k === 'escape' || k === 'backspace') { this.setState({ view: 'menu' }); e.preventDefault(); }
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+
+  get menu() {
+    return [
+      { key: 'resume', label: 'RESUME', sub: 'TERMINA FIELD · AUTOSAVED 4 MIN AGO' },
+      { key: 'inventory', label: 'INVENTORY', sub: '21 ITEMS · 12 MASKS' },
+      { key: 'map', label: 'MAP', sub: '68% EXPLORED · 5 OF 10 OWL STATUES' },
+      { key: 'song', label: 'SONG OF TIME', sub: 'RETURN TO THE FIRST DAWN' },
+      { key: 'options', label: 'OPTIONS', sub: 'RESOLUTION · MSAA · FRAME RATE' },
+    ];
+  }
+
+  move(d) { const n = this.menu.length; this.setState((s) => ({ sel: (s.sel + d + n) % n })); }
+  choose(i) {
+    const k = this.menu[i].key;
+    if (k === 'resume') this.setState({ paused: false, sel: i });
+    else this.setState({ view: k, sel: i, pick: 0 });
+  }
+
+  itemsRaw() {
+    return [
+      ['Ocarina of Time', 'ocarina', ''], ["Hero's Bow", 'bow', '30'], ['Fire Arrow', 'arrowFire', ''], ['Ice Arrow', 'arrowIce', ''], ['Light Arrow', 'arrowLight', ''], ["Moon's Tear", 'moonsTear', ''],
+      ['Bomb', 'bomb', '20'], ['Bombchu', 'bombchu', '10'], ['Deku Stick', 'stick', '10'], ['Deku Nut', 'nut', '20'], ['Magic Beans', 'beans', '5'], ['Letter to Kafei', 'letterKafei', ''],
+      ['Powder Keg', 'powderkeg', '1'], ['Pictograph Box', 'pictobox', ''], ['Lens of Truth', 'lens', ''], ['Hookshot', 'hookshot', ''], ["Great Fairy's Sword", 'gfsword', ''], ['Pendant of Memories', 'pendant', ''],
+      ['Red Potion', 'potionRed', ''], ['Milk', 'milk', ''], ['Fairy', 'fairy', ''], ['Fish', 'fish', ''], ['Gold Dust', 'goldDust', ''], ['Empty Bottle', 'bottleEmpty', ''],
+    ];
+  }
+  masksRaw() {
+    return [
+      ["Postman's Hat", 'maskPostman'], ['All-Night Mask', 'maskAllNight'], ['Blast Mask', 'maskBlast'], ['Stone Mask', 'maskStone'], ["Great Fairy's Mask", 'maskGreatFairy'], ['Deku Mask', 'maskDeku'],
+      ['Keaton Mask', 'maskKeaton'], ['Bremen Mask', 'maskBremen'], ['Bunny Hood', 'maskBunny'], ["Don Gero's Mask", 'maskDonGero'], ['Mask of Scents', 'maskScents'], ['Goron Mask', 'maskGoron'],
+      ["Romani's Mask", 'maskRomani'], ["Circus Leader's Mask", 'maskCircus'], ["Kafei's Mask", 'maskKafei'], ["Couple's Mask", ''], ['Mask of Truth', 'maskTruth'], ['Zora Mask', 'maskZora'],
+      ["Kamaro's Mask", 'maskKamaro'], ['Gibdo Mask', ''], ["Garo's Mask", 'maskGaro'], ["Captain's Hat", 'maskCaptain'], ["Giant's Mask", ''], ["Fierce Deity's Mask", 'maskFierce'],
+    ];
+  }
+
+  renderVals() {
+    const paused = this.state.paused;
+    const view = this.state.view;
+    const sel = this.state.sel;
+
+    const rows = this.menu.map((m, i) => {
+      const on = i === sel;
+      const warm = m.key === 'song';
+      return {
+        label: m.label, sub: m.sub, on,
+        color: on ? (warm ? '#f0d488' : '#e7dcfa') : (warm ? '#8a7647' : '#6b6380'),
+        shadow: on ? (warm ? '0 0 26px rgba(224,189,102,.4)' : '0 0 26px rgba(180,140,232,.45)') : 'none',
+        dot: on ? (warm ? '#e0bd66' : '#b48ce8') : 'transparent',
+        onClick: () => this.choose(i),
+      };
+    });
+
+    const mm = (n) => 'assets/mm/' + n + '.png';
+    const tab = this.state.invTab;
+    const raw = tab === 'items'
+      ? this.itemsRaw().map(([name, img, count]) => ({ name, img, count }))
+      : this.masksRaw().map(([name, img]) => ({ name, img, count: '' }));
+    const pick = this.state.pick;
+    const cells = raw.map((c, i) => ({
+      name: c.name, img: c.img ? mm(c.img) : '', count: c.count, i,
+      cursor: c.img ? 'pointer' : 'default',
+      border: pick === i && c.img ? '#e0bd66' : c.img ? 'rgba(180,140,232,.17)' : 'rgba(255,255,255,.04)',
+      bg: pick === i && c.img ? 'radial-gradient(80% 100% at 50% 50%,rgba(224,189,102,.14),transparent 76%)' : 'transparent',
+      glow: pick === i && c.img ? '0 0 22px rgba(224,189,102,.26), inset 0 0 18px rgba(224,189,102,.08)' : 'none',
+      onClick: c.img ? () => this.setState({ pick: i }) : () => {},
+    }));
+    const picked = cells[pick] && cells[pick].img ? cells[pick] : cells.find((c) => c.img);
+    this._picked = picked;
+
+    const S = this.state.slots;
+    const holds = (k) => picked && S[k] && S[k].name === picked.name;
+    const slot = (k, key, geo) => {
+      const a = S[k] || { name: '', img: '', count: '' };
+      const mine = holds(k);
+      return {
+        key, name: a.name || 'Empty slot', img: a.img, count: a.count,
+        edge: a.img ? 'solid' : 'dashed',
+        rim: mine ? '#f6e6ae' : a.img ? '#cfa53d' : 'rgba(207,165,61,.5)',
+        glow: mine ? '0 0 34px rgba(224,189,102,.55), 0 6px 14px rgba(0,0,0,.6)' : '0 6px 14px rgba(0,0,0,.6)',
+        onClick: () => this.assign(k),
+        ...(geo || {}),
+      };
+    };
+
+    const dpadSlots = [
+      slot('up',    '▲', { left: '192px', top: '68px',  badgeL: '50%',   badgeT: '-2px',  area: '1 / 2' }),
+      slot('left',  '◄', { left: '68px',  top: '192px', badgeL: '-2px',  badgeT: '50%',   area: '2 / 1' }),
+      slot('right', '►', { left: '316px', top: '192px', badgeL: '126px', badgeT: '50%',   area: '2 / 3' }),
+      slot('down',  '▼', { left: '192px', top: '316px', badgeL: '50%',   badgeT: '126px', area: '3 / 2' }),
+    ];
+    const xSlot = slot('X', 'X');
+    const ySlot = slot('Y', 'Y');
+    const rSlot = slot('R', 'R');
+    const faceSlots = [xSlot, ySlot, rSlot];
+
+    const assignedKey = picked ? Object.keys(S).find((k) => S[k].name === picked.name) : null;
+    const keyLabel = { up: 'D-PAD ▲', left: 'D-PAD ◄', right: 'D-PAD ►', down: 'D-PAD ▼', X: 'X BUTTON', Y: 'Y BUTTON', R: 'R BUTTON' };
+    const descs = {
+      "Hero's Bow": 'Draw and hold to aim. Fire and Ice arrows share the same quiver.',
+      'Bomb': 'Two-second fuse. Cracks boulders and rattles Bombchu walls.',
+      'Ocarina of Time': 'Every song you know is held here. Bind it to R for quick playing.',
+      'Lens of Truth': 'Drains magic while held. Reveals what the field is hiding.',
+      'Hookshot': 'Reaches wooden targets and Deku trunks across a gap.',
+      'Milk': 'Two mouthfuls per bottle. Restores five hearts each.',
+      "Fierce Deity's Mask": 'Boss rooms only. Drains magic steadily while worn.',
+      'Powder Keg': 'Goron-sized blast. One at a time, and it walks slowly.',
+    };
+    const fallback = tab === 'items' ? 'Assign it to a D-pad slot or a face button to reach it mid-fight.' : 'Wear it to transform, or park it in a D-pad quick slot.';
+
+    const hz = this.hz;
+    const g = this.state.gfx;
+    const oSel = this.state.optSel;
+    const fpsOn = !g.matchHz;
+    const effFps = g.matchHz ? hz : Math.min(g.fps, hz);
+    const pct = (v, lo, hi) => Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100)) + '%';
+    const row = (i) => ({
+      dot: oSel === i ? '#e0bd66' : 'transparent',
+      border: oSel === i ? 'rgba(180,140,232,.46)' : 'rgba(180,140,232,.11)',
+      bg: oSel === i ? 'radial-gradient(72% 150% at 16% 50%,rgba(180,140,232,.14),transparent 74%)' : 'transparent',
+    });
+    const seg = (active) => ({
+      bg: 'transparent',
+      border: active ? '#e0bd66' : 'transparent',
+      color: active ? '#f0d488' : '#635a7d',
+    });
+    const msaaOpts = [0, 1, 2, 3, 4, 5].map((n) => ({
+      label: n === 0 ? 'OFF' : n + '×', ...seg(g.msaa === n),
+      onClick: () => this.setGfx({ msaa: n }, 1),
+    }));
+    const texOpts = ['Three-Point', 'Linear', 'None'].map((t) => ({
+      label: t.toUpperCase(), ...seg(g.tex === t),
+      onClick: () => this.setGfx({ tex: t }, 4),
+    }));
+    const gfx = {
+      r0: row(0), r1: row(1), r2: row(2), r3: row(3), r4: row(4),
+      resLabel: g.res + '%', resFill: pct(g.res, 50, 200),
+      resDown: () => this.gfxAdjust(0, -1), resUp: () => this.gfxAdjust(0, 1),
+      msaaOpts, texOpts,
+      hzLabel: hz + ' HZ',
+      fpsLabel: effFps + ' FPS', fpsFill: pct(effFps, 20, hz),
+      fpsDown: () => this.gfxAdjust(2, -1), fpsUp: () => this.gfxAdjust(2, 1),
+      fpsCursor: fpsOn ? 'pointer' : 'not-allowed',
+      fpsTrackFill: fpsOn ? 'linear-gradient(90deg,rgba(180,140,232,.55),#cbb0f2)' : 'rgba(120,112,140,.2)',
+      fpsKnob: fpsOn ? '#efe6ff' : '#3b3648',
+      fpsGlow: fpsOn ? '0 0 14px rgba(180,140,232,.55)' : 'none',
+      fpsText: fpsOn ? '#e0bd66' : '#4a4232',
+      fpsLabelC: fpsOn ? '#cfc4e6' : '#5b5470',
+      fpsBtnC: fpsOn ? '#cfc4e6' : '#38323f',
+      fpsHint: fpsOn ? 'Caps the frame rate between 20 and the display maximum' : 'Locked by Match Refresh Rate',
+      matchOn: g.matchHz,
+      matchLabel: g.matchHz ? 'ON' : 'OFF',
+      matchTextC: g.matchHz ? '#f0d488' : '#5d5570',
+      matchBoxBorder: g.matchHz ? '#e0bd66' : 'rgba(180,140,232,.26)',
+      matchBoxBg: 'transparent',
+      toggleMatch: () => this.gfxAdjust(3, 1),
+    };
+
+    const e = this.state.enh;
+    const oTab = this.state.optTab;
+    const cat = oTab === 'settings' ? this.state.setCat : this.state.enhCat;
+    const pending = [];
+    if (g.tex !== g.texApplied) pending.push('TEXTURE FILTER');
+    if (e.wide !== e.wideApplied) pending.push('WIDESCREEN');
+    const enhVals = {
+      atSettingsTab: oTab === 'settings', atEnhTab: oTab === 'enhancements',
+      cats: (oTab === 'settings' ? ['Graphics', 'Audio', 'Controls', 'System'] : ['Graphics', 'Gameplay', 'Camera', 'Quality of Life']).map((c) => {
+        const active = c === cat;
+        return {
+          label: c.toUpperCase(), ...seg(active),
+          onClick: () => this.setState(oTab === 'settings' ? { setCat: c, optSel: 0 } : { enhCat: c, optSel: 0 }),
+        };
+      }),
+      showGfxRows: oTab === 'settings' && cat === 'Graphics',
+      showEnhRows: oTab === 'enhancements' && cat === 'Graphics',
+      showStub: cat !== 'Graphics',
+      stubTitle: cat.toUpperCase(),
+      stubLine: (oTab === 'settings' ? 'SETTINGS' : 'ENHANCEMENTS') + ' FOR ' + cat.toUpperCase() + ' NOT DESIGNED YET',
+      goSettings: () => this.setState({ optTab: 'settings', optSel: 0 }),
+      goEnhancements: () => this.setState({ optTab: 'enhancements', optSel: 0 }),
+      setBg: 'transparent',
+      setBorder: oTab === 'settings' ? '#c9a2ff' : 'transparent',
+      setFg: oTab === 'settings' ? '#efe6ff' : '#544d69',
+      enhBg: 'transparent',
+      enhBorder: oTab === 'enhancements' ? '#c9a2ff' : 'transparent',
+      enhFg: oTab === 'enhancements' ? '#efe6ff' : '#544d69',
+      tabCaption: oTab === 'settings' ? 'HOW THE GAME RUNS' : 'BEYOND THE ORIGINAL HARDWARE',
+      e0: row(0), e1: row(1), e2: row(2), e3: row(3), e4: row(4),
+      wideOpts: ['4:3', '16:9', '21:9'].map((w) => ({ label: w, ...seg(e.wide === w), onClick: () => this.setEnh({ wide: w }, 0) })),
+      anisoOpts: [0, 2, 4, 8, 16].map((n) => ({ label: n === 0 ? 'OFF' : n + '×', ...seg(e.aniso === n), onClick: () => this.setEnh({ aniso: n }, 2) })),
+      fogOpts: ['Original', 'Extended', 'Off'].map((f) => ({ label: f.toUpperCase(), ...seg(e.fog === f), onClick: () => this.setEnh({ fog: f }, 4) })),
+      hiResOn: e.hiRes,
+      hiResLabel: e.hiRes ? 'ON' : 'OFF',
+      hiResTextC: e.hiRes ? '#f0d488' : '#5d5570',
+      hiResBoxBorder: e.hiRes ? '#e0bd66' : 'rgba(180,140,232,.26)',
+      hiResBoxBg: 'transparent',
+      toggleHiRes: () => this.enhAdjust(1, 1),
+      packLabel: 'TERMINA HD · 412 MB',
+      sharpLabel: e.sharp + '%', sharpFill: pct(e.sharp, 0, 100),
+      sharpDown: () => this.enhAdjust(3, -1), sharpUp: () => this.enhAdjust(3, 1),
+      needsReload: pending.length > 0,
+      reloadMsg: pending.join(' AND ') + ' CHANGED · RELOAD THE CORE TO APPLY',
+      applyReload: () => this.setState((s) => ({ gfx: { ...s.gfx, texApplied: s.gfx.tex }, enh: { ...s.enh, wideApplied: s.enh.wide } })),
+    };
+
+    const hf = Math.max(0, Math.min(10, this.props.heartsFull ?? 8));
+    const hoursLeft = Math.max(0, Math.min(72, this.props.hoursRemaining ?? 60));
+    const eff = this.props.pauseEffect || 'Shimmer';
+    const subTitle = view === 'inventory' ? 'INVENTORY' : view === 'map' ? 'MAP' : view === 'song' ? 'SONG OF TIME' : 'OPTIONS';
+    const subHint = view === 'inventory' ? 'Ⓐ ASSIGN   ·   Ⓑ BACK' : view === 'options' ? '↑ ↓ ROW   ·   ◄ ► ADJUST   ·   Ⓑ BACK' : 'Ⓑ BACK';
+
+    return {
+      paused, running: !paused,
+      atMenu: paused && view === 'menu',
+      inSub: paused && view !== 'menu',
+      atInventory: view === 'inventory', atMap: view === 'map', atSong: view === 'song', atOptions: view === 'options',
+      effShimmer: eff === 'Shimmer', effMoonlight: eff === 'Moonlight', effEmber: eff === 'Ember',
+      rows, cells, subTitle, subHint, ...gfx, ...enhVals,
+      invCount: tab === 'items' ? '21 OF 24 SLOTS FILLED' : '12 OF 24 MASKS RECOVERED',
+      itemsBg: 'transparent',
+      itemsBorder: tab === 'items' ? '#c9a2ff' : 'transparent',
+      itemsFg: tab === 'items' ? '#efe6ff' : '#544d69',
+      masksBg: 'transparent',
+      masksBorder: tab === 'masks' ? '#c9a2ff' : 'transparent',
+      masksFg: tab === 'masks' ? '#efe6ff' : '#544d69',
+      goItems: () => this.setState({ invTab: 'items', pick: 0 }),
+      goMasks: () => this.setState({ invTab: 'masks', pick: 0 }),
+      selName: picked ? picked.name : '', selImg: picked ? picked.img : '',
+      selSlot: tab === 'items' ? 'Assign to a face button or D-pad slot' : 'Wear to transform · one D-pad quick slot',
+      assignLabel: tab === 'items' ? 'ASSIGN' : 'WEAR',
+      showWord: view !== 'inventory',
+      showcaseTab: tab === 'items' ? 'ITEMS' : 'MASKS',
+      selCount: picked ? picked.count : '',
+      selDesc: picked ? (descs[picked.name] || fallback) : fallback,
+      selAssigned: assignedKey ? 'ON ' + keyLabel[assignedKey] : 'NOT ASSIGNED',
+      assignHint: 'TAP A SLOT TO ASSIGN',
+      dpadSlots, xSlot, ySlot, rSlot, faceSlots,
+      hearts: Array.from({ length: 10 }, (_, i) => ({ full: i < hf, empty: i >= hf })),
+      magicPct: Math.max(0, Math.min(100, this.props.magicPct ?? 62)),
+      rupees: String(this.props.rupees ?? 218),
+      dayName: 'DAY ' + (hoursLeft > 48 ? 1 : hoursLeft > 24 ? 2 : 3),
+      hrsLabel: hoursLeft + ' H',
+      timeStr: '7:40', ampm: 'AM',
+      navTabs: [
+        { label: 'MAP', active: true, onClick: () => this.setState({ paused: false }) },
+        { label: 'ITEMS', active: false, onClick: () => this.setState({ paused: true, view: 'inventory', invTab: 'items', pick: 0, sel: 1 }) },
+        { label: 'MASKS', active: false, onClick: () => this.setState({ paused: true, view: 'inventory', invTab: 'masks', pick: 0, sel: 1 }) },
+      ].map((t) => ({ ...t, color: t.active ? '#efe6ff' : '#544d69', border: t.active ? '#c9a2ff' : 'transparent' })),
+      back: () => this.setState({ view: 'menu' }),
+      resume: () => this.setState({ paused: false, view: 'menu' }),
+      pause: () => this.setState({ paused: true, view: 'menu' }),
+      yes: true,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
