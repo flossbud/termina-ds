@@ -66,7 +66,7 @@ New files, all under the Android app:
 |---|---|
 | `secondscreen/TerminaDesign.kt` | Design tokens: every color from the handoff table as a named `Color`, bundled font families, text styles with exact size/weight/tracking, `DesignFrame` scaling |
 | `secondscreen/HudModel.kt` | Pure snapshot→display mapping (no Compose imports). All formulas in §5 live here. JVM-tested |
-| `secondscreen/SceneNames.kt` | Generated `sceneId → humanName` table from `mm/include/tables/scene_table.h` (115 entries) |
+| `secondscreen/SceneNames.kt` | Generated `sceneId → humanName` table from `mm/include/tables/scene_table.h` (102 named ids of 113) |
 | `secondscreen/GameplayScreen.kt` | The §4 layout: vitals bar, map region, area label, nav |
 | `secondscreen/SecondScreenHost.kt` | Rewritten: keeps the poll loop, adds `route()`, deletes the Phase 2 debug readout wholesale (its own charter) |
 
@@ -119,12 +119,15 @@ Engine semantics per `SnapshotPublisher.cpp`:
 - **Clock.** `time` is the engine u16 day fraction, `0x0000` = midnight:
   `minutesOfDay = time * 1440 / 0x10000`. Displayed 12-hour `h:mm` with the
   `AM`/`PM` suffix per §4 (`12:00 AM` at midnight, `12:00 PM` at noon).
-- **Day + countdown chip.** `DAY n` from the `day` slot. Hours remaining until
-  the cycle ends (Day 4, 6:00 AM):
-  `remainingMinutes = (4 - day) * 1440 + 360 - minutesOfDay`, clamped ≥ 0;
-  chip shows `floor(remainingMinutes / 60) H` (floor matches the in-game
-  "hours remain" convention at day boundaries). If `day < 1` (pre-cycle intro
-  state) the day label and chip are hidden.
+- **Day + countdown chip.** `DAY n` from the `day` slot. The engine's day does
+  not increment at midnight — a day runs 6:00 AM → 6:00 AM (`z64save.h:562`) —
+  so the countdown mirrors the engine's own `TIME_UNTIL_MOON_CRASH` macro
+  (`z64save.h:564`) rather than assuming calendar days:
+  `elapsedInDay = floorMod(minutesOfDay - 360, 1440)`;
+  `remainingMinutes = (4 - day) * 1440 - elapsedInDay`, clamped ≥ 0. The chip
+  shows `floor(remainingMinutes / 60) H`, which reproduces the in-game
+  "Dawn of the Final Day — 24 hours remain" exactly at Day 3, 6:00 AM. If
+  `day < 1` (pre-cycle intro state) the day label and chip are hidden.
 - **Area label.** `SceneNames[sceneId]`, uppercased at render. Unknown or
   unset scene id → `SCENE <id>` (never blank, never a crash — the table has
   gaps by construction, e.g. ids 1–6).
@@ -223,8 +226,10 @@ against the UP-TO-DATE zero-test trap.
 **JVM (all pure logic, no Compose testing framework this phase):**
 - Clock: `0x0000`→`12:00 AM`, `0x4000`→`6:00 AM`, `0x8000`→`12:00 PM`,
   7:40 AM's exact u16, `0xFFFF`→`11:59 PM`.
-- Countdown: Day 1 6:00 AM → 72; Day 3 5:59 AM → 24 (floor at the boundary);
-  clamp to 0 past the deadline; hidden when `day < 1`.
+- Countdown: Day 1 6:00 AM → 72 H; Day 1 7:40 AM → 70 H; Day 1 2:00 AM
+  (20 h elapsed — past midnight, `day` still 1) → 52 H; Day 3 6:00 AM → 24 H
+  (the in-game "24 hours remain"); Day 3 5:59 AM → 0 H (one minute left);
+  clamped to 0 past the deadline; hidden when `day < 1`.
 - Hearts: 0 health; partial (41/48 → 2 full + 9/16 partial of 3); exactly 10
   (one row); 11 and 20 (two rows); capacity 0.
 - Magic: pct math, clamping, capacity-0 hides the rail.
