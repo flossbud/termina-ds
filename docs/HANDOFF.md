@@ -1,7 +1,8 @@
 # Termina DS — Handoff for the Next Agent
 
-You are picking up an in-progress project. **Phase 0 (fork + build + rebrand)
-and Phase 1 (second-screen foundation) are complete and hardware-verified.**
+You are picking up an in-progress project. **Phase 0 (fork + build + rebrand),
+Phase 1 (second-screen foundation), and Phase 2 (read-only game-state bridge)
+are complete and hardware-verified.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -67,8 +68,14 @@ Invariants you must not break:
 | `docs/UPSTREAM.md` | Ledger of inherited-file edits + the vendoring/rename record |
 | `engine/` | The vendored engine (was the `libultraship` submodule) |
 | `OTRExporter/`, `ZAPDTR/` | Vendored asset-build tools (were submodules) |
-| `mm/2s2h/TerminaDS/NativeBridge.cpp` | JNI seam, native side (currently: uptime heartbeat only) |
+| `docs/superpowers/specs/2026-07-23-termina-ds-phase-2-state-bridge-design.md` | Phase 2 spec (state bridge) |
+| `docs/superpowers/plans/2026-07-23-termina-ds-phase-2.md` | Phase 2 implementation plan (done) |
+| `mm/2s2h/TerminaDS/GameSnapshot.h` | **Layout contract.** The index enum IS the payload; Kotlin mirrors it by hand |
+| `mm/2s2h/TerminaDS/SnapshotPublisher.cpp` | Game-thread sampler + seqlock. **The only file that dereferences game pointers** |
+| `mm/2s2h/TerminaDS/NativeBridge.cpp` | JNI seam, native side (uptime + `nativeReadSnapshot`) |
 | `Android/app/src/main/java/com/terminads/mm/NativeBridge.kt` | JNI seam, Kotlin side — the ONLY thing that calls native |
+| `Android/app/src/main/java/com/terminads/mm/GameSnapshot.kt` | Kotlin mirror of the layout + pure decoder (unit-tested) |
+| `Android/app/src/main/java/com/terminads/mm/GameSnapshotPoller.kt` | 10 Hz main-thread poll, staleness, `BridgeState` classification |
 | `Android/app/src/main/java/com/terminads/mm/secondscreen/` | All second-screen code (manager, presentation, policy, host, lifecycle shim) |
 | `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | Inherited game activity; second screen wired into onCreate/onResume/onDestroy |
 | `tools/build-apk.sh`, `docker/Dockerfile.android` | The reproducible build |
@@ -101,12 +108,26 @@ uptime heartbeat).
 (`adb pair` / `adb connect`); the pairing may need re-establishing each session
 (the user reads the code off the device). Last known address: `10.0.0.30`.
 
-**Verify natives landed:** `llvm-nm -D` on the packaged `arm64-v8a` `.so`,
-grepping for `Java_com_terminads_mm_*`. This is how the JNI rename and each new
-native symbol were confirmed — a green build is not proof the symbol shipped.
+**Verify natives landed:** `llvm-nm -D` on the packaged `arm64-v8a` library
+(`lib/arm64-v8a/lib2ship.so`), grepping for `Java_com_terminads_mm_*`. This is
+how the JNI rename and each new native symbol were confirmed — a green build is
+not proof the symbol shipped.
 
-**Unit tests:** `./gradlew :app:testReleaseUnitTest` inside the Docker image —
-13 fast JVM tests (display policy, lifecycle owner). No device needed.
+> ⚠️ **`llvm-nm` is NOT on the build host.** It ships inside the NDK in the
+> `termina-ds-build:latest` image — run the check there, or use host `nm -D` on
+> the extracted `.so`. Run bare on the host with stderr suppressed, `llvm-nm`
+> prints nothing, which is byte-identical to the symptom of the real
+> `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
+> here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
+
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 34 fast JVM
+tests (display policy, lifecycle owner, snapshot decoder, poller). No NDK, no
+device, about a minute.
+
+> ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testReleaseUnitTest UP-TO-DATE`
+> **while running no tests at all.** Console text is not evidence. Pass
+> `--rerun-tasks` and read counts from
+> `Android/app/build/test-results/testReleaseUnitTest/*.xml`.
 
 **⚠️ You cannot screenshot the second screen.** Both Thor displays are
 `FLAG_SECURE`, so `screencap` returns black/empty. Logcat can prove the
@@ -129,15 +150,20 @@ coexists with.
 
 ## 7. What's next (roadmap, in dependency order)
 
-From the spec (§6 there). Phases 0-1 done.
+From the spec (§6 there). Phases 0-2 done.
 
-- **Phase 2 — Read-only game-state bridge.** Grow `NativeBridge` from the uptime
-  heartbeat into a per-frame snapshot of `gSaveContext`/`PlayState`/`Player`
-  exposed to Kotlin. This is the foundation for everything visible. Medium risk.
-  Design it as a narrow, read-only struct snapshot; keep the main-thread and
-  frame-safety concerns front of mind.
 - **Phase 3 — Live HUD** (hearts, rupees, magic, C-items) on the bottom screen.
-  First real payoff. Replaces the placeholder. Low risk once Phase 2 exists.
+  First real payoff. **Start here.** Phase 2 hands you a `GameSnapshot` data
+  class updating at 10 Hz as Compose state, with explicit validity flags; Phase 3
+  deletes the debug readout in `SecondScreenHost.kt` and renders from that
+  object, adding **no new native code**. Read
+  `docs/verification/2026-07-23-phase-2-thor.md` first — it lists the engine
+  representation quirks (an empty C-button is `255`, `roomNum` can be `-1`, yaw
+  is a signed binary angle) that the HUD must handle. Low risk.
+
+  Extending the payload later costs: one enum entry in `GameSnapshot.h`, one
+  field in the publisher, one in the decoder, one test, and a
+  `TDS_SNAP_SCHEMA_VERSION` bump **on both sides**.
 - **Phase 4 — Settings reskin** for the handheld.
 - **Phase 5 — Command bridge** (bottom screen → game, frame-safe): warps, item
   assignment, pause. High risk — this MUTATES game state; needs frame-safety.
