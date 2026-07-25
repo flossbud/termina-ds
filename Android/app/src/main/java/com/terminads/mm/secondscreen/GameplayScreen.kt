@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -298,6 +299,9 @@ private fun NavTab(label: String, active: Boolean) {
     Column(
         Modifier
             .height(du(46f * LEGIBILITY))
+            // Load-bearing: fillMaxWidth() in a wrap-content Column takes the
+            // row's max constraint; intrinsic width pins it to the label.
+            .width(IntrinsicSize.Min)
             .semantics {
                 if (active) {
                     contentDescription = "$label tab, current view"
