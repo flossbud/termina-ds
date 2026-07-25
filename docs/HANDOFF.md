@@ -2,8 +2,9 @@
 
 You are picking up an in-progress project. **Phase 0 (fork + build + rebrand),
 Phase 1 (second-screen foundation), and Phase 2 (read-only game-state bridge)
-are complete and hardware-verified. Phase 3 (live HUD) is implemented, pending
-hardware verification on the Thor.**
+are complete and hardware-verified. Phase 3 (live HUD) is complete and
+hardware-verified (`docs/verification/2026-07-25-phase-3-thor.md`), including
+five hardware-driven amendments.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -169,14 +170,18 @@ coexists with.
 
 ## 7. What's next (roadmap, in dependency order)
 
-From the spec (§6 there). Phases 0-2 are complete and hardware-verified. Phase 3
-is implemented, pending hardware verification on the Thor.
+From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
 
 - **Phase 3 — Live HUD:** bottom-screen vitals bar, map region with area label,
   and inert nav.
-  **Implemented, pending hardware verification on the Thor.**
+  **Complete and hardware-verified** (`docs/verification/2026-07-25-phase-3-thor.md`).
   The Thor variant applies a 1.5x legibility factor to type and
-  reading-critical glyphs and uses an immersive Presentation window.
+  reading-critical glyphs, lays the Presentation out under the second
+  screen's reserved navbar strip, dismisses the second screen when the app
+  is backgrounded, and drains hearts as counterclockwise quarter-pie wedges.
+  Deferred to Phase 4's verification: TalkBack, framerate, the >10-hearts
+  visual, a release keystore (`tools/make-keystore.sh`), and Compose UI
+  tests.
   Phase 2 hands the HUD a `GameSnapshot` data class updating at 10 Hz as Compose
   state, with explicit validity flags; Phase 3 replaced the debug readout in
   `SecondScreenHost.kt` and renders from that object, adding **no new native
