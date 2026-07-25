@@ -1,14 +1,17 @@
 /*
  * Termina DS: game-thread half of the Phase 2 read-only state bridge.
  *
- * THIS IS THE ONLY FILE IN THE PROJECT THAT DEREFERENCES GAME POINTERS.
- * That containment is deliberate -- gPlayState is NULL across every scene
- * transition (z_play.c:481) and the player actor can be absent while a
- * PlayState exists, so these reads are only safe on the thread that owns those
- * lifetimes. Everything downstream sees plain integers.
+ * SnapshotPublisher.cpp (reads) and CommandMailbox.cpp (writes) are the only
+ * files in the project that touch game state, both exclusively on the game
+ * thread. That containment is deliberate -- gPlayState is NULL across every
+ * scene transition (z_play.c:481) and the player actor can be absent while a
+ * PlayState exists, so these accesses are only safe on the thread that owns
+ * those lifetimes. Everything outside the pair exchanges plain command and
+ * snapshot data.
  *
  * Registration uses RegisterShipInitFunc, so no inherited file is edited.
  */
+#include "CommandMailbox.h"
 #include "GameSnapshot.h"
 
 #include <atomic>
@@ -199,7 +202,12 @@ static RegisterShipInitFunc sRegisterSnapshotPublisher([]() {
     }
     registered = true;
 
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateUpdate>(Publish);
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameStateUpdate>([]() {
+        // Drain before publishing: the same frame's snapshot reports the
+        // commands' effects, closing the observe-don't-assume loop.
+        TerminaDS_DrainCommands();
+        Publish();
+    });
 });
 
 } // namespace

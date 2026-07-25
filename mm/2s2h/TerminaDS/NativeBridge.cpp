@@ -14,6 +14,7 @@
 #include <chrono>
 #include <cstdint>
 
+#include "CommandMailbox.h"
 #include "GameSnapshot.h"
 
 namespace {
@@ -67,6 +68,32 @@ Java_com_terminads_mm_NativeBridge_nativeReadSnapshot(JNIEnv* env, jobject thiz,
 
     env->SetIntArrayRegion(out, 0, TDS_SNAP_COUNT, reinterpret_cast<const jint*>(values));
     return static_cast<jint>(TDS_SNAP_STATUS_OK);
+}
+
+/*
+ * Submit one absolute command to the game thread. Returns a TdsSubmitStatus.
+ * The name string is copied into the ring before this returns; no reference
+ * is retained.
+ */
+extern "C" JNIEXPORT jint JNICALL
+Java_com_terminads_mm_NativeBridge_nativeSubmitCommand(JNIEnv* env, jobject thiz, jint op, jint a,
+                                                       jint b, jstring name) {
+    (void)thiz;
+
+    const char* nameChars = nullptr;
+    if (name != nullptr) {
+        nameChars = env->GetStringUTFChars(name, nullptr);
+        if (nameChars == nullptr) {
+            return static_cast<jint>(TDS_SUBMIT_INVALID);
+        }
+    }
+
+    const int32_t status = TerminaDS_SubmitCommand(op, a, b, nameChars);
+
+    if (nameChars != nullptr) {
+        env->ReleaseStringUTFChars(name, nameChars);
+    }
+    return static_cast<jint>(status);
 }
 
 #endif // __ANDROID__
