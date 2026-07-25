@@ -53,6 +53,8 @@ object NativeBridge {
 
     private external fun nativeReadSnapshot(out: IntArray): Int
 
+    private external fun nativeSubmitCommand(op: Int, a: Int, b: Int, name: String?): Int
+
     /** Native process uptime in milliseconds, or -1 if native is not loaded yet. */
     fun uptimeMillis(): Long =
         try {
@@ -72,6 +74,14 @@ object NativeBridge {
             statusToResult(nativeReadSnapshot(out))
         } catch (e: UnsatisfiedLinkError) {
             SnapshotReadResult.UNAVAILABLE
+        }
+
+    /** Submit one absolute game command, or -1 if native is not loaded yet. */
+    fun submitCommand(op: Int, a: Int, b: Int, name: String?): Int =
+        try {
+            nativeSubmitCommand(op, a, b, name)
+        } catch (e: UnsatisfiedLinkError) {
+            -1
         }
 
     /**
