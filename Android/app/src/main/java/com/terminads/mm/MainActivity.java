@@ -90,12 +90,28 @@ public class MainActivity extends SDLActivity{
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (secondScreenManager != null) {
+            secondScreenManager.start();
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         applyImmersiveFullscreen();
         if (secondScreenManager != null) {
             secondScreenManager.onActivityResume();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        if (secondScreenManager != null) {
+            secondScreenManager.stop();
+        }
+        super.onStop();
     }
 
     @Override

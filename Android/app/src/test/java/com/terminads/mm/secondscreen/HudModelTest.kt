@@ -146,7 +146,17 @@ class HudModelTest {
 
     @Test
     fun partialHeartFollowsTheFullHearts() {
-        assertEquals(listOf(1f, 1f, 9f / 16f), heartFills(2, 9, 3))
+        assertEquals(listOf(1f, 1f, 0.5f), heartFills(2, 9, 3))
+    }
+
+    @Test
+    fun fifteenSixteenthsFloorsToThreeQuarters() {
+        assertEquals(listOf(0.75f), heartFills(0, 15, 1))
+    }
+
+    @Test
+    fun threeSixteenthsFloorsToEmpty() {
+        assertEquals(listOf(0f), heartFills(0, 3, 1))
     }
 
     // ---- magic ----

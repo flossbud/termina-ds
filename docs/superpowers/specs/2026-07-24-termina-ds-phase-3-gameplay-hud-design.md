@@ -106,8 +106,11 @@ Engine semantics per `SnapshotPublisher.cpp`:
 
 - **Hearts.** `health`/`healthCapacity` are in 1/16-heart units.
   `totalHearts = healthCapacity / 16`, `fullHearts = health / 16`,
-  `partialFraction = (health % 16) / 16f` (one partial heart drawn as a
-  horizontal clip fill — invisible granularity at 18 design-px, but honest).
+  `partialSixteenths = health % 16`, then
+  `partialFraction = floor(partialSixteenths / 4) / 4`: the partial heart is
+  drawn as a clockwise pie wedge anchored at its center, starting at 12
+  o'clock. This 2026-07-25 hardware-verification amendment was requested by the
+  user to match the game's quarter-heart visual language.
   Rows wrap at **10 hearts per row** like the original game (MM max is 20;
   two rows of 18px hearts + 3px gap fit the 64px bar). `doubleDefense` draws a
   1.4px gold (`#e0bd66`) stroke on filled hearts — a token-vocabulary extension,
@@ -192,8 +195,9 @@ Hardware verification showed that the handoff's absolute px render about 3x
 smaller physically on the Thor's ~320 dpi panel than on the authoring monitor.
 All type and reading-critical glyphs therefore scale by `LEGIBILITY = 1.5`,
 while structural geometry and the 1240×1080 design frame remain unchanged. The
-Presentation also hides system bars because Android reserved a measured 55px
-navbar strip on the presentation display, reducing the app window to 1240×1025.
+Presentation lays out beneath system bars because Android reserved a measured
+55px navbar strip on the presentation display, reducing the app window to
+1240×1025, and an unfocused Presentation cannot hide that bar.
 
 ## 7. Accessibility
 
@@ -241,8 +245,8 @@ against the UP-TO-DATE zero-test trap.
   (20 h elapsed — past midnight, `day` still 1) → 52 H; Day 3 6:00 AM → 24 H
   (the in-game "24 hours remain"); Day 3 5:59 AM → 0 H (one minute left);
   clamped to 0 past the deadline; hidden when `day < 1`.
-- Hearts: 0 health; partial (41/48 → 2 full + 9/16 partial of 3); exactly 10
-  (one row); 11 and 20 (two rows); capacity 0.
+- Hearts: 0 health; quarter-floor partials (9/16→1/2, 15/16→3/4, 3/16→0);
+  exactly 10 (one row); 11 and 20 (two rows); capacity 0.
 - Magic: pct math, clamping, capacity-0 hides the rail.
 - Scene names: known id, unset gap (ids 1–6), out-of-range id → `SCENE <id>`.
 - `route()`: every `BridgeState` × `hasPlayState` combination → expected screen.
@@ -258,8 +262,8 @@ against the UP-TO-DATE zero-test trap.
    Phase 2 NULL-window under the real consumer).
 6. Clock vs. the in-game clock: time, AM/PM, day, hours-remaining plausibility.
 7. Heart wrap >10 and double defense (2S2H's save editor can set both).
-8. Background and return → stall chip within ~1 s, LIVE on return — closes
-   Phase 2 deferred item 10.
+8. Backgrounding dismisses the second screen; returning restores it. The stall
+   chip covers in-game stalls only — closes Phase 2 deferred item 10.
 9. TalkBack pass over every element; confirm no continuous re-announcement —
    closes Phase 2 deferred item 11.
 10. Top-screen framerate spot-check with 2S2H's FPS display enabled — finally

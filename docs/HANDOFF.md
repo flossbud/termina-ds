@@ -83,7 +83,7 @@ Invariants you must not break:
 | `Android/.../secondscreen/SceneNames.kt` | GENERATED sceneId -> name table (tools/generate-scene-names.py) |
 | `Android/.../secondscreen/HudModel.kt` | Pure snapshot -> HUD model, route(), diagnostic strings |
 | `Android/.../secondscreen/GameplayScreen.kt` | The §4 gameplay HUD (vitals, map, nav) |
-| `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | Inherited game activity; second screen wired into onCreate/onResume/onDestroy |
+| `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | Inherited game activity; second screen wired into onCreate/onStart/onResume/onStop/onDestroy |
 | `tools/build-apk.sh`, `docker/Dockerfile.android` | The reproducible build |
 | `tools/assemble-apk.sh` | UI-only APK assembly -- NEVER after native changes (stale glob) |
 | `tools/generate-scene-names.py` | Regenerates SceneNames.kt from scene_table.h |

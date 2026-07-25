@@ -6,8 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.Display
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -36,8 +34,8 @@ class SecondScreenPresentation(
 
         window?.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         // A measured 55px navbar inset shrank the design frame to 95%.
-        // Unfocused windows cannot hide the bar, so lay out beneath it instead;
-        // the gesture pill may overlay the bottom edge, which is acceptable.
+        // An unfocused window cannot hide system bars, so these flags lay the
+        // window beneath them; the gesture pill may overlay the bottom edge.
         window?.addFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
@@ -70,14 +68,6 @@ class SecondScreenPresentation(
 
         if (Build.VERSION.SDK_INT >= 30) {
             window?.setDecorFitsSystemWindows(false)
-            window?.insetsController?.apply {
-                hide(
-                    WindowInsets.Type.statusBars() or
-                        WindowInsets.Type.navigationBars(),
-                )
-                systemBarsBehavior =
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
         }
     }
 

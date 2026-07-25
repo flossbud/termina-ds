@@ -30,7 +30,7 @@ data class HudModel(
     val areaName: String,
 )
 
-/** Fill fraction for each capacity heart, with at most one partial heart. */
+/** Quarter-quantized fill for each capacity heart, with at most one partial. */
 fun heartFills(
     fullHearts: Int,
     partialSixteenths: Int,
@@ -38,7 +38,7 @@ fun heartFills(
 ): List<Float> = List(totalHearts) { index ->
     when {
         index < fullHearts -> 1f
-        index == fullHearts -> partialSixteenths / 16f
+        index == fullHearts -> (partialSixteenths / 4) / 4f
         else -> 0f
     }
 }

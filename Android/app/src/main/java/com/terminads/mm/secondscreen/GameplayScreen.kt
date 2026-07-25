@@ -24,11 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -192,9 +193,22 @@ private fun Heart(fillFraction: Float, doubleDefense: Boolean) {
     Canvas(Modifier.size(du(18f * LEGIBILITY))) {
         val path = heartPath(size.width)
         drawPath(path, TerminaColors.HeartEmptyFill)
-        if (fillFraction > 0f) {
-            clipRect(right = size.width * fillFraction) {
-                drawPath(path, TerminaColors.HeartRed)
+        when {
+            fillFraction >= 1f -> drawPath(path, TerminaColors.HeartRed)
+            fillFraction > 0f -> {
+                val wedge = Path().apply {
+                    moveTo(size.width / 2f, size.height / 2f)
+                    arcTo(
+                        rect = Rect(0f, 0f, size.width, size.height),
+                        startAngleDegrees = -90f,
+                        sweepAngleDegrees = fillFraction * 360f,
+                        forceMoveTo = false,
+                    )
+                    close()
+                }
+                clipPath(wedge) {
+                    drawPath(path, TerminaColors.HeartRed)
+                }
             }
         }
         when {
