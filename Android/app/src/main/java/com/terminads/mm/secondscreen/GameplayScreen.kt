@@ -201,7 +201,7 @@ private fun Heart(fillFraction: Float, doubleDefense: Boolean) {
                     arcTo(
                         rect = Rect(0f, 0f, size.width, size.height),
                         startAngleDegrees = -90f,
-                        sweepAngleDegrees = fillFraction * 360f,
+                        sweepAngleDegrees = -fillFraction * 360f, // Counterclockwise from 12.
                         forceMoveTo = false,
                     )
                     close()

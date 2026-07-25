@@ -108,7 +108,7 @@ Engine semantics per `SnapshotPublisher.cpp`:
   `totalHearts = healthCapacity / 16`, `fullHearts = health / 16`,
   `partialSixteenths = health % 16`, then
   `partialFraction = floor(partialSixteenths / 4) / 4`: the partial heart is
-  drawn as a clockwise pie wedge anchored at its center, starting at 12
+  drawn as a counterclockwise pie wedge anchored at its center, starting at 12
   o'clock. This 2026-07-25 hardware-verification amendment was requested by the
   user to match the game's quarter-heart visual language.
   Rows wrap at **10 hearts per row** like the original game (MM max is 20;
