@@ -5,7 +5,7 @@
 # takes about a minute rather than the 8-19 minutes a full ./tools/build-apk.sh
 # costs. Use it for every Kotlin change; save the full build for native changes.
 #
-# Gradle prints "BUILD SUCCESSFUL" with "testReleaseUnitTest UP-TO-DATE" while
+# Gradle prints "BUILD SUCCESSFUL" with "testDebugUnitTest UP-TO-DATE" while
 # running zero tests, which has already produced a false pass in this project
 # (docs/HANDOFF.md section 5). Console text is therefore not evidence here. This
 # script forces --rerun-tasks, deletes the previous results first, and decides
@@ -18,7 +18,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IMAGE="${TERMINA_BUILD_IMAGE:-termina-ds-build:latest}"
-RESULTS_REL="app/build/test-results/testReleaseUnitTest"
+RESULTS_REL="app/build/test-results/testDebugUnitTest"
 RESULTS_DIR="${REPO_ROOT}/Android/${RESULTS_REL}"
 
 # Stale results are removed inside the container, not on the host: the image
@@ -30,7 +30,7 @@ docker run --rm \
     -v "termina-ds-android-home:/root/.android" \
     -w /workspace/Android \
     "${IMAGE}" \
-    sh -c "rm -rf ${RESULTS_REL} && exec ./gradlew --no-daemon --rerun-tasks :app:testReleaseUnitTest \"\$@\"" \
+    sh -c "rm -rf ${RESULTS_REL} && exec ./gradlew --no-daemon --rerun-tasks :app:testDebugUnitTest \"\$@\"" \
     sh "$@" || gradle_status=$?
 
 shopt -s nullglob

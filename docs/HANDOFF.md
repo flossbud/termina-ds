@@ -154,11 +154,11 @@ pause routing/tracking, design scaling, scene names, HUD model, structural
 guards). No NDK, no device, about a minute. Extra arguments still reach Gradle, so
 `./tools/run-unit-tests.sh --tests '*PollerTest*'` works.
 
-> ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testReleaseUnitTest UP-TO-DATE`
+> ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testDebugUnitTest UP-TO-DATE`
 > **while running no tests at all.** Console text is not evidence. The script
 > now defends against this itself: it forces `--rerun-tasks`, wipes the previous
 > results, takes its counts from
-> `Android/app/build/test-results/testReleaseUnitTest/*.xml`, and exits non-zero
+> `Android/app/build/test-results/testDebugUnitTest/*.xml`, and exits non-zero
 > on any failure, error, or missing XML. Trust its `PASS`/`FAIL` line and the
 > counts it prints — not Gradle's. Anything invoking Gradle directly still has
 > to apply the guard by hand.

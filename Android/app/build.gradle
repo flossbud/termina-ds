@@ -30,7 +30,10 @@ android {
     }
 
     testOptions {
-        unitTests.returnDefaultValues = true
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
     }
     ndkVersion "26.0.10792818"
     compileSdkVersion 34
@@ -130,6 +133,9 @@ dependencies {
     implementation 'androidx.savedstate:savedstate-ktx:1.2.1'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.13'
+    testImplementation 'androidx.compose.ui:ui-test-junit4:1.7.5'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest:1.7.5'
 }
 
 tasks.register("verifyBundledAssets") {
