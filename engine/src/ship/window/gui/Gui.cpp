@@ -35,6 +35,9 @@
 #include "ship/port/mobile/MobileImpl.h"
 #endif
 
+// Termina DS veil font registration; defined in mm/2s2h/TerminaDS/PauseVeil.cpp.
+extern "C" void TerminaDS_LoadVeilFont(void);
+
 #ifdef ENABLE_OPENGL
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -128,6 +131,10 @@ void Gui::Init(GuiWindowInitData windowImpl) {
     iconsConfig.GlyphMinAdvanceX = iconFontSize;
     mImGuiIo->Fonts->AddFontFromMemoryCompressedBase85TTF(fontawesome_compressed_data_base85, iconFontSize,
                                                           &iconsConfig, sIconsRanges);
+    // Termina DS: the pause veil's wordmark font. Registered here because the
+    // atlas is built once during Gui::Init; a later AddFont would not be
+    // rasterised. See mm/2s2h/TerminaDS/PauseVeil.cpp.
+    TerminaDS_LoadVeilFont();
 
 #if defined(__ANDROID__)
     // Scale Android menus from the persisted in-app setting.
