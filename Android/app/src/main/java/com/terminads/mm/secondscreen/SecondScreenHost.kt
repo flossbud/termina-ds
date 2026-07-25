@@ -94,6 +94,7 @@ fun SecondScreenHost(
                         else -> failedTarget = false
                     }
                 },
+                onOptionsTap = {},
             )
             is ScreenKind.Idle -> IdlePlate(screen.waitingForGame)
             is ScreenKind.Diagnostic -> DiagnosticPlate(screen.message, displayInfo)

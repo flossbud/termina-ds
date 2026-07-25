@@ -47,6 +47,11 @@ object TerminaColors {
     val Gold = Color(0xFFE0BD66)           // numeric values, double-defense rim
     val GoldLight = Color(0xFFF0D488)
     val GoldDim = Color(0xFFC9B17A)        // reload/stall bar text
+    val MenuRowInk = Color(0xFFE7DCFA)      // selected pause-menu row
+    val MenuRowInert = Color(0xFF6B6380)    // unselected pause-menu row
+    val SongOfTimeInert = Color(0xFF8A7647) // the one warm row, unselected
+    val HairlineFaint = Color(0x1FB48CE8)   // rgba(180,140,232,.12) row rules
+    val HairlineStrong = Color(0x75B48CE8)  // rgba(180,140,232,.46) selected rule
     val TextDim = Color(0xFF6A5F85)
     val TextDimmer = Color(0xFF544D69)     // inactive tabs
     val TextDimmest = Color(0xFF3F3950)    // footer hints
@@ -117,6 +122,16 @@ object TerminaType {
     val IdleWordmark = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 48f)
     val IdleCaption = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Medium, 13f, 3f)
     val Diagnostic = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Medium, 16f, 1f)
+    val MenuRow = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 42f, 7f)
+    val MenuSubLine = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Medium, 14f, 4f)
+    val SubscreenTitle = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 30f, 5f)
+    val SubscreenTab = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 27f, 6f)
+    val CategoryChip = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Bold, 14f, 4f)
+    val OptionLabel = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 30f, 4f)
+    val OptionDescription = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Medium, 13f, 2.5f)
+    val OptionReadout = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 34f, 1f)
+    val OptionSegment = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 23f, 3f)
+    val FooterHint = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Medium, 13f, 3f)
 }
 
 /** Set by DesignRoot; 1f default keeps previews and tests harmless. */
