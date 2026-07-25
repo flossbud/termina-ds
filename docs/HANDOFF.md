@@ -2,7 +2,8 @@
 
 You are picking up an in-progress project. **Phase 0 (fork + build + rebrand),
 Phase 1 (second-screen foundation), and Phase 2 (read-only game-state bridge)
-are complete and hardware-verified.**
+are complete and hardware-verified. Phase 3 (live HUD) is implemented, pending
+hardware verification on the Thor.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -77,29 +78,41 @@ Invariants you must not break:
 | `Android/app/src/main/java/com/terminads/mm/GameSnapshot.kt` | Kotlin mirror of the layout + pure decoder (unit-tested) |
 | `Android/app/src/main/java/com/terminads/mm/GameSnapshotPoller.kt` | 10 Hz main-thread poll, staleness, `BridgeState` classification |
 | `Android/app/src/main/java/com/terminads/mm/secondscreen/` | All second-screen code (manager, presentation, policy, host, lifecycle shim) |
+| `Android/.../secondscreen/DesignFrame.kt` | Pure design-frame scaling (1240x1080 reference) |
+| `Android/.../secondscreen/TerminaDesign.kt` | Design tokens: colors, bundled fonts, type specs, DesignRoot |
+| `Android/.../secondscreen/SceneNames.kt` | GENERATED sceneId -> name table (tools/generate-scene-names.py) |
+| `Android/.../secondscreen/HudModel.kt` | Pure snapshot -> HUD model, route(), diagnostic strings |
+| `Android/.../secondscreen/GameplayScreen.kt` | The §4 gameplay HUD (vitals, map, nav) |
 | `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | Inherited game activity; second screen wired into onCreate/onResume/onDestroy |
 | `tools/build-apk.sh`, `docker/Dockerfile.android` | The reproducible build |
+| `tools/assemble-apk.sh` | UI-only APK assembly -- NEVER after native changes (stale glob) |
+| `tools/generate-scene-names.py` | Regenerates SceneNames.kt from scene_table.h |
+| `docs/design/second-screen-handoff/` | The committed design handoff (README.md is the visual source of truth) |
+| `tools/bootstrap-build-host.sh` | Recreates docker+adb+build image on a fresh host |
 | `tools/deploy-apk.sh`, `tools/make-keystore.sh` | Deploy + release signing |
 
-The second-screen pieces (all built, unit-tested where possible):
+The second-screen foundation pieces (all built, unit-tested where possible):
 `DisplayInfo` (data class) + `DisplaySelectionPolicy` (picks the non-default
 display), `PresentationLifecycleOwner` (the ComposeView-in-Presentation shim),
 `SecondScreenPresentation` (hosts the ComposeView, `FLAG_NOT_FOCUSABLE`),
-`SecondScreenManager` (display discovery + Presentation lifecycle),
-`SecondScreenHost` (the placeholder Compose UI — display metrics + tap counter +
-uptime heartbeat).
+and `SecondScreenManager` (display discovery + Presentation lifecycle). Phase 3
+replaced the placeholder host content with routed gameplay, loading, ROM-missing,
+and bridge-error screens driven by the live snapshot model.
 
 ## 5. How to build, deploy, and verify (and the traps)
 
 **Build:** `./tools/build-apk.sh` — runs entirely in Docker (`termina-ds-build:latest`).
-- **It takes ~8-19 minutes** and exceeds a typical 10-minute shell timeout. Run
-  it backgrounded and poll the log; do not abandon it as "hung".
+- **Latest measured full pipeline: 15m 21s on the current wheelhouse VM
+  (4 cores).** Run it backgrounded and poll the log; do not abandon it as
+  "hung".
 - It does `rm -rf Android/app/.cxx` every build **on purpose**: CMake's
   `GLOB_RECURSE` freezes the native source list at configure time and AGP won't
   reconfigure when a *new* `.cpp` appears, so a new native file compiles green
   but ships without its code. Clearing `.cxx` forces a re-glob. Cost: full native
   recompile each build. (First thing to optimize if build time hurts — make the
   clear conditional on native-source changes. Deferred, documented.)
+- `tools/assemble-apk.sh` exists precisely because it skips the `.cxx` clear —
+  it is the fast path for UI work and a foot-gun after native work.
 - Output: `Android/app/build/outputs/apk/release/app-release.apk`. Debug-signed
   by default via a persistent keystore volume (`termina-ds-android-home`) so
   builds update installs in place.
@@ -120,9 +133,10 @@ not proof the symbol shipped.
 > `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
 > here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
 
-**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 39 fast JVM
-tests (display policy, lifecycle owner, snapshot decoder, poller). No NDK, no
-device, about a minute. Extra arguments still reach Gradle, so
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 73 fast JVM
+tests (display policy, lifecycle owner, snapshot decoder/poller, design scaling,
+scene names, HUD model/routing, structural guards). No NDK, no device, about a
+minute. Extra arguments still reach Gradle, so
 `./tools/run-unit-tests.sh --tests '*PollerTest*'` works.
 
 > ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testReleaseUnitTest UP-TO-DATE`
@@ -150,21 +164,23 @@ coexists with.
 - Verify claims on real hardware, not just a green build. `llvm-nm` for symbols,
   logcat for lifecycle, the user's eyes for rendering.
 - The build is slow; batch changes and background the build.
-- Placeholder UI is intentionally throwaway — don't over-invest in it; it exists
-  to prove the pipeline. Real features replace it.
+- The Phase 1-2 placeholder UI existed only to prove the pipeline; Phase 3
+  replaced it with the live HUD.
 
 ## 7. What's next (roadmap, in dependency order)
 
-From the spec (§6 there). Phases 0-2 done.
+From the spec (§6 there). Phases 0-2 are complete and hardware-verified. Phase 3
+is implemented, pending hardware verification on the Thor.
 
 - **Phase 3 — Live HUD** (hearts, rupees, magic, C-items) on the bottom screen.
-  First real payoff. **Start here.** Phase 2 hands you a `GameSnapshot` data
-  class updating at 10 Hz as Compose state, with explicit validity flags; Phase 3
-  deletes the debug readout in `SecondScreenHost.kt` and renders from that
-  object, adding **no new native code**. Read
+  **Implemented, pending hardware verification on the Thor.**
+  Phase 2 hands the HUD a `GameSnapshot` data class updating at 10 Hz as Compose
+  state, with explicit validity flags; Phase 3 replaced the debug readout in
+  `SecondScreenHost.kt` and renders from that object, adding **no new native
+  code**. Read
   `docs/verification/2026-07-23-phase-2-thor.md` first — it lists the engine
   representation quirks (an empty C-button is `255`, `roomNum` can be `-1`, yaw
-  is a signed binary angle) that the HUD must handle. Low risk.
+  is a signed binary angle) that the HUD must handle.
 
   Extending the payload later costs: one enum entry in `GameSnapshot.h`, one
   field in the publisher, one in the decoder, one test, and a
@@ -200,8 +216,8 @@ templates).
   test; `(void)env/(void)thiz` boilerplate; a dead reset in the `SecondScreenManager`
   show() catch; the `.cxx`-every-build cost (§5).
 - **Untested verification tail:** top-screen framerate measurement with the
-  second screen active; TalkBack reading the bottom screen (the accessibility
-  premise — the placeholder already carries a `contentDescription`); USB-C
+  second screen active; TalkBack reading the bottom screen (the Phase 3 HUD now
+  provides explicit semantics for vitals and the stalled-data chip); USB-C
   external-display-out takeover behavior.
 - **No `LICENSE` file yet** for Termina DS itself. The upstream base is CC0-1.0.
   The user's choice; ask before adding one.
