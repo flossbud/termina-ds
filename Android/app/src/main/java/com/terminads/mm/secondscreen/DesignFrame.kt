@@ -14,3 +14,9 @@ const val DESIGN_HEIGHT_PX = 1080f
  */
 fun designScale(panelWidthPx: Float, panelHeightPx: Float): Float =
     minOf(panelWidthPx / DESIGN_WIDTH_PX, panelHeightPx / DESIGN_HEIGHT_PX)
+
+/** The uniformly scaled design frame's pixel dimensions within the panel. */
+fun designFramePx(panelWidthPx: Float, panelHeightPx: Float): Pair<Float, Float> {
+    val scale = designScale(panelWidthPx, panelHeightPx)
+    return DESIGN_WIDTH_PX * scale to DESIGN_HEIGHT_PX * scale
+}

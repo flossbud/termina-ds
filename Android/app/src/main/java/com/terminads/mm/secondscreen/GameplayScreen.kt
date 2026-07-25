@@ -161,17 +161,11 @@ private fun VitalsBar(model: HudModel, modifier: Modifier) {
 
 @Composable
 private fun HeartRows(model: HudModel) {
-    // Fill fraction per heart index; the heart after the full ones carries the
-    // partial sixteenths. Rows wrap at 10 like the original game's HUD.
-    val fills = List(model.totalHearts) { i ->
-        when {
-            i < model.fullHearts -> 1f
-            i == model.fullHearts -> model.partialSixteenths / 16f
-            else -> 0f
-        }
-    }
+    val rows = heartRows(
+        heartFills(model.fullHearts, model.partialSixteenths, model.totalHearts)
+    )
     Column(verticalArrangement = Arrangement.spacedBy(du(3f))) {
-        fills.chunked(10).forEach { row ->
+        rows.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(du(3f))) {
                 row.forEach { fill -> Heart(fill, model.doubleDefense) }
             }
@@ -191,25 +185,50 @@ private fun Heart(fillFraction: Float, doubleDefense: Boolean) {
             }
         }
         when {
-            // Double defense: gold rim on every heart (delta noted in spec §6;
-            // the handoff's token table has no double-defense treatment).
-            doubleDefense -> drawPath(path, TerminaColors.Gold, style = Stroke(strokePx))
-            // Empty/partial hearts keep the handoff's empty-heart stroke.
+            // Double defense rims filled and partial hearts, per spec §5.
+            doubleDefense && fillFraction > 0f ->
+                drawPath(path, TerminaColors.Gold, style = Stroke(strokePx))
+            // Empty hearts always keep the handoff's empty-heart stroke.
             fillFraction < 1f ->
                 drawPath(path, TerminaColors.HeartEmptyStroke, style = Stroke(strokePx))
         }
     }
 }
 
-/** A filled heart silhouette in a size x size box, lobes up. */
+/** The handoff's exact 24-unit SVG heart, scaled into a size x size box. */
 private fun heartPath(size: Float): Path = Path().apply {
-    moveTo(0.50f * size, 0.30f * size)
-    cubicTo(0.50f * size, 0.12f * size, 0.30f * size, 0.02f * size, 0.16f * size, 0.12f * size)
-    cubicTo(0.02f * size, 0.24f * size, 0.06f * size, 0.44f * size, 0.20f * size, 0.60f * size)
-    cubicTo(0.32f * size, 0.74f * size, 0.50f * size, 0.90f * size, 0.50f * size, 0.90f * size)
-    cubicTo(0.50f * size, 0.90f * size, 0.68f * size, 0.74f * size, 0.80f * size, 0.60f * size)
-    cubicTo(0.94f * size, 0.44f * size, 0.98f * size, 0.24f * size, 0.84f * size, 0.12f * size)
-    cubicTo(0.70f * size, 0.02f * size, 0.50f * size, 0.12f * size, 0.50f * size, 0.30f * size)
+    val scale = size / 24f
+    moveTo(12f * scale, 21f * scale)
+    cubicTo(
+        12f * scale, 21f * scale,
+        4.5f * scale, 16.3f * scale,
+        2f * scale, 11.7f * scale,
+    )
+    cubicTo(
+        0.2f * scale, 8.1f * scale,
+        2f * scale, 4.5f * scale,
+        5.5f * scale, 4.5f * scale,
+    )
+    relativeCubicTo(
+        2f * scale, 0f,
+        3.4f * scale, 1.1f * scale,
+        4.5f * scale, 2.6f * scale,
+    )
+    relativeCubicTo(
+        1.1f * scale, -1.5f * scale,
+        2.5f * scale, -2.6f * scale,
+        4.5f * scale, -2.6f * scale,
+    )
+    relativeCubicTo(
+        3.5f * scale, 0f,
+        5.3f * scale, 3.6f * scale,
+        3.5f * scale, 7.2f * scale,
+    )
+    cubicTo(
+        19.5f * scale, 16.3f * scale,
+        12f * scale, 21f * scale,
+        12f * scale, 21f * scale,
+    )
     close()
 }
 

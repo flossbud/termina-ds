@@ -6,18 +6,22 @@ import org.junit.Test
 class DesignFrameTest {
 
     @Test
-    fun nativePanelScalesToOne() {
-        assertEquals(1f, designScale(1240f, 1080f), 1e-6f)
+    fun nativePanelUsesTheNativeDesignFrame() {
+        assertEquals(1240f to 1080f, designFramePx(1240f, 1080f))
     }
 
     @Test
-    fun uniformScaleUsesTheTighterAxis() {
-        // Half-width panel: width is the constraint even though height fits.
-        assertEquals(0.5f, designScale(620f, 1080f), 1e-6f)
+    fun halfSizePanelUsesAHalfSizeDesignFrame() {
+        assertEquals(620f to 540f, designFramePx(620f, 540f))
     }
 
     @Test
-    fun tallerPanelScalesByWidth() {
-        assertEquals(1f, designScale(1240f, 2000f), 1e-6f)
+    fun widerPanelPillarboxesTheNativeDesignFrame() {
+        assertEquals(1240f to 1080f, designFramePx(2000f, 1080f))
+    }
+
+    @Test
+    fun tallerPanelLetterboxesTheNativeDesignFrame() {
+        assertEquals(1240f to 1080f, designFramePx(1240f, 2000f))
     }
 }

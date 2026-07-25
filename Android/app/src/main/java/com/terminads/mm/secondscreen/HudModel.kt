@@ -30,6 +30,22 @@ data class HudModel(
     val areaName: String,
 )
 
+/** Fill fraction for each capacity heart, with at most one partial heart. */
+fun heartFills(
+    fullHearts: Int,
+    partialSixteenths: Int,
+    totalHearts: Int,
+): List<Float> = List(totalHearts) { index ->
+    when {
+        index < fullHearts -> 1f
+        index == fullHearts -> partialSixteenths / 16f
+        else -> 0f
+    }
+}
+
+/** Heart fills partitioned into the original HUD's ten-heart rows. */
+fun heartRows(fills: List<Float>): List<List<Float>> = fills.chunked(10)
+
 /** Engine u16 day fraction (0x10000 = 24 h, 0 = midnight) -> minutes. */
 internal fun minutesOfDay(timeOfDay: Int): Int = timeOfDay * 1440 / 0x10000
 

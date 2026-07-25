@@ -172,7 +172,8 @@ coexists with.
 From the spec (§6 there). Phases 0-2 are complete and hardware-verified. Phase 3
 is implemented, pending hardware verification on the Thor.
 
-- **Phase 3 — Live HUD** (hearts, rupees, magic, C-items) on the bottom screen.
+- **Phase 3 — Live HUD:** bottom-screen vitals bar, map region with area label,
+  and inert nav.
   **Implemented, pending hardware verification on the Thor.**
   Phase 2 hands the HUD a `GameSnapshot` data class updating at 10 Hz as Compose
   state, with explicit validity flags; Phase 3 replaced the debug readout in

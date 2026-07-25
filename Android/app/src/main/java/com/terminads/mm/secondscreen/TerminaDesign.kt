@@ -1,6 +1,6 @@
 package com.terminads.mm.secondscreen
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -16,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
@@ -153,13 +154,23 @@ fun DesignRoot(content: @Composable () -> Unit) {
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
-            .background(TerminaColors.ScreenBackground)
+            .background(TerminaColors.ScreenBackground),
+        contentAlignment = Alignment.Center,
     ) {
         val scale = designScale(
             constraints.maxWidth.toFloat(),
             constraints.maxHeight.toFloat(),
         )
-        CompositionLocalProvider(LocalDesignScale provides scale) { content() }
+        CompositionLocalProvider(LocalDesignScale provides scale) {
+            Box(
+                Modifier.size(
+                    du(DESIGN_WIDTH_PX),
+                    du(DESIGN_HEIGHT_PX),
+                ),
+            ) {
+                content()
+            }
+        }
     }
 }
 
@@ -179,7 +190,10 @@ fun BreathingDiamond(
         initialValue = 0.4f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1050, easing = FastOutSlowInEasing),
+            tween(
+                durationMillis = 1050,
+                easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f),
+            ),
             RepeatMode.Reverse,
         ),
         label = "pzBreatheAlpha",

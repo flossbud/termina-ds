@@ -124,6 +124,31 @@ class HudModelTest {
         assertEquals(0, m.totalHearts)
     }
 
+    @Test
+    fun zeroHealthProducesEmptyCapacityFills() {
+        assertEquals(listOf(0f, 0f, 0f), heartFills(0, 0, 3))
+    }
+
+    @Test
+    fun exactlyTenHeartsStayInOneRow() {
+        assertEquals(listOf(10), heartRows(heartFills(10, 0, 10)).map { it.size })
+    }
+
+    @Test
+    fun elevenHeartsWrapAfterTen() {
+        assertEquals(listOf(10, 1), heartRows(heartFills(11, 0, 11)).map { it.size })
+    }
+
+    @Test
+    fun twentyHeartsUseTwoFullRows() {
+        assertEquals(listOf(10, 10), heartRows(heartFills(20, 0, 20)).map { it.size })
+    }
+
+    @Test
+    fun partialHeartFollowsTheFullHearts() {
+        assertEquals(listOf(1f, 1f, 9f / 16f), heartFills(2, 9, 3))
+    }
+
     // ---- magic ----
 
     @Test

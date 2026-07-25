@@ -1,7 +1,7 @@
 # Termina DS Phase 3: Bottom-Screen Gameplay HUD
 
 **Date:** 2026-07-24
-**Status:** Approved (design sections approved in session; spec pending user review)
+**Status:** Approved (2026-07-24)
 **Depends on:** Phase 2 state bridge (`docs/superpowers/specs/2026-07-23-termina-ds-phase-2-state-bridge-design.md`), verified on hardware 2026-07-23.
 **Design source:** `docs/design/second-screen-handoff/README.md` — the "Termina DS — dual-screen gameplay HUD, pause menu & graphics options" handoff package. Section numbers below (§4, §6, …) refer to that document.
 
@@ -179,10 +179,12 @@ is the handoff's own: **hifi — reproduce precisely.**
   §4 animates. Value changes snap; no tweening of hearts/magic (the design
   does not specify any, and 10 Hz data would fight it).
 
-**Fonts.** Cinzel (700, 800) and Chivo Mono (500, 700) as static-weight TTFs in
-`res/font/`, committed with their OFL license files. Barlow is used only by
-pause-phase screens and is deferred until one exists. No runtime font fetching
-— the Thor build must work offline.
+**Fonts.** Cinzel and Chivo Mono are bundled as variable TTFs because Google
+Fonts ships these families variable-only. `FontVariation` weight instances pin
+Cinzel 700/800 and Chivo Mono 500/700. The files live in `res/font/` and are
+committed with their OFL license files. Barlow is used only by pause-phase
+screens and is deferred until one exists. No runtime font fetching — the Thor
+build must work offline.
 
 ## 7. Accessibility
 
