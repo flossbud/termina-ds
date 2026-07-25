@@ -15,6 +15,7 @@ class CommandBridgeTest {
 
     @Test
     fun pauseSetSubmitsAbsoluteValues() {
+        assertEquals(1, CommandBridge.OP_PAUSE_SET)
         val rec = Recorder()
         val bridge = CommandBridge(rec::submit)
         assertEquals(SubmitStatus.OK, bridge.setPaused(true))
@@ -28,6 +29,7 @@ class CommandBridgeTest {
 
     @Test
     fun cvarSetCarriesNameAndValue() {
+        assertEquals(2, CommandBridge.OP_CVAR_SET_INT)
         val rec = Recorder()
         CommandBridge(rec::submit).setCVarInt("gInterpolationFPS", 60)
         assertEquals(CommandBridge.OP_CVAR_SET_INT, rec.lastOp)
@@ -38,6 +40,7 @@ class CommandBridgeTest {
 
     @Test
     fun statusesDecodeAndUnknownIsPermanent() {
+        assertEquals(3, CommandBridge.OP_CVAR_SAVE)
         val rec = Recorder(result = 1)
         assertEquals(SubmitStatus.FULL, CommandBridge(rec::submit).saveCVars())
         assertEquals(CommandBridge.OP_CVAR_SAVE, rec.lastOp)

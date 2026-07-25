@@ -72,6 +72,7 @@ fun SecondScreenHost(
                         SubmitStatus.OK -> {
                             failedTarget = null
                             pauseTracker.request(target = true)
+                            pauseRequestState = PauseRequestState.PENDING
                         }
                         else -> failedTarget = true
                     }
@@ -88,6 +89,7 @@ fun SecondScreenHost(
                         SubmitStatus.OK -> {
                             failedTarget = null
                             pauseTracker.request(target = false)
+                            pauseRequestState = PauseRequestState.PENDING
                         }
                         else -> failedTarget = false
                     }

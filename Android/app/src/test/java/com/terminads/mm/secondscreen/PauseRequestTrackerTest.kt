@@ -90,13 +90,14 @@ class PauseRequestTrackerTest {
     }
 
     @Test
-    fun pendingUntilTheSnapshotAcks() {
+    fun requestImmediatelyMakesTheNextNonMatchingObservationPending() {
         val clock = Clock()
         val tracker = PauseRequestTracker({ clock.now })
+
         tracker.request(target = true)
+
+        // No clock advance and no intervening poll: pending begins at request time.
         assertEquals(PauseRequestState.PENDING, tracker.observe(isPaused = false))
-        clock.now += 200
-        assertEquals(PauseRequestState.IDLE, tracker.observe(isPaused = true))
     }
 
     @Test

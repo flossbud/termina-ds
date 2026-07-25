@@ -1208,9 +1208,8 @@ git commit -m "feat(secondscreen): pause control, ack tracking, root-menu skelet
   values 1/2/3 match across `CommandMailbox.h`, `CommandBridge.companion`;
   `ScreenKind.Gameplay(model, stalledSeconds, pauseAvailable)` matches Task
   5's definition and Task 6's host; tracker API matches its test.
-- **Test arithmetic:** 82 → 84 (T2) → 87 (T4) → 95 (T5: −1 deleted, +5
-  route, +4 tracker) → 95 (T6). Trust failure/error counts over totals if
-  the baseline drifts.
-- **Ring-full UX note:** Task 6 ignores non-OK submits for the pause tap
-  (button stays untapped-looking; the tracker never goes pending) — honest
-  minimum for Plan A; Plan B's settings rows surface FULL/INVALID statuses.
+- **Final test count:** 104 JVM tests. Trust failure/error counts over totals
+  if the baseline drifts.
+- **Submit-failure UX note:** Task 6 surfaces non-OK pause/resume submissions
+  as target-specific visible failures per spec §4; the tracker never goes
+  pending for rejected commands.

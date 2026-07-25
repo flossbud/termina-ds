@@ -148,7 +148,7 @@ This is accepted, discoverable, and harmless; it is not a failed pause.
 > `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
 > here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
 
-**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 95 fast JVM
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 104 fast JVM
 tests (display policy, lifecycle owner, snapshot decoder/poller, command bridge,
 pause routing/tracking, design scaling, scene names, HUD model, structural
 guards). No NDK, no device, about a minute. Extra arguments still reach Gradle, so
