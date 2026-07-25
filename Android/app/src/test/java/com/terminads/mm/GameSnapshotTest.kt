@@ -19,10 +19,56 @@ class GameSnapshotTest {
     }
 
     @Test
+    fun slotCountMatchesSchemaV3() {
+        assertEquals(3, GameSnapshotLayout.SCHEMA_VERSION)
+        assertEquals(39, GameSnapshotLayout.SLOT_COUNT)
+        assertEquals(38, GameSnapshotLayout.IDX_DISPLAY_REFRESH_HZ)
+    }
+
+    @Test
+    fun decodesTheSettingsBlock() {
+        val raw = IntArray(GameSnapshotLayout.SLOT_COUNT)
+        raw[GameSnapshotLayout.IDX_SCHEMA_VERSION] = 3
+        raw[GameSnapshotLayout.IDX_CVAR_INTERNAL_RES] = 150
+        raw[GameSnapshotLayout.IDX_CVAR_MSAA] = 4
+        raw[GameSnapshotLayout.IDX_CVAR_FPS] = 60
+        raw[GameSnapshotLayout.IDX_CVAR_MATCH_HZ] = 1
+        raw[GameSnapshotLayout.IDX_CVAR_TEXTURE_FILTER] = 2
+        raw[GameSnapshotLayout.IDX_CVAR_CLOCK_TYPE] = 1
+        raw[GameSnapshotLayout.IDX_CVAR_BLUR_MODE] = 2
+        raw[GameSnapshotLayout.IDX_CVAR_BLUR_STRENGTH] = 180
+        raw[GameSnapshotLayout.IDX_CVAR_DRAW_DISTANCE] = 3
+        raw[GameSnapshotLayout.IDX_CVAR_3D_ITEM_DROPS] = 1
+        raw[GameSnapshotLayout.IDX_DISPLAY_REFRESH_HZ] = 120
+
+        val decoded = decodeSnapshot(raw) as SnapshotDecode.Ok
+        val s = decoded.snapshot.settings
+        assertEquals(150, s.internalResPercent)
+        assertEquals(4, s.msaa)
+        assertEquals(60, s.fps)
+        assertEquals(true, s.matchRefreshRate)
+        assertEquals(2, s.textureFilter)
+        assertEquals(1, s.clockType)
+        assertEquals(2, s.motionBlurMode)
+        assertEquals(180, s.motionBlurStrength)
+        assertEquals(3, s.actorDrawDistance)
+        assertEquals(true, s.threeDItemDrops)
+        assertEquals(120, s.displayRefreshHz)
+    }
+
+    @Test
+    fun aV2PayloadIsReportedAsAMismatchNotDecoded() {
+        val raw = IntArray(GameSnapshotLayout.SLOT_COUNT)
+        raw[GameSnapshotLayout.IDX_SCHEMA_VERSION] = 2
+        val decoded = decodeSnapshot(raw)
+        assertEquals(SnapshotDecode.SchemaMismatch(2, 3), decoded)
+    }
+
+    @Test
     fun slotCountMatchesTheDocumentedLayout() {
         // Guards the hand-written mirror of mm/2s2h/TerminaDS/GameSnapshot.h.
-        assertEquals(28, GameSnapshotLayout.SLOT_COUNT)
-        assertEquals(2, GameSnapshotLayout.SCHEMA_VERSION)
+        assertEquals(39, GameSnapshotLayout.SLOT_COUNT)
+        assertEquals(3, GameSnapshotLayout.SCHEMA_VERSION)
         assertEquals(0, GameSnapshotLayout.IDX_SCHEMA_VERSION)
         assertEquals(26, GameSnapshotLayout.IDX_PLAYER_YAW)
         assertEquals(27, GameSnapshotLayout.IDX_PAUSE_STATE)

@@ -8,11 +8,11 @@ package com.terminads.mm
  * reflected here AND must bump SCHEMA_VERSION on both sides -- decodeSnapshot
  * then reports the mismatch instead of decoding garbage.
  *
- * Codegen is not worth it for 28 integers; the runtime guard plus
+ * Codegen is not worth it for 39 integers; the runtime guard plus
  * GameSnapshotTest.slotCountMatchesTheDocumentedLayout is the safety net.
  */
 object GameSnapshotLayout {
-    const val SCHEMA_VERSION = 2
+    const val SCHEMA_VERSION = 3
 
     const val IDX_SCHEMA_VERSION = 0
     const val IDX_FRAME_COUNTER = 1
@@ -47,7 +47,22 @@ object GameSnapshotLayout {
     const val IDX_PLAYER_YAW = 26
     const val IDX_PAUSE_STATE = 27
 
-    const val SLOT_COUNT = 28
+    // v3: the ten graphics settings the Options subscreen renders, plus the
+    // live display refresh rate. They ride the snapshot rather than a JNI
+    // getter because CVars are an unmutexed map the game thread writes.
+    const val IDX_CVAR_INTERNAL_RES = 28
+    const val IDX_CVAR_MSAA = 29
+    const val IDX_CVAR_FPS = 30
+    const val IDX_CVAR_MATCH_HZ = 31
+    const val IDX_CVAR_TEXTURE_FILTER = 32
+    const val IDX_CVAR_CLOCK_TYPE = 33
+    const val IDX_CVAR_BLUR_MODE = 34
+    const val IDX_CVAR_BLUR_STRENGTH = 35
+    const val IDX_CVAR_DRAW_DISTANCE = 36
+    const val IDX_CVAR_3D_ITEM_DROPS = 37
+    const val IDX_DISPLAY_REFRESH_HZ = 38
+
+    const val SLOT_COUNT = 39
 
     const val FLAG_PLAY_STATE_VALID = 1 shl 0
     const val FLAG_PLAYER_VALID = 1 shl 1
@@ -56,6 +71,30 @@ object GameSnapshotLayout {
     const val FLAG_SAVE_LOADED = 1 shl 4
     const val FLAG_MENU_OPEN = 1 shl 5
 }
+
+/**
+ * Engine graphics configuration as of this frame. Mirrors the CVars
+ * mm/2s2h/BenGui/BenMenu.cpp binds its own Settings/Enhancements Graphics rows
+ * to, so the two menus cannot disagree about what a row means.
+ *
+ * [internalResPercent] is the float CVar gSettings.InternalResolution scaled by
+ * 100, so the payload stays int32 end to end.
+ * [displayRefreshHz] is not a CVar -- it is the live display rate, which the
+ * FPS row needs for its maximum and its chip.
+ */
+data class GameSettings(
+    val internalResPercent: Int,
+    val msaa: Int,
+    val fps: Int,
+    val matchRefreshRate: Boolean,
+    val textureFilter: Int,
+    val clockType: Int,
+    val motionBlurMode: Int,
+    val motionBlurStrength: Int,
+    val actorDrawDistance: Int,
+    val threeDItemDrops: Boolean,
+    val displayRefreshHz: Int,
+)
 
 /**
  * One frame of read-only game state.
@@ -102,6 +141,8 @@ data class GameSnapshot(
     val saveLoaded: Boolean,
     /** v2: kaleido or the BenMenu owns the game's screen. */
     val menuOpen: Boolean,
+    /** v3: engine graphics configuration, for the Options subscreen. */
+    val settings: GameSettings,
 )
 
 /** Outcome of decoding a raw payload. */
@@ -170,6 +211,19 @@ fun decodeSnapshot(values: IntArray): SnapshotDecode {
             isPaused = values[GameSnapshotLayout.IDX_PAUSE_STATE] != 0,
             saveLoaded = flag(GameSnapshotLayout.FLAG_SAVE_LOADED),
             menuOpen = flag(GameSnapshotLayout.FLAG_MENU_OPEN),
+            settings = GameSettings(
+                internalResPercent = values[GameSnapshotLayout.IDX_CVAR_INTERNAL_RES],
+                msaa = values[GameSnapshotLayout.IDX_CVAR_MSAA],
+                fps = values[GameSnapshotLayout.IDX_CVAR_FPS],
+                matchRefreshRate = values[GameSnapshotLayout.IDX_CVAR_MATCH_HZ] != 0,
+                textureFilter = values[GameSnapshotLayout.IDX_CVAR_TEXTURE_FILTER],
+                clockType = values[GameSnapshotLayout.IDX_CVAR_CLOCK_TYPE],
+                motionBlurMode = values[GameSnapshotLayout.IDX_CVAR_BLUR_MODE],
+                motionBlurStrength = values[GameSnapshotLayout.IDX_CVAR_BLUR_STRENGTH],
+                actorDrawDistance = values[GameSnapshotLayout.IDX_CVAR_DRAW_DISTANCE],
+                threeDItemDrops = values[GameSnapshotLayout.IDX_CVAR_3D_ITEM_DROPS] != 0,
+                displayRefreshHz = values[GameSnapshotLayout.IDX_DISPLAY_REFRESH_HZ],
+            ),
         )
     )
 }

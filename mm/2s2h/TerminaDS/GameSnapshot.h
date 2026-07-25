@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define TDS_SNAP_SCHEMA_VERSION 2
+#define TDS_SNAP_SCHEMA_VERSION 3
 
 enum TdsSnapshotIndex {
     TDS_SNAP_IDX_SCHEMA_VERSION = 0,
@@ -66,6 +66,35 @@ enum TdsSnapshotIndex {
      * frozen (our pause; z_play.c:988). 0 when unpaused or no PlayState.
      */
     TDS_SNAP_IDX_PAUSE_STATE,
+
+    /*
+     * v3: the ten graphics settings the Options subscreen renders, sampled
+     * from the CVars BenMenu itself uses. They ride the snapshot rather than
+     * a JNI getter because CVars live in an unmutexed std::unordered_map
+     * (engine/include/ship/config/ConsoleVariable.h:67) that this thread
+     * writes whenever a command drains -- reading it from the Android main
+     * thread would be a data race, not merely a stale read.
+     *
+     * Internal resolution is a float CVar (0.5-2.0); it is published as a
+     * percent so the whole payload stays int32.
+     */
+    TDS_SNAP_IDX_CVAR_INTERNAL_RES,
+    TDS_SNAP_IDX_CVAR_MSAA,
+    TDS_SNAP_IDX_CVAR_FPS,
+    TDS_SNAP_IDX_CVAR_MATCH_HZ,
+    TDS_SNAP_IDX_CVAR_TEXTURE_FILTER,
+    TDS_SNAP_IDX_CVAR_CLOCK_TYPE,
+    TDS_SNAP_IDX_CVAR_BLUR_MODE,
+    TDS_SNAP_IDX_CVAR_BLUR_STRENGTH,
+    TDS_SNAP_IDX_CVAR_DRAW_DISTANCE,
+    TDS_SNAP_IDX_CVAR_3D_ITEM_DROPS,
+
+    /*
+     * v3: not a CVar. The FPS row's maximum and its "MAX n HZ" chip come from
+     * the live display, and GetCurrentRefreshRate()
+     * (engine/include/ship/window/Window.h:56) is only safe on this thread.
+     */
+    TDS_SNAP_IDX_DISPLAY_REFRESH_HZ,
 
     TDS_SNAP_COUNT
 };

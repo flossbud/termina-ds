@@ -1,7 +1,9 @@
 package com.terminads.mm.secondscreen
 
 import com.terminads.mm.BridgeState
+import com.terminads.mm.DEFAULT_GAME_SETTINGS
 import com.terminads.mm.GameSnapshot
+import com.terminads.mm.GameSettings
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -9,7 +11,10 @@ class PauseRequestTrackerTest {
 
     private class Clock(var now: Long = 1_000L)
 
-    private fun snapshot(isPaused: Boolean) = GameSnapshot(
+    private fun snapshot(
+        isPaused: Boolean,
+        settings: GameSettings = DEFAULT_GAME_SETTINGS,
+    ) = GameSnapshot(
         frameCounter = 7, health = 48, healthCapacity = 48, magic = 0,
         magicCapacity = 0, magicLevel = 0, rupees = 0, playerForm = 4,
         equippedMask = 0, day = 1, timeOfDay = 0x4000, isNight = false,
@@ -18,6 +23,7 @@ class PauseRequestTrackerTest {
         hasPlayer = true, sceneId = 0x2D, roomNum = 0,
         playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
         isPaused = isPaused, saveLoaded = true, menuOpen = false,
+        settings = settings,
     )
 
     @Test

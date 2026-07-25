@@ -20,6 +20,8 @@
 #include "2s2h/BenGui/BenGui.hpp"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
+#include <libultraship/libultraship.h>
+#include <libultraship/bridge/consolevariablebridge.h>
 
 extern "C" {
 #include "z64save.h"
@@ -158,6 +160,27 @@ void Publish() {
             v[TDS_SNAP_IDX_PLAYER_YAW] = player->actor.shape.rot.y;
         }
     }
+
+    // v3 settings block. These are engine configuration, not game state, so
+    // they sit outside the gPlayState guard above -- they are valid on the
+    // title screen and across scene transitions alike. CVar names and their
+    // defaults are copied from mm/2s2h/BenGui/BenMenu.cpp so the two menus
+    // cannot disagree about what a row means.
+    v[TDS_SNAP_IDX_CVAR_INTERNAL_RES] =
+        (int32_t)(CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1.0f) * 100.0f + 0.5f);
+    v[TDS_SNAP_IDX_CVAR_MSAA] = CVarGetInteger(CVAR_MSAA_VALUE, 1);
+    v[TDS_SNAP_IDX_CVAR_FPS] = CVarGetInteger("gInterpolationFPS", 20);
+    v[TDS_SNAP_IDX_CVAR_MATCH_HZ] = CVarGetInteger("gMatchRefreshRate", 0);
+    v[TDS_SNAP_IDX_CVAR_TEXTURE_FILTER] = CVarGetInteger(CVAR_TEXTURE_FILTER, 0);
+    v[TDS_SNAP_IDX_CVAR_CLOCK_TYPE] = CVarGetInteger("gEnhancements.Graphics.ClockType", 0);
+    v[TDS_SNAP_IDX_CVAR_BLUR_MODE] = CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0);
+    v[TDS_SNAP_IDX_CVAR_BLUR_STRENGTH] =
+        CVarGetInteger("gEnhancements.Graphics.MotionBlur.Strength", 180);
+    v[TDS_SNAP_IDX_CVAR_DRAW_DISTANCE] =
+        CVarGetInteger("gEnhancements.Graphics.IncreaseActorDrawDistance", 1);
+    v[TDS_SNAP_IDX_CVAR_3D_ITEM_DROPS] = CVarGetInteger("gEnhancements.Graphics.3DItemDrops", 0);
+    v[TDS_SNAP_IDX_DISPLAY_REFRESH_HZ] =
+        (int32_t)Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
 
     v[TDS_SNAP_IDX_FLAGS] = flags;
 

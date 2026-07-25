@@ -1,7 +1,9 @@
 package com.terminads.mm.secondscreen
 
 import com.terminads.mm.BridgeState
+import com.terminads.mm.DEFAULT_GAME_SETTINGS
 import com.terminads.mm.GameSnapshot
+import com.terminads.mm.GameSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -14,6 +16,7 @@ class RouteTest {
         isPaused: Boolean = false,
         saveLoaded: Boolean = true,
         menuOpen: Boolean = false,
+        settings: GameSettings = DEFAULT_GAME_SETTINGS,
     ) = GameSnapshot(
         frameCounter = 7, health = 48, healthCapacity = 48, magic = 0,
         magicCapacity = 0, magicLevel = 0, rupees = 0, playerForm = 4,
@@ -23,6 +26,7 @@ class RouteTest {
         hasPlayer = hasPlayState, sceneId = sceneId, roomNum = 0,
         playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
         isPaused = isPaused, saveLoaded = saveLoaded, menuOpen = menuOpen,
+        settings = settings,
     )
 
     @Test

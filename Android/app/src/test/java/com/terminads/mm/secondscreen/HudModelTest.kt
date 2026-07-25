@@ -1,6 +1,8 @@
 package com.terminads.mm.secondscreen
 
+import com.terminads.mm.DEFAULT_GAME_SETTINGS
 import com.terminads.mm.GameSnapshot
+import com.terminads.mm.GameSettings
 import java.lang.reflect.Modifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -26,6 +28,7 @@ class HudModelTest {
         isPaused: Boolean = false,
         saveLoaded: Boolean = true,
         menuOpen: Boolean = false,
+        settings: GameSettings = DEFAULT_GAME_SETTINGS,
     ) = GameSnapshot(
         frameCounter = 1, health = health, healthCapacity = healthCapacity,
         magic = magic, magicCapacity = magicCapacity, magicLevel = 0,
@@ -35,6 +38,7 @@ class HudModelTest {
         hasPlayState = hasPlayState, hasPlayer = hasPlayState, sceneId = sceneId,
         roomNum = 0, playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
         isPaused = isPaused, saveLoaded = saveLoaded, menuOpen = menuOpen,
+        settings = settings,
     )
 
     // ---- clock ----
