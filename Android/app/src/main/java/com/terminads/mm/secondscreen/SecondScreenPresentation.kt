@@ -35,6 +35,13 @@ class SecondScreenPresentation(
         super.onCreate(savedInstanceState)
 
         window?.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        // A measured 55px navbar inset shrank the design frame to 95%.
+        // Unfocused windows cannot hide the bar, so lay out beneath it instead;
+        // the gesture pill may overlay the bottom edge, which is acceptable.
+        window?.addFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+        )
 
         lifecycleOwner.onCreate()
 
@@ -62,8 +69,6 @@ class SecondScreenPresentation(
         setContentView(composeView)
 
         if (Build.VERSION.SDK_INT >= 30) {
-            // The Thor reserved a measured 55px navbar strip here, shrinking
-            // the 1240x1080 design frame to 95% in the 1240x1025 app window.
             window?.setDecorFitsSystemWindows(false)
             window?.insetsController?.apply {
                 hide(
