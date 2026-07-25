@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.terminads.mm.CommandBridge
 import com.terminads.mm.GameSnapshotPoller
 import com.terminads.mm.NativeBridge
 
@@ -49,12 +50,16 @@ class SecondScreenPresentation(
             read = NativeBridge::readSnapshot,
             nowMillis = SystemClock::uptimeMillis,
         )
+        val commandBridge = CommandBridge(NativeBridge::submitCommand)
+        val pauseTracker = PauseRequestTracker(SystemClock::uptimeMillis)
 
         val composeView = ComposeView(context).apply {
             setContent {
                 SecondScreenHost(
                     displayInfo = displayInfo,
                     pollBridge = poller::poll,
+                    commandBridge = commandBridge,
+                    pauseTracker = pauseTracker,
                 )
             }
         }

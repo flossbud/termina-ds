@@ -107,6 +107,7 @@ data class DesignTextSpec(
 object TerminaType {
     val AreaLabel = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 20f, 3f)
     val NavTab = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 23f, 7f)
+    val PauseAction = DesignTextSpec(TerminaFonts.Cinzel, FontWeight.Bold, 19f, 5f)
     val DayLabel = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Bold, 13f, 4f)
     val Clock = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Bold, 18f)
     val ClockSuffix = DesignTextSpec(TerminaFonts.ChivoMono, FontWeight.Bold, 11f)

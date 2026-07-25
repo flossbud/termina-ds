@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,7 +45,14 @@ import com.terminads.mm.R
  * write bridge can pause the game.
  */
 @Composable
-fun GameplayScreen(model: HudModel, stalledSeconds: Long?) {
+fun GameplayScreen(
+    model: HudModel,
+    stalledSeconds: Long?,
+    pauseAvailable: Boolean,
+    pausePending: Boolean,
+    pauseFailed: Boolean,
+    onPauseTap: () -> Unit,
+) {
     Column(Modifier.fillMaxSize()) {
         VitalsBar(model, Modifier.fillMaxWidth().height(du(64f * LEGIBILITY)))
         Box(Modifier.fillMaxWidth().weight(1f)) {
@@ -77,7 +85,13 @@ fun GameplayScreen(model: HudModel, stalledSeconds: Long?) {
                 )
             }
         }
-        NavBar(Modifier.fillMaxWidth().height(du(104f)))
+        NavBar(
+            pauseAvailable = pauseAvailable,
+            pausePending = pausePending,
+            pauseFailed = pauseFailed,
+            onPauseTap = onPauseTap,
+            modifier = Modifier.fillMaxWidth().height(du(104f)),
+        )
     }
 }
 
@@ -288,15 +302,86 @@ private fun StallChip(seconds: Long, modifier: Modifier = Modifier) {
 // ---- nav ----
 
 @Composable
-private fun NavBar(modifier: Modifier) {
-    Row(
+private fun NavBar(
+    pauseAvailable: Boolean,
+    pausePending: Boolean,
+    pauseFailed: Boolean,
+    onPauseTap: () -> Unit,
+    modifier: Modifier,
+) {
+    Box(modifier) {
+        Row(
+            Modifier.align(Alignment.Center),
+            horizontalArrangement = Arrangement.spacedBy(du(56f), Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            NavTab("MAP", active = true)
+            NavTab("ITEMS", active = false)
+            NavTab("MASKS", active = false)
+        }
+        PauseControl(
+            available = pauseAvailable,
+            pending = pausePending,
+            failed = pauseFailed,
+            onTap = onPauseTap,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = du(30f)),
+        )
+    }
+}
+
+/**
+ * Design delta (spec §5): the handoff assumed a physical pause key; this
+ * control borrows its RESUME PLAY action vocabulary — gold underlined
+ * Cinzel. Disabled while the engine's own menu is up or no save is loaded.
+ */
+@Composable
+private fun PauseControl(
+    available: Boolean,
+    pending: Boolean,
+    failed: Boolean,
+    onTap: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val ink = when {
+        !available -> TerminaColors.TextDimmer
+        pending -> TerminaColors.GoldDim
+        else -> TerminaColors.GoldLight
+    }
+    val underline = if (available) TerminaColors.Gold else Color.Transparent
+    Column(
         modifier,
-        horizontalArrangement = Arrangement.spacedBy(du(56f), Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        NavTab("MAP", active = true)
-        NavTab("ITEMS", active = false)
-        NavTab("MASKS", active = false)
+        Column(
+            Modifier
+                .width(IntrinsicSize.Min)
+                .height(du(46f * LEGIBILITY))
+                .clickable(enabled = available && !pending, onClick = onTap)
+                .semantics {
+                    contentDescription = when {
+                        !available -> "Pause unavailable while the game's own menu is open"
+                        pending -> "Pausing"
+                        else -> "Pause the game"
+                    }
+                    if (!available) disabled()
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text("PAUSE", style = TerminaType.PauseAction.toStyle(ink))
+            Box(Modifier.fillMaxWidth().height(du(2f * LEGIBILITY)).background(underline))
+        }
+        if (failed) {
+            Text(
+                "PAUSE FAILED",
+                style = TerminaType.StallChip.toStyle(TerminaColors.GoldDim),
+                modifier = Modifier
+                    .padding(top = du(4f))
+                    .semantics { contentDescription = "Pause failed" },
+            )
+        }
     }
 }
 

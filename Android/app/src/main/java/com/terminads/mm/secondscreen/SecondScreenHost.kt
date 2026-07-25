@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.em
 import com.terminads.mm.BridgeState
+import com.terminads.mm.CommandBridge
+import com.terminads.mm.SubmitStatus
 import kotlinx.coroutines.delay
 
 /**
@@ -32,9 +34,13 @@ import kotlinx.coroutines.delay
 fun SecondScreenHost(
     displayInfo: DisplayInfo,
     pollBridge: () -> BridgeState,
+    commandBridge: CommandBridge,
+    pauseTracker: PauseRequestTracker,
     pollIntervalMillis: Long = 100L,
 ) {
     var state by remember { mutableStateOf<BridgeState>(BridgeState.NoFramesYet) }
+    var pauseRequestState by remember { mutableStateOf(PauseRequestState.IDLE) }
+    var failedTarget by remember { mutableStateOf<Boolean?>(null) }
 
     // Main-thread coroutine scoped to this composition: starts when the
     // Presentation shows, stops when it dismisses. The Presentation lifecycle
@@ -43,17 +49,50 @@ fun SecondScreenHost(
     LaunchedEffect(pollBridge, pollIntervalMillis) {
         while (true) {
             state = pollBridge()
+            state.pausedOrNull()?.let {
+                pauseRequestState = pauseTracker.observe(it)
+                failedTarget = failedTargetAfterObservation(failedTarget, it)
+            }
             delay(pollIntervalMillis)
         }
     }
 
     DesignRoot {
         when (val screen = route(state)) {
-            is ScreenKind.Gameplay -> GameplayScreen(screen.model, screen.stalledSeconds)
-            is ScreenKind.PauseMenu -> {
-                // Task 6 replaces this with the pause menu.
-                IdlePlate(waitingForGame = false)
-            }
+            is ScreenKind.Gameplay -> GameplayScreen(
+                model = screen.model,
+                stalledSeconds = screen.stalledSeconds,
+                pauseAvailable = screen.pauseAvailable,
+                pausePending = pauseRequestState == PauseRequestState.PENDING,
+                pauseFailed =
+                    pauseRequestState == PauseRequestState.TIMED_OUT ||
+                        isSubmitFailureVisible(failedTarget, screenTarget = true),
+                onPauseTap = {
+                    when (commandBridge.setPaused(true)) {
+                        SubmitStatus.OK -> {
+                            failedTarget = null
+                            pauseTracker.request(target = true)
+                        }
+                        else -> failedTarget = true
+                    }
+                },
+            )
+            is ScreenKind.PauseMenu -> PauseMenuScreen(
+                model = screen.model,
+                resumePending = pauseRequestState == PauseRequestState.PENDING,
+                resumeFailed =
+                    pauseRequestState == PauseRequestState.TIMED_OUT ||
+                        isSubmitFailureVisible(failedTarget, screenTarget = false),
+                onResumeTap = {
+                    when (commandBridge.setPaused(false)) {
+                        SubmitStatus.OK -> {
+                            failedTarget = null
+                            pauseTracker.request(target = false)
+                        }
+                        else -> failedTarget = false
+                    }
+                },
+            )
             is ScreenKind.Idle -> IdlePlate(screen.waitingForGame)
             is ScreenKind.Diagnostic -> DiagnosticPlate(screen.message, displayInfo)
         }
