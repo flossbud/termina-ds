@@ -247,3 +247,94 @@ templates).
   docker + adb and rebuilds the image from `docker/Dockerfile.android`. Do
   not go hunting for the old host's toolchain; the image is fully
   reproducible from the repo.
+
+## 10. Working practices for agent sessions (read before executing anything)
+
+Everything in this section was learned the hard way across Phases 2-4a.
+
+**Environment.** Sessions run on the wheelhouse VM (`wheelhouse.mimilab.lan`,
+4 cores/16 GB). Docker group membership may not be active in your shell —
+prefix docker-touching scripts with `sg docker -c '<command>'` if bare
+`docker` is denied. The Thor is reached over **wireless adb** at
+`10.0.0.30` (connect port changes per session; after a device or host
+reboot the pairing may be gone entirely — the user runs Settings →
+Developer options → Wireless debugging → "Pair device with pairing code"
+and sends you the pairing IP:port + 6-digit code for `adb pair`, then the
+main-screen port for `adb connect`).
+
+**Signing.** The app is debug-signed by the keystore inside this VM's
+`termina-ds-android-home` Docker volume. If that volume is ever lost, the
+Thor will refuse updates (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) and the fix
+is uninstall/reinstall — game data survives in `/sdcard/2S2H` shared
+storage (the app's data root is `/sdcard/TerminaDS`; a legacy-import flow
+migrates). A real release keystore via `tools/make-keystore.sh` is planned
+Plan B work.
+
+**Verification discipline.**
+- Both Thor displays are FLAG_SECURE: you cannot screenshot them. Logcat
+  proves launch and the publisher line proves the bridge
+  (`Snapshot: publisher registered, first publish (schema 2, 28 slots)`);
+  only the user can judge rendering. **When a visual report and your
+  mental model disagree, ask for a phone photo of the panel first** — a
+  photo found in seconds a layout bug that two code reviews missed
+  (Phase 3's nav underline).
+- A green build is not proof a native symbol shipped: verify with llvm-nm
+  inside the Docker image (see `.superpowers/codex-sol/verify-apk.sh` for
+  the exact three-symbol + mm.o2r gate).
+- `./tools/run-unit-tests.sh` is self-verifying from JUnit XML (104 tests
+  as of Phase 4a). Never trust raw Gradle console text: it prints BUILD
+  SUCCESSFUL with zero tests run when tasks are UP-TO-DATE.
+
+**Execution workflow.** The project uses the superpowers skills:
+brainstorm → spec (docs/superpowers/specs/) → plan
+(docs/superpowers/plans/) → per-task execution with reviews. Phases 3-4a
+ran Codex GPT-5.6-Sol subagents (`codex exec`) with a durable ledger at
+`.superpowers/codex-sol/progress.md` — read it for the full task-by-task
+history including every review finding and accepted debt. If you use that
+workflow: subagent sandboxes have **no network by default and can never
+reach docker** — the orchestrator runs every build/test and relays
+verbatim output into the session as RED/GREEN evidence; and build each
+phase's reviewer constraints from THAT phase's plan (a reviewer handed a
+previous phase's "no native changes" constraints will confidently flag
+compliant work as violations).
+
+**User rules (standing, from the project owner).**
+- Commits authored as `jaret <jaretmsanchez@gmail.com>`. Never involve the
+  WheelHouse-Software GitHub account. Pushes go over the user's SSH key as
+  `flossbud`, and only when the user asks.
+- The user is hands-on with the Thor next to them — lean on that for any
+  visual/latency/input check instead of guessing.
+- Sessions may be driven from a phone (wheelhouse mobile): when offering
+  choices, end the message with a numbered list (1./2./3.) so the user can
+  reply with just a number.
+
+**Accepted behaviors (do not "fix" without asking).**
+- While paused, the camera settles to rest (frame-advance gates the Play
+  update; camera smoothing runs on the draw side). Accepted 2026-07-25.
+- While paused, holding Z+R single-steps frames (engine dev affordance,
+  z_pause.c:44).
+- The pre-save intro/title publish garbage save slots by design; routing
+  gates on the schema-v2 `saveLoaded` flag.
+
+## 11. Next up: Phase 4 Plan B
+
+Scope (user-approved 2026-07-25): the full §5 pause-root-menu styling and
+§10 Options subscreen from the design handoff
+(`docs/design/second-screen-handoff/README.md`), both Graphics categories
+bound to real CVars; the engine-side ImGui PAUSED veil (darkened frame +
+wordmark + subtitle while `pauseState` is set); Compose UI test
+infrastructure (Robolectric smoke tests — the class of tooling that would
+have caught the Phase 3 nav bug at build time); and the release keystore.
+
+Research the plan must pin before writing (spec §2 lists them):
+- The 10-row CVar table (names, ranges, defaults, live-vs-restart) read
+  from `mm/2s2h/BenGui/BenMenu.cpp`'s Settings→Graphics and
+  Enhancements→Graphics sections (known so far: `gInterpolationFPS` :635,
+  `gMatchRefreshRate` :654, and the disable-when pattern at :2201 that
+  mirrors the design's FPS lock).
+- The ImGui overlay seam: how 2S2H registers always-on-top draw windows
+  (`mm/2s2h/BenGui/BenGui.cpp` setup around :99) and its custom-font
+  loading, for the veil.
+- The Options screens write CVars through the existing command mailbox
+  (`CVAR_SET_INT` + debounced `CVAR_SAVE`) — no new native machinery
+  expected beyond the veil's draw hook reading `pauseState`.
