@@ -22,7 +22,7 @@ fully replace it.
 | Pause button + §5 root menu | **Yes** | INVENTORY / MAP / SONG OF TIME rows present but inert |
 | §10 Options — both Graphics categories | **Yes** | Real CVars per §5 below; other categories show the designed empty states |
 | Schema v2 (`saveLoaded`, `pauseState`, `menuOpen`) | **Yes** | Retires the scene-8 hotfix |
-| Top-screen PAUSED veil (handoff §2) | No | Engine-side rendering; the top screen shows the frozen game frame |
+| Top-screen PAUSED veil (handoff §2) | **Plan B** (amended 2026-07-25 after hardware verification) | Engine-side ImGui overlay rendered while `pauseState` is set: darkened frame, wordmark, subtitle. Phase 4a showed the bare frozen frame; the camera's draw-side settle after pausing is accepted behavior |
 | Item assignment, warps, kaleido replacement | No | Phase 5+ |
 | Compose UI test infrastructure | **Yes** | Debt called in by Phase 3's nav bug; scope in §9 |
 | Release keystore | **Yes** | Orchestrator task via `tools/make-keystore.sh`; ends debug-keystore fragility |

@@ -4,10 +4,10 @@ You are picking up an in-progress project. **Phase 0 (fork + build + rebrand),
 Phase 1 (second-screen foundation), and Phase 2 (read-only game-state bridge)
 are complete and hardware-verified. Phase 3 (live HUD) is complete and
 hardware-verified (`docs/verification/2026-07-25-phase-3-thor.md`), including
-five hardware-driven amendments. Phase 4a status: command mailbox + pause
-implemented and reviewed per-task, install candidate on device; hardware
-verification of the pause round-trip pending; Plan B (full pause-menu styling +
-Options) next.**
+five hardware-driven amendments. Phase 4a is complete and
+hardware-verified (`docs/verification/2026-07-25-phase-4a-thor.md`; camera
+draw-side settle accepted, PAUSED veil moved to Plan B). Plan B (full
+pause-menu styling + Options + ImGui veil) next.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -186,46 +186,16 @@ coexists with.
 
 From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
 
-**Phase 4a status:** command mailbox + pause implemented and reviewed per-task,
-install candidate on device; hardware verification of the pause round-trip
-pending; Plan B (full pause-menu styling + Options) next.
+**Phase 4a — Command mailbox + pause:** complete and hardware-verified
+(`docs/verification/2026-07-25-phase-4a-thor.md`). The write path is the
+SPSC command mailbox (absolute commands, drained on the game thread);
+pause rides the engine frame-advance gate. Accepted behaviors: the camera
+settles on the draw side after pausing; Z+R single-steps while frozen.
+**Plan B next:** full §5 pause-menu styling, §10 Options on real BenMenu
+CVars, the engine-side ImGui PAUSED veil, Compose UI test infra, release
+keystore.
 
-The pending Thor checklist is:
 
-1. Check pause round-trip latency and confirm the top screen freezes.
-2. Confirm PAUSE is disabled while kaleido or BenMenu owns the screen.
-3. Resume and confirm normal game updates return.
-4. Background while paused: the second screen releases, the game stays frozen,
-   and the pause menu is restored on return.
-5. Confirm the idle plate appears on the title/intro now that `saveLoaded` gates
-   the HUD.
-6. Sanity-check the accepted Z+R frame-step quirk while paused.
-7. Run TalkBack over the new pause control and pause-menu rows.
-
-- **Phase 3 — Live HUD:** bottom-screen vitals bar, map region with area label,
-  and inert nav.
-  **Complete and hardware-verified** (`docs/verification/2026-07-25-phase-3-thor.md`).
-  The Thor variant applies a 1.5x legibility factor to type and
-  reading-critical glyphs, lays the Presentation out under the second
-  screen's reserved navbar strip, dismisses the second screen when the app
-  is backgrounded, and drains hearts as counterclockwise quarter-pie wedges.
-  Deferred to Phase 4's verification: TalkBack, framerate, the >10-hearts
-  visual, a release keystore (`tools/make-keystore.sh`), and Compose UI
-  tests.
-  Phase 2 hands the HUD a `GameSnapshot` data class updating at 10 Hz as Compose
-  state, with explicit validity flags; Phase 3 replaced the debug readout in
-  `SecondScreenHost.kt` and renders from that object, adding **no new native
-  code**. Read
-  `docs/verification/2026-07-23-phase-2-thor.md` first — it lists the engine
-  representation quirks (an empty C-button is `255`, `roomNum` can be `-1`, yaw
-  is a signed binary angle) that the HUD must handle.
-
-  Extending the payload later costs: one enum entry in `GameSnapshot.h`, one
-  field in the publisher, one in the decoder, one test, and a
-  `TDS_SNAP_SCHEMA_VERSION` bump **on both sides**.
-- **Phase 4 — Settings reskin** for the handheld. Phase 4a Plan A delivered the
-  frame-safe command mailbox and pause/resume skeleton; Plan B is the full
-  pause-menu styling and Options work above.
 - **Phase 5 — Command bridge expansion** (bottom screen → game, frame-safe):
   warps and item assignment. High risk — this MUTATES game state; preserve the
   mailbox's game-thread drain and absolute-command rules.
