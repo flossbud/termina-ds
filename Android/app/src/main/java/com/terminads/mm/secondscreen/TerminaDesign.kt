@@ -140,8 +140,12 @@ fun DesignTextSpec.toStyle(color: Color, shadow: Shadow? = null): TextStyle = Te
     color = color,
     fontFamily = family,
     fontWeight = weight,
-    fontSize = dus(sizePx),
-    letterSpacing = if (trackingPx != 0f) dus(trackingPx) else TextUnit.Unspecified,
+    fontSize = dus(sizePx * LEGIBILITY),
+    letterSpacing = if (trackingPx != 0f) {
+        dus(trackingPx * LEGIBILITY)
+    } else {
+        TextUnit.Unspecified
+    },
     shadow = shadow,
 )
 
@@ -200,7 +204,7 @@ fun BreathingDiamond(
     )
     Box(
         modifier
-            .size(du(sizePx))
+            .size(du(sizePx * LEGIBILITY))
             .rotate(45f)
             .alpha(alpha)
             .background(color, RoundedCornerShape(du(2f)))

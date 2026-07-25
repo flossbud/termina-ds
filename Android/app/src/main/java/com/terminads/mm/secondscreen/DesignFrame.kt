@@ -9,6 +9,14 @@ const val DESIGN_WIDTH_PX = 1240f
 const val DESIGN_HEIGHT_PX = 1080f
 
 /**
+ * Physical-panel legibility factor: the handoff's px were authored on a
+ * desktop monitor; at the Thor's ~320 dpi they render ~3x smaller than
+ * designed. Applied to all type and reading-critical glyphs, never to
+ * structural geometry.
+ */
+const val LEGIBILITY = 1.5f
+
+/**
  * One uniform scale factor from the actual panel to the design frame, using
  * the tighter axis so nothing stretches. Pure so the JVM tests can hold it.
  */

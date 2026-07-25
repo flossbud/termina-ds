@@ -175,6 +175,8 @@ is implemented, pending hardware verification on the Thor.
 - **Phase 3 — Live HUD:** bottom-screen vitals bar, map region with area label,
   and inert nav.
   **Implemented, pending hardware verification on the Thor.**
+  The Thor variant applies a 1.5x legibility factor to type and
+  reading-critical glyphs and uses an immersive Presentation window.
   Phase 2 hands the HUD a `GameSnapshot` data class updating at 10 Hz as Compose
   state, with explicit validity flags; Phase 3 replaced the debug readout in
   `SecondScreenHost.kt` and renders from that object, adding **no new native

@@ -44,7 +44,7 @@ import com.terminads.mm.R
 @Composable
 fun GameplayScreen(model: HudModel, stalledSeconds: Long?) {
     Column(Modifier.fillMaxSize()) {
-        VitalsBar(model, Modifier.fillMaxWidth().height(du(64f)))
+        VitalsBar(model, Modifier.fillMaxWidth().height(du(64f * LEGIBILITY)))
         Box(Modifier.fillMaxWidth().weight(1f)) {
             Image(
                 painter = painterResource(R.drawable.termina_map),
@@ -96,9 +96,9 @@ private fun VitalsBar(model: HudModel, modifier: Modifier) {
             // 130x5 rail, green fill at pct%, both fully rounded.
             Box(
                 Modifier
-                    .padding(start = du(12f))
-                    .width(du(130f))
-                    .height(du(5f))
+                    .padding(start = du(12f * LEGIBILITY))
+                    .width(du(130f * LEGIBILITY))
+                    .height(du(5f * LEGIBILITY))
                     .background(TerminaColors.MagicTrack, RoundedCornerShape(50)),
             ) {
                 Box(
@@ -116,14 +116,17 @@ private fun VitalsBar(model: HudModel, modifier: Modifier) {
             // 11px rupee diamond: rotated square, 2px corner radius.
             Box(
                 Modifier
-                    .size(du(11f))
+                    .size(du(11f * LEGIBILITY))
                     .rotate(45f)
-                    .background(TerminaColors.RupeeGreen, RoundedCornerShape(du(2f))),
+                    .background(
+                        TerminaColors.RupeeGreen,
+                        RoundedCornerShape(du(2f * LEGIBILITY)),
+                    ),
             )
             Text(
                 "${model.rupees}",
                 style = TerminaType.RupeeCount.toStyle(TerminaColors.VitalsInk),
-                modifier = Modifier.padding(start = du(8f)),
+                modifier = Modifier.padding(start = du(8f * LEGIBILITY)),
             )
         }
         Spacer(Modifier.weight(1f))
@@ -150,8 +153,15 @@ private fun VitalsBar(model: HudModel, modifier: Modifier) {
             Box(
                 Modifier
                     .padding(start = du(14f))
-                    .border(du(1f), TerminaColors.ChipBorder, RoundedCornerShape(du(6f)))
-                    .padding(horizontal = du(10f), vertical = du(3f)),
+                    .border(
+                        du(1f),
+                        TerminaColors.ChipBorder,
+                        RoundedCornerShape(du(6f * LEGIBILITY)),
+                    )
+                    .padding(
+                        horizontal = du(10f * LEGIBILITY),
+                        vertical = du(3f * LEGIBILITY),
+                    ),
             ) {
                 Text(chip, style = TerminaType.CountdownChip.toStyle(TerminaColors.AccentLight))
             }
@@ -164,9 +174,11 @@ private fun HeartRows(model: HudModel) {
     val rows = heartRows(
         heartFills(model.fullHearts, model.partialSixteenths, model.totalHearts)
     )
-    Column(verticalArrangement = Arrangement.spacedBy(du(3f))) {
+    // 2 rows x 27px + 4.5px gap = 58.5px; centered padding of 18.75px
+    // per side brings the total to the 96px legibility-height vitals bar.
+    Column(verticalArrangement = Arrangement.spacedBy(du(3f * LEGIBILITY))) {
         rows.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(du(3f))) {
+            Row(horizontalArrangement = Arrangement.spacedBy(du(3f * LEGIBILITY))) {
                 row.forEach { fill -> Heart(fill, model.doubleDefense) }
             }
         }
@@ -176,7 +188,7 @@ private fun HeartRows(model: HudModel) {
 @Composable
 private fun Heart(fillFraction: Float, doubleDefense: Boolean) {
     val strokePx = dupx(1.4f)
-    Canvas(Modifier.size(du(18f))) {
+    Canvas(Modifier.size(du(18f * LEGIBILITY))) {
         val path = heartPath(size.width)
         drawPath(path, TerminaColors.HeartEmptyFill)
         if (fillFraction > 0f) {
@@ -238,8 +250,15 @@ private fun heartPath(size: Float): Path = Path().apply {
 private fun StallChip(seconds: Long, modifier: Modifier = Modifier) {
     Box(
         modifier
-            .border(du(1f), TerminaColors.WarningAmberBorder, RoundedCornerShape(du(6f)))
-            .padding(horizontal = du(10f), vertical = du(3f))
+            .border(
+                du(1f),
+                TerminaColors.WarningAmberBorder,
+                RoundedCornerShape(du(6f * LEGIBILITY)),
+            )
+            .padding(
+                horizontal = du(10f * LEGIBILITY),
+                vertical = du(3f * LEGIBILITY),
+            )
             // Static description: the visible text ticks once a second, and
             // per-poll/per-second values are banned from semantics (spec §7).
             .clearAndSetSemantics { contentDescription = "Bridge stalled" },
@@ -278,7 +297,7 @@ private fun NavTab(label: String, active: Boolean) {
     val underline = if (active) TerminaColors.AccentBright else Color.Transparent
     Column(
         Modifier
-            .height(du(46f))
+            .height(du(46f * LEGIBILITY))
             .semantics {
                 if (active) {
                     contentDescription = "$label tab, current view"
@@ -294,7 +313,7 @@ private fun NavTab(label: String, active: Boolean) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(du(2f))
+                .height(du(2f * LEGIBILITY))
                 .background(underline),
         )
     }

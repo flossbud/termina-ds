@@ -186,6 +186,15 @@ committed with their OFL license files. Barlow is used only by pause-phase
 screens and is deferred until one exists. No runtime font fetching — the Thor
 build must work offline.
 
+### 6a. Thor legibility variant (2026-07-25)
+
+Hardware verification showed that the handoff's absolute px render about 3x
+smaller physically on the Thor's ~320 dpi panel than on the authoring monitor.
+All type and reading-critical glyphs therefore scale by `LEGIBILITY = 1.5`,
+while structural geometry and the 1240×1080 design frame remain unchanged. The
+Presentation also hides system bars because Android reserved a measured 55px
+navbar strip on the presentation display, reducing the app window to 1240×1025.
+
 ## 7. Accessibility
 
 TalkBack is the reason this project chose Compose; Phase 2 left it unverified

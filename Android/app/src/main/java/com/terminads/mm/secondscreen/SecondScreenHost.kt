@@ -76,12 +76,12 @@ private fun IdlePlate(waitingForGame: Boolean) {
                 .toStyle(TerminaColors.Ink3)
                 .copy(letterSpacing = 0.18.em),
         )
-        BreathingDiamond(Modifier.padding(top = du(22f)))
+        BreathingDiamond(Modifier.padding(top = du(22f * LEGIBILITY)))
         if (waitingForGame) {
             Text(
                 "WAITING FOR THE GAME",
                 style = TerminaType.IdleCaption.toStyle(TerminaColors.TextHint),
-                modifier = Modifier.padding(top = du(18f)),
+                modifier = Modifier.padding(top = du(18f * LEGIBILITY)),
             )
         }
     }
@@ -111,7 +111,7 @@ private fun DiagnosticPlate(message: String, displayInfo: DisplayInfo) {
             "display ${displayInfo.displayId} ${displayInfo.name} " +
                 "${displayInfo.widthPx}x${displayInfo.heightPx}",
             style = TerminaType.IdleCaption.toStyle(TerminaColors.TextDimmest),
-            modifier = Modifier.padding(top = du(18f)),
+            modifier = Modifier.padding(top = du(18f * LEGIBILITY)),
         )
     }
 }

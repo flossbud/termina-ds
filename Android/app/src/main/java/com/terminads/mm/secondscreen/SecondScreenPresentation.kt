@@ -2,9 +2,12 @@ package com.terminads.mm.secondscreen
 
 import android.app.Presentation
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.Display
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -57,6 +60,20 @@ class SecondScreenPresentation(
         composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
 
         setContentView(composeView)
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            // The Thor reserved a measured 55px navbar strip here, shrinking
+            // the 1240x1080 design frame to 95% in the 1240x1025 app window.
+            window?.setDecorFitsSystemWindows(false)
+            window?.insetsController?.apply {
+                hide(
+                    WindowInsets.Type.statusBars() or
+                        WindowInsets.Type.navigationBars(),
+                )
+                systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
     }
 
     override fun onStart() {
