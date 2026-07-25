@@ -23,10 +23,25 @@
 enum TdsCommandOp {
     /* a: 0 = resume, nonzero = freeze. Requires a live PlayState. */
     TDS_CMD_PAUSE_SET = 1,
-    /* name: CVar key; a: value. */
+    /* name: CVar key; a: value. For CVars that need no engine apply call. */
     TDS_CMD_CVAR_SET_INT = 2,
     /* Persist CVars via the LUS save path. Debounced by the caller. */
-    TDS_CMD_CVAR_SAVE = 3
+    TDS_CMD_CVAR_SAVE = 3,
+
+    /*
+     * The three settings whose CVar write alone changes nothing. BenMenu
+     * applies them through .Callback() (BenMenu.cpp:596-599, :621-623) and the
+     * interpreter reads the CVars only at Init (interpreter.cpp:4187-4189,
+     * Fast3dWindow.cpp:101-102). Each opcode below performs the CVar write AND
+     * the engine apply inside one drained command, so a dropped command can
+     * never leave a persisted value the screen does not show.
+     */
+    /* a: 50..200, the internal resolution as a percent. */
+    TDS_CMD_SET_INTERNAL_RES = 4,
+    /* a: 1..8, the MSAA sample count. */
+    TDS_CMD_SET_MSAA = 5,
+    /* a: 0..2, FILTER_THREE_POINT / FILTER_LINEAR / FILTER_NONE. */
+    TDS_CMD_SET_TEXTURE_FILTER = 6
 };
 
 enum TdsSubmitStatus {

@@ -24,6 +24,22 @@ class CommandBridge(private val submit: (Int, Int, Int, String?) -> Int) {
 
     fun saveCVars(): SubmitStatus = decode(submit(OP_CVAR_SAVE, 0, 0, null))
 
+    /**
+     * The three settings whose CVar write alone changes nothing: BenMenu
+     * applies them through a Callback and the interpreter reads the CVars only
+     * at Init. Native performs the write and the apply in one drained command.
+     *
+     * Values are range-checked natively; an out-of-range value returns INVALID
+     * rather than reaching the engine.
+     */
+    fun setInternalResPercent(percent: Int): SubmitStatus =
+        decode(submit(OP_SET_INTERNAL_RES, percent, 0, null))
+
+    fun setMsaa(level: Int): SubmitStatus = decode(submit(OP_SET_MSAA, level, 0, null))
+
+    fun setTextureFilter(mode: Int): SubmitStatus =
+        decode(submit(OP_SET_TEXTURE_FILTER, mode, 0, null))
+
     private fun decode(status: Int): SubmitStatus = when (status) {
         0 -> SubmitStatus.OK
         1 -> SubmitStatus.FULL
@@ -37,5 +53,8 @@ class CommandBridge(private val submit: (Int, Int, Int, String?) -> Int) {
         const val OP_PAUSE_SET = 1
         const val OP_CVAR_SET_INT = 2
         const val OP_CVAR_SAVE = 3
+        const val OP_SET_INTERNAL_RES = 4
+        const val OP_SET_MSAA = 5
+        const val OP_SET_TEXTURE_FILTER = 6
     }
 }

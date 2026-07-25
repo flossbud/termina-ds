@@ -3,7 +3,9 @@
 #include <atomic>
 #include <cstring>
 
+#include <libultraship/libultraship.h>
 #include <libultraship/bridge/consolevariablebridge.h>
+#include <fast/Fast3dWindow.h>
 
 extern "C" {
 #include "z64play.h"
@@ -44,6 +46,33 @@ void Apply(const TdsCommand& cmd) {
         case TDS_CMD_CVAR_SAVE:
             CVarSave();
             break;
+        case TDS_CMD_SET_INTERNAL_RES: {
+            const float multiplier = cmd.a / 100.0f;
+            CVarSetFloat(CVAR_INTERNAL_RESOLUTION, multiplier);
+            Ship::Context::GetInstance()->GetWindow()->SetResolutionMultiplier(multiplier);
+            break;
+        }
+        case TDS_CMD_SET_MSAA:
+            CVarSetInteger(CVAR_MSAA_VALUE, cmd.a);
+            Ship::Context::GetInstance()->GetWindow()->SetMsaaLevel(cmd.a);
+            break;
+        case TDS_CMD_SET_TEXTURE_FILTER: {
+            // SetTextureFilter is the one apply call not on the abstract Ship::Window
+            // (engine/include/fast/Fast3dWindow.h:54), so it needs the concrete
+            // backend. This is the only place in TerminaDS that knows which renderer
+            // is in use; keep it here.
+            auto window = std::dynamic_pointer_cast<Fast::Fast3dWindow>(
+                Ship::Context::GetInstance()->GetWindow());
+            if (window == nullptr) {
+                // Non-Fast3D backend: drop the whole command rather than persist a
+                // value the renderer will never honour. The snapshot publishes the
+                // CVar, so a write here would show the UI a setting that is not live.
+                break;
+            }
+            CVarSetInteger(CVAR_TEXTURE_FILTER, cmd.a);
+            window->SetTextureFilter((Fast::FilteringMode)cmd.a);
+            break;
+        }
         default:
             // Validated at submit; an unknown op here is a torn build --
             // drop it rather than guess.
@@ -54,11 +83,20 @@ void Apply(const TdsCommand& cmd) {
 } // namespace
 
 extern "C" int32_t TerminaDS_SubmitCommand(int32_t op, int32_t a, int32_t b, const char* name) {
-    if (op < TDS_CMD_PAUSE_SET || op > TDS_CMD_CVAR_SAVE) {
+    if (op < TDS_CMD_PAUSE_SET || op > TDS_CMD_SET_TEXTURE_FILTER) {
         return TDS_SUBMIT_INVALID;
     }
     const bool needsName = (op == TDS_CMD_CVAR_SET_INT);
     if (needsName && (name == NULL || std::strlen(name) >= TDS_CMD_NAME_CAPACITY)) {
+        return TDS_SUBMIT_INVALID;
+    }
+    // Range-check the semantic opcodes at submit, not at apply. An
+    // out-of-range value reaching the engine would be a real fault; rejecting
+    // it here means the caller sees it as a status rather than the game
+    // silently taking a nonsense multiplier.
+    if ((op == TDS_CMD_SET_INTERNAL_RES && (a < 50 || a > 200)) ||
+        (op == TDS_CMD_SET_MSAA && (a < 1 || a > 8)) ||
+        (op == TDS_CMD_SET_TEXTURE_FILTER && (a < 0 || a > 2))) {
         return TDS_SUBMIT_INVALID;
     }
 
