@@ -26,20 +26,6 @@ class RouteTest {
     )
 
     @Test
-    fun preSaveCutsceneSceneIdlesDespiteLiveWorld() {
-        // The intro plays in scene 0x08 ("Cutscene Scene") with a live
-        // PlayState before any save exists -- never a HUD there.
-        assertEquals(
-            ScreenKind.Idle(waitingForGame = false),
-            route(BridgeState.Live(snapshot(hasPlayState = true, sceneId = 8))),
-        )
-        assertEquals(
-            ScreenKind.Idle(waitingForGame = false),
-            route(BridgeState.Stalled(snapshot(hasPlayState = true, sceneId = 8), 2400)),
-        )
-    }
-
-    @Test
     fun liveWithWorldShowsGameplay() {
         val screen = route(BridgeState.Live(snapshot(hasPlayState = true)))
         assertTrue(screen is ScreenKind.Gameplay)
@@ -61,6 +47,42 @@ class RouteTest {
     @Test
     fun stalledWithoutWorldIdles() {
         assertEquals(ScreenKind.Idle(waitingForGame = false), route(BridgeState.Stalled(snapshot(false), 2400)))
+    }
+
+    @Test
+    fun noSaveIdlesEvenWithLiveWorld() {
+        // Replaces the scene-8 special case: title demo, intro cutscene,
+        // file select all publish saveLoaded=false.
+        assertEquals(
+            ScreenKind.Idle(waitingForGame = false),
+            route(BridgeState.Live(snapshot(hasPlayState = true, saveLoaded = false))),
+        )
+    }
+
+    @Test
+    fun pausedRoutesToThePauseMenu() {
+        val screen = route(BridgeState.Live(snapshot(hasPlayState = true, isPaused = true)))
+        assertTrue(screen is ScreenKind.PauseMenu)
+    }
+
+    @Test
+    fun stalledWhilePausedStaysOnThePauseMenu() {
+        assertTrue(
+            route(BridgeState.Stalled(snapshot(hasPlayState = true, isPaused = true), 2400))
+                is ScreenKind.PauseMenu,
+        )
+    }
+
+    @Test
+    fun engineMenuDisablesThePauseControl() {
+        val screen = route(BridgeState.Live(snapshot(hasPlayState = true, menuOpen = true)))
+        assertEquals(false, (screen as ScreenKind.Gameplay).pauseAvailable)
+    }
+
+    @Test
+    fun normalPlayOffersThePauseControl() {
+        val screen = route(BridgeState.Live(snapshot(hasPlayState = true)))
+        assertEquals(true, (screen as ScreenKind.Gameplay).pauseAvailable)
     }
 
     @Test

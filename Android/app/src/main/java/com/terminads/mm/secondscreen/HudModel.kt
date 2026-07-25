@@ -119,21 +119,15 @@ fun vitalsDescription(m: HudModel): String {
 
 /** Which screen the host shows. A pure function of the bridge state. */
 sealed interface ScreenKind {
-    data class Gameplay(val model: HudModel, val stalledSeconds: Long?) : ScreenKind
+    data class Gameplay(
+        val model: HudModel,
+        val stalledSeconds: Long?,
+        val pauseAvailable: Boolean,
+    ) : ScreenKind
+    data class PauseMenu(val model: HudModel) : ScreenKind
     data class Idle(val waitingForGame: Boolean) : ScreenKind
     data class Diagnostic(val message: String) : ScreenKind
 }
-
-/**
- * The engine's "Cutscene Scene" (scene_table.h ordinal 0x08): the intro
- * sequence plays here with a live PlayState before any save is loaded, so
- * hasPlayState alone would render meaningless vitals over it. Schema v2's
- * saveLoaded flag replaces this scene-id special case in Phase 4.
- */
-private const val CUTSCENE_SCENE_ID = 8
-
-private fun inPlayableWorld(s: GameSnapshot): Boolean =
-    s.hasPlayState && s.sceneId != CUTSCENE_SCENE_ID
 
 /**
  * Routing per spec §4. The diagnostic strings are copied verbatim from the
@@ -141,18 +135,8 @@ private fun inPlayableWorld(s: GameSnapshot): Boolean =
  * what the screen shows; RouteTest pins them.
  */
 fun route(state: BridgeState): ScreenKind = when (state) {
-    is BridgeState.Live ->
-        if (inPlayableWorld(state.snapshot)) {
-            ScreenKind.Gameplay(deriveHudModel(state.snapshot), stalledSeconds = null)
-        } else {
-            ScreenKind.Idle(waitingForGame = false)
-        }
-    is BridgeState.Stalled ->
-        if (inPlayableWorld(state.snapshot)) {
-            ScreenKind.Gameplay(deriveHudModel(state.snapshot), state.millisSinceChange / 1000)
-        } else {
-            ScreenKind.Idle(waitingForGame = false)
-        }
+    is BridgeState.Live -> routeSnapshot(state.snapshot, stalledSeconds = null)
+    is BridgeState.Stalled -> routeSnapshot(state.snapshot, state.millisSinceChange / 1000)
     BridgeState.NoFramesYet -> ScreenKind.Idle(waitingForGame = true)
     BridgeState.NativeUnavailable -> ScreenKind.Diagnostic("NATIVE NOT LOADED")
     is BridgeState.SchemaMismatch -> ScreenKind.Diagnostic(
@@ -164,5 +148,16 @@ fun route(state: BridgeState): ScreenKind = when (state) {
     )
     BridgeState.UnknownReadStatus -> ScreenKind.Diagnostic(
         "UNKNOWN READ STATUS (native is newer than this build's Kotlin)"
+    )
+}
+
+/** Spec §6: the routing table for a decoded snapshot. */
+private fun routeSnapshot(s: GameSnapshot, stalledSeconds: Long?): ScreenKind = when {
+    !s.hasPlayState || !s.saveLoaded -> ScreenKind.Idle(waitingForGame = false)
+    s.isPaused -> ScreenKind.PauseMenu(deriveHudModel(s))
+    else -> ScreenKind.Gameplay(
+        deriveHudModel(s),
+        stalledSeconds,
+        pauseAvailable = !s.menuOpen,
     )
 }

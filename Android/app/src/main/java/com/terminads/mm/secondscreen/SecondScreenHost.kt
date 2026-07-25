@@ -50,6 +50,10 @@ fun SecondScreenHost(
     DesignRoot {
         when (val screen = route(state)) {
             is ScreenKind.Gameplay -> GameplayScreen(screen.model, screen.stalledSeconds)
+            is ScreenKind.PauseMenu -> {
+                // Task 6 replaces this with the pause menu.
+                IdlePlate(waitingForGame = false)
+            }
             is ScreenKind.Idle -> IdlePlate(screen.waitingForGame)
             is ScreenKind.Diagnostic -> DiagnosticPlate(screen.message, displayInfo)
         }
