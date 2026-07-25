@@ -44,6 +44,7 @@ resolving mechanically.
 | `Android/build.gradle` | Kotlin + Compose compiler classpath | Compose toolchain (Task 7) |
 | `Android/app/build.gradle` | compileSdk 34, Kotlin/Compose plugins, deps, test options | Compose toolchain (Task 7) |
 | `Android/gradle.properties` | `org.gradle.jvmargs` 1536m → 4096m | Compose toolchain (Task 7) |
+| `mm/2s2h/BenGui/BenGui.hpp`, `mm/2s2h/BenGui/BenGui.cpp` | added `BenGui::IsBenMenuVisible()` accessor | TerminaDS snapshot's `MENU_OPEN` flag (Phase 4a) |
 
 ## Files we have added (never conflict)
 

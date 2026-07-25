@@ -8,7 +8,13 @@ import org.junit.Test
 
 class RouteTest {
 
-    private fun snapshot(hasPlayState: Boolean, sceneId: Int = 0x2D) = GameSnapshot(
+    private fun snapshot(
+        hasPlayState: Boolean,
+        sceneId: Int = 0x2D,
+        isPaused: Boolean = false,
+        saveLoaded: Boolean = true,
+        menuOpen: Boolean = false,
+    ) = GameSnapshot(
         frameCounter = 7, health = 48, healthCapacity = 48, magic = 0,
         magicCapacity = 0, magicLevel = 0, rupees = 0, playerForm = 4,
         equippedMask = 0, day = 1, timeOfDay = 0x4000, isNight = false,
@@ -16,6 +22,7 @@ class RouteTest {
         buttonAmmo = listOf(0, 0, 0, 0), hasPlayState = hasPlayState,
         hasPlayer = hasPlayState, sceneId = sceneId, roomNum = 0,
         playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
+        isPaused = isPaused, saveLoaded = saveLoaded, menuOpen = menuOpen,
     )
 
     @Test

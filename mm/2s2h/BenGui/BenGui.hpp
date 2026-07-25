@@ -11,6 +11,7 @@ namespace BenGui {
     void Draw();
     void Destroy();
     UIWidgets::Colors GetMenuThemeColor();
+    bool IsBenMenuVisible();
 }
 
 #define THEME_COLOR BenGui::GetMenuThemeColor()

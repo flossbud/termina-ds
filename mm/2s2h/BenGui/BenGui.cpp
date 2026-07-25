@@ -73,6 +73,10 @@ UIWidgets::Colors GetMenuThemeColor() {
     return mBenMenu->GetMenuThemeColor();
 }
 
+bool IsBenMenuVisible() {
+    return mBenMenu != nullptr && mBenMenu->IsVisible();
+}
+
 void SetupGuiElements() {
     auto gui = Ship::Context::GetInstance()->GetWindow()->GetGui();
 

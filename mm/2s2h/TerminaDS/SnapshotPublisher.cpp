@@ -14,6 +14,7 @@
 #include <atomic>
 #include <cstring>
 
+#include "2s2h/BenGui/BenGui.hpp"
 #include "2s2h/GameInteractor/GameInteractor.h"
 #include "2s2h/ShipInit.hpp"
 
@@ -100,6 +101,15 @@ void Publish() {
     if (playerData.doubleDefense) {
         flags |= TDS_SNAP_FLAG_DOUBLE_DEFENSE;
     }
+    // v2: fileNum is the committed save slot; the title screen parks it at
+    // 0xFF (z_title.c:283). Unsigned compare rejects the sentinel and any
+    // debug negative in one test.
+    if ((uint32_t)gSaveContext.fileNum <= 2u) {
+        flags |= TDS_SNAP_FLAG_SAVE_LOADED;
+    }
+    if (BenGui::IsBenMenuVisible()) {
+        flags |= TDS_SNAP_FLAG_MENU_OPEN;
+    }
 
     v[TDS_SNAP_IDX_PLAYER_FORM] = gSaveContext.save.playerForm;
     v[TDS_SNAP_IDX_EQUIPPED_MASK] = gSaveContext.save.equippedMask;
@@ -131,6 +141,10 @@ void Publish() {
         flags |= TDS_SNAP_FLAG_PLAY_STATE_VALID;
         v[TDS_SNAP_IDX_SCENE_ID] = play->sceneId;
         v[TDS_SNAP_IDX_ROOM_NUM] = play->roomCtx.curRoom.num;
+        v[TDS_SNAP_IDX_PAUSE_STATE] = FrameAdvance_IsEnabled((PlayState*)play);
+        if (play->pauseCtx.state != PAUSE_STATE_OFF) {
+            flags |= TDS_SNAP_FLAG_MENU_OPEN;
+        }
 
         const Player* player = GET_PLAYER(play);
         if (player != NULL) {

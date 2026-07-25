@@ -21,9 +21,40 @@ class GameSnapshotTest {
     @Test
     fun slotCountMatchesTheDocumentedLayout() {
         // Guards the hand-written mirror of mm/2s2h/TerminaDS/GameSnapshot.h.
-        assertEquals(27, GameSnapshotLayout.SLOT_COUNT)
+        assertEquals(28, GameSnapshotLayout.SLOT_COUNT)
+        assertEquals(2, GameSnapshotLayout.SCHEMA_VERSION)
         assertEquals(0, GameSnapshotLayout.IDX_SCHEMA_VERSION)
         assertEquals(26, GameSnapshotLayout.IDX_PLAYER_YAW)
+        assertEquals(27, GameSnapshotLayout.IDX_PAUSE_STATE)
+        assertEquals(1 shl 4, GameSnapshotLayout.FLAG_SAVE_LOADED)
+        assertEquals(1 shl 5, GameSnapshotLayout.FLAG_MENU_OPEN)
+    }
+
+    @Test
+    fun v2FieldsDecode() {
+        val values = IntArray(GameSnapshotLayout.SLOT_COUNT)
+        values[GameSnapshotLayout.IDX_SCHEMA_VERSION] = GameSnapshotLayout.SCHEMA_VERSION
+        values[GameSnapshotLayout.IDX_FRAME_COUNTER] = 5
+        values[GameSnapshotLayout.IDX_FLAGS] =
+            GameSnapshotLayout.FLAG_SAVE_LOADED or GameSnapshotLayout.FLAG_MENU_OPEN
+        values[GameSnapshotLayout.IDX_PAUSE_STATE] = 1
+
+        val snapshot = (decodeSnapshot(values) as SnapshotDecode.Ok).snapshot
+        assertTrue(snapshot.saveLoaded)
+        assertTrue(snapshot.menuOpen)
+        assertTrue(snapshot.isPaused)
+    }
+
+    @Test
+    fun v2FieldsAbsentDecodeFalse() {
+        val values = IntArray(GameSnapshotLayout.SLOT_COUNT)
+        values[GameSnapshotLayout.IDX_SCHEMA_VERSION] = GameSnapshotLayout.SCHEMA_VERSION
+        values[GameSnapshotLayout.IDX_FRAME_COUNTER] = 5
+
+        val snapshot = (decodeSnapshot(values) as SnapshotDecode.Ok).snapshot
+        assertFalse(snapshot.saveLoaded)
+        assertFalse(snapshot.menuOpen)
+        assertFalse(snapshot.isPaused)
     }
 
     @Test

@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define TDS_SNAP_SCHEMA_VERSION 1
+#define TDS_SNAP_SCHEMA_VERSION 2
 
 enum TdsSnapshotIndex {
     TDS_SNAP_IDX_SCHEMA_VERSION = 0,
@@ -26,12 +26,13 @@ enum TdsSnapshotIndex {
     // Everything from here through TDS_SNAP_IDX_BTN_AMMO_C_RIGHT is read out of
     // gSaveContext unconditionally, every frame -- including on the title
     // screen and at file select, where gSaveContext holds no meaningful save.
-    // There is no flag for "a save is loaded"; the only signal a consumer has
-    // is TDS_SNAP_FLAG_PLAY_STATE_VALID, which these slots do not depend on
-    // and can be set or clear independently of them. Do not render this range
-    // as a real HUD unless PLAY_STATE_VALID (and, ideally, PLAYER_VALID) is
-    // also set, or boot/menu screens will show a plausible-looking but
-    // meaningless health/magic/rupee readout.
+    // These save-derived slots are still published unconditionally; v2's
+    // TDS_SNAP_FLAG_SAVE_LOADED is the signal consumers must gate on.
+    // TDS_SNAP_FLAG_PLAY_STATE_VALID alone is not enough because these slots
+    // do not depend on it and it can be set or clear independently of them.
+    // Do not render this range as a real HUD unless SAVE_LOADED is set, or
+    // boot/menu screens will show a plausible-looking but meaningless
+    // health/magic/rupee readout.
     TDS_SNAP_IDX_HEALTH,
     TDS_SNAP_IDX_HEALTH_CAPACITY,
     TDS_SNAP_IDX_MAGIC,
@@ -60,6 +61,12 @@ enum TdsSnapshotIndex {
     TDS_SNAP_IDX_PLAYER_Z,
     TDS_SNAP_IDX_PLAYER_YAW,
 
+    /*
+     * v2: 1 while the engine's frame-advance gate holds the Play update
+     * frozen (our pause; z_play.c:988). 0 when unpaused or no PlayState.
+     */
+    TDS_SNAP_IDX_PAUSE_STATE,
+
     TDS_SNAP_COUNT
 };
 
@@ -67,7 +74,21 @@ enum TdsSnapshotFlag {
     TDS_SNAP_FLAG_PLAY_STATE_VALID = 1 << 0,
     TDS_SNAP_FLAG_PLAYER_VALID = 1 << 1,
     TDS_SNAP_FLAG_IS_NIGHT = 1 << 2,
-    TDS_SNAP_FLAG_DOUBLE_DEFENSE = 1 << 3
+    TDS_SNAP_FLAG_DOUBLE_DEFENSE = 1 << 3,
+    /*
+     * v2: a save file is active. gSaveContext.fileNum is the slot index
+     * after file select commits (z_file_choose_NES.c:2200) and 0xFF on the
+     * title screen (z_title.c:283); the pre-save intro cutscene inherits
+     * the title's sentinel. This is the honest "is there a game" signal
+     * the payload lacked since Phase 2.
+     */
+    TDS_SNAP_FLAG_SAVE_LOADED = 1 << 4,
+    /*
+     * v2: the engine owns the screen -- kaleido pause is up
+     * (pauseCtx.state != PAUSE_STATE_OFF) or the BenMenu ImGui menu is
+     * visible. The UI disables its pause control while set.
+     */
+    TDS_SNAP_FLAG_MENU_OPEN = 1 << 5
 };
 
 /*

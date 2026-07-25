@@ -8,11 +8,11 @@ package com.terminads.mm
  * reflected here AND must bump SCHEMA_VERSION on both sides -- decodeSnapshot
  * then reports the mismatch instead of decoding garbage.
  *
- * Codegen is not worth it for 27 integers; the runtime guard plus
+ * Codegen is not worth it for 28 integers; the runtime guard plus
  * GameSnapshotTest.slotCountMatchesTheDocumentedLayout is the safety net.
  */
 object GameSnapshotLayout {
-    const val SCHEMA_VERSION = 1
+    const val SCHEMA_VERSION = 2
 
     const val IDX_SCHEMA_VERSION = 0
     const val IDX_FRAME_COUNTER = 1
@@ -45,13 +45,16 @@ object GameSnapshotLayout {
     const val IDX_PLAYER_Y = 24
     const val IDX_PLAYER_Z = 25
     const val IDX_PLAYER_YAW = 26
+    const val IDX_PAUSE_STATE = 27
 
-    const val SLOT_COUNT = 27
+    const val SLOT_COUNT = 28
 
     const val FLAG_PLAY_STATE_VALID = 1 shl 0
     const val FLAG_PLAYER_VALID = 1 shl 1
     const val FLAG_IS_NIGHT = 1 shl 2
     const val FLAG_DOUBLE_DEFENSE = 1 shl 3
+    const val FLAG_SAVE_LOADED = 1 shl 4
+    const val FLAG_MENU_OPEN = 1 shl 5
 }
 
 /**
@@ -93,6 +96,12 @@ data class GameSnapshot(
     val playerY: Float,
     val playerZ: Float,
     val playerYaw: Int,
+    /** v2: the frame-advance gate holds the Play update frozen (our pause). */
+    val isPaused: Boolean,
+    /** v2: a save file is active — the honest "is there a game" signal. */
+    val saveLoaded: Boolean,
+    /** v2: kaleido or the BenMenu owns the game's screen. */
+    val menuOpen: Boolean,
 )
 
 /** Outcome of decoding a raw payload. */
@@ -158,6 +167,9 @@ fun decodeSnapshot(values: IntArray): SnapshotDecode {
             playerY = Float.fromBits(values[GameSnapshotLayout.IDX_PLAYER_Y]),
             playerZ = Float.fromBits(values[GameSnapshotLayout.IDX_PLAYER_Z]),
             playerYaw = values[GameSnapshotLayout.IDX_PLAYER_YAW],
+            isPaused = values[GameSnapshotLayout.IDX_PAUSE_STATE] != 0,
+            saveLoaded = flag(GameSnapshotLayout.FLAG_SAVE_LOADED),
+            menuOpen = flag(GameSnapshotLayout.FLAG_MENU_OPEN),
         )
     )
 }

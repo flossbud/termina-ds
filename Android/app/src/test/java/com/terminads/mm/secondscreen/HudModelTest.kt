@@ -23,6 +23,9 @@ class HudModelTest {
         doubleDefense: Boolean = false,
         hasPlayState: Boolean = true,
         sceneId: Int = 0x2D, // Termina Field
+        isPaused: Boolean = false,
+        saveLoaded: Boolean = true,
+        menuOpen: Boolean = false,
     ) = GameSnapshot(
         frameCounter = 1, health = health, healthCapacity = healthCapacity,
         magic = magic, magicCapacity = magicCapacity, magicLevel = 0,
@@ -31,6 +34,7 @@ class HudModelTest {
         buttonItems = listOf(255, 255, 255, 255), buttonAmmo = listOf(0, 0, 0, 0),
         hasPlayState = hasPlayState, hasPlayer = hasPlayState, sceneId = sceneId,
         roomNum = 0, playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
+        isPaused = isPaused, saveLoaded = saveLoaded, menuOpen = menuOpen,
     )
 
     // ---- clock ----
