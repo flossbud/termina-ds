@@ -129,14 +129,14 @@ class OptionsCommandsTest {
     }
 
     @Test
-    fun debouncerFiresOnlyAfterTheQuietWindow() {
+    fun debouncerIsDueOnlyAfterTheQuietWindow() {
         val d = CVarSaveDebouncer(windowMillis = 2_000L)
         assertNull(d.dueAt())
 
         d.noteChange(nowMillis = 1_000L)
         assertEquals(3_000L, d.dueAt())
-        assertFalse(d.fire(nowMillis = 2_999L))
-        assertTrue(d.fire(nowMillis = 3_000L))
+        assertFalse(d.isDue(nowMillis = 2_999L))
+        assertTrue(d.isDue(nowMillis = 3_000L))
     }
 
     @Test
@@ -145,16 +145,27 @@ class OptionsCommandsTest {
         d.noteChange(nowMillis = 1_000L)
         d.noteChange(nowMillis = 2_500L)
         assertEquals(4_500L, d.dueAt())
-        assertFalse(d.fire(nowMillis = 3_000L))
-        assertTrue(d.fire(nowMillis = 4_500L))
+        assertFalse(d.isDue(nowMillis = 3_000L))
+        assertTrue(d.isDue(nowMillis = 4_500L))
     }
 
     @Test
-    fun firingClearsThePendingSaveSoItDoesNotRepeat() {
+    fun clearingDischargesThePendingSaveSoItDoesNotRepeat() {
         val d = CVarSaveDebouncer(windowMillis = 2_000L)
         d.noteChange(nowMillis = 0L)
-        assertTrue(d.fire(nowMillis = 2_000L))
+        assertTrue(d.isDue(nowMillis = 2_000L))
+        d.clear()
         assertNull(d.dueAt())
-        assertFalse(d.fire(nowMillis = 9_000L))
+        assertFalse(d.isDue(nowMillis = 9_000L))
+    }
+
+    @Test
+    fun aPendingSaveSurvivesANonOkSubmissionUntilCleared() {
+        val d = CVarSaveDebouncer(windowMillis = 2_000L)
+        d.noteChange(nowMillis = 0L)
+
+        assertTrue(d.isDue(nowMillis = 2_000L))
+        // A non-OK submit does not call clear().
+        assertTrue(d.isDue(nowMillis = 2_100L))
     }
 }

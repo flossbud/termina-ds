@@ -1,5 +1,6 @@
 package com.terminads.mm.secondscreen
 
+import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,8 @@ fun SecondScreenHost(
     var state by remember { mutableStateOf<BridgeState>(BridgeState.NoFramesYet) }
     var pauseRequestState by remember { mutableStateOf(PauseRequestState.IDLE) }
     var failedTarget by remember { mutableStateOf<Boolean?>(null) }
+    var nav by remember { mutableStateOf(PauseNavState()) }
+    val saveDebouncer = remember { CVarSaveDebouncer() }
 
     // Main-thread coroutine scoped to this composition: starts when the
     // Presentation shows, stops when it dismisses. The Presentation lifecycle
@@ -49,6 +52,25 @@ fun SecondScreenHost(
     LaunchedEffect(pollBridge, pollIntervalMillis) {
         while (true) {
             state = pollBridge()
+            // The poll loop is the single clock for the save debounce, so no
+            // second timer touches the main thread.
+            if (saveDebouncer.isDue(SystemClock.uptimeMillis())) {
+                when (commandBridge.saveCVars()) {
+                    // Accepted by the ring. Persistence is the game thread's
+                    // problem now.
+                    SubmitStatus.OK -> saveDebouncer.clear()
+                    // Ring momentarily full. Stay pending and retry on the next
+                    // poll (~100 ms) -- the game thread drains every frame, so
+                    // this clears itself. CVAR_SAVE has no snapshot signal, so
+                    // dropping it here would lose the write with no way to
+                    // notice.
+                    SubmitStatus.FULL -> Unit
+                    // INVALID/UNKNOWN are permanent -- a build skew between the
+                    // Kotlin and native opcode tables. Retrying cannot help and
+                    // would spin every poll forever, so discharge it.
+                    SubmitStatus.INVALID, SubmitStatus.UNKNOWN -> saveDebouncer.clear()
+                }
+            }
             state.pausedOrNull()?.let {
                 pauseRequestState = pauseTracker.observe(it)
                 failedTarget = failedTargetAfterObservation(failedTarget, it)
@@ -78,24 +100,53 @@ fun SecondScreenHost(
                     }
                 },
             )
-            is ScreenKind.PauseMenu -> PauseMenuScreen(
-                model = screen.model,
-                resumePending = pauseRequestState == PauseRequestState.PENDING,
-                resumeFailed =
-                    pauseRequestState == PauseRequestState.TIMED_OUT ||
-                        isSubmitFailureVisible(failedTarget, screenTarget = false),
-                onResumeTap = {
-                    when (commandBridge.setPaused(false)) {
-                        SubmitStatus.OK -> {
-                            failedTarget = null
-                            pauseTracker.request(target = false)
-                            pauseRequestState = PauseRequestState.PENDING
+            is ScreenKind.PauseMenu -> when (nav.view) {
+                PauseView.ROOT -> PauseMenuScreen(
+                    model = screen.model,
+                    resumePending = pauseRequestState == PauseRequestState.PENDING,
+                    resumeFailed =
+                        pauseRequestState == PauseRequestState.TIMED_OUT ||
+                            isSubmitFailureVisible(failedTarget, screenTarget = false),
+                    onResumeTap = {
+                        when (commandBridge.setPaused(false)) {
+                            SubmitStatus.OK -> {
+                                failedTarget = null
+                                pauseTracker.request(target = false)
+                                pauseRequestState = PauseRequestState.PENDING
+                            }
+                            else -> failedTarget = false
                         }
-                        else -> failedTarget = false
-                    }
-                },
-                onOptionsTap = {},
-            )
+                    },
+                    onOptionsTap = { nav = nav.openOptions() },
+                )
+                PauseView.OPTIONS -> OptionsScreen(
+                    model = screen.model,
+                    settings = screen.settings,
+                    tab = nav.tab,
+                    category = nav.category,
+                    selectedKey = nav.selectedKey,
+                    onTabSelect = { nav = nav.selectTab(it) },
+                    onCategorySelect = { nav = nav.selectCategory(it) },
+                    onRowSelect = { nav = nav.selectRow(it) },
+                    onRowChange = { key, value ->
+                        // Fire and observe: the next snapshot is the ack. A
+                        // dropped command simply never changes the row.
+                        submitOptionChange(commandBridge, key, value)
+                        saveDebouncer.noteChange(SystemClock.uptimeMillis())
+                    },
+                    onBack = { nav = nav.back() },
+                    onResume = {
+                        when (commandBridge.setPaused(false)) {
+                            SubmitStatus.OK -> {
+                                failedTarget = null
+                                pauseTracker.request(target = false)
+                                pauseRequestState = PauseRequestState.PENDING
+                            }
+                            else -> failedTarget = false
+                        }
+                    },
+                )
+            }
             is ScreenKind.Idle -> IdlePlate(screen.waitingForGame)
             is ScreenKind.Diagnostic -> DiagnosticPlate(screen.message, displayInfo)
         }

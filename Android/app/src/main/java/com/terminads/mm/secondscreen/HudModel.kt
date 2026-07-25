@@ -2,6 +2,7 @@ package com.terminads.mm.secondscreen
 
 import com.terminads.mm.BridgeState
 import com.terminads.mm.GameSnapshot
+import com.terminads.mm.GameSettings
 import java.util.Locale
 
 /**
@@ -124,7 +125,7 @@ sealed interface ScreenKind {
         val stalledSeconds: Long?,
         val pauseAvailable: Boolean,
     ) : ScreenKind
-    data class PauseMenu(val model: HudModel) : ScreenKind
+    data class PauseMenu(val model: HudModel, val settings: GameSettings) : ScreenKind
     data class Idle(val waitingForGame: Boolean) : ScreenKind
     data class Diagnostic(val message: String) : ScreenKind
 }
@@ -154,7 +155,7 @@ fun route(state: BridgeState): ScreenKind = when (state) {
 /** Spec §6: the routing table for a decoded snapshot. */
 private fun routeSnapshot(s: GameSnapshot, stalledSeconds: Long?): ScreenKind = when {
     !s.hasPlayState || !s.saveLoaded -> ScreenKind.Idle(waitingForGame = false)
-    s.isPaused -> ScreenKind.PauseMenu(deriveHudModel(s))
+    s.isPaused -> ScreenKind.PauseMenu(deriveHudModel(s), s.settings)
     else -> ScreenKind.Gameplay(
         deriveHudModel(s),
         stalledSeconds,

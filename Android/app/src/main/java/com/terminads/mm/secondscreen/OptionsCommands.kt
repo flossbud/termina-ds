@@ -80,11 +80,14 @@ class CVarSaveDebouncer(private val windowMillis: Long = 2_000L) {
 
     fun dueAt(): Long? = dueAtMillis
 
-    /** True exactly once per quiet window, when it has elapsed. */
-    fun fire(nowMillis: Long): Boolean {
+    /** True while a save is pending and its quiet window has elapsed. */
+    fun isDue(nowMillis: Long): Boolean {
         val due = dueAtMillis ?: return false
-        if (nowMillis < due) return false
+        return nowMillis >= due
+    }
+
+    /** Discharge after ring acceptance or a permanent failure that cannot benefit from retry. */
+    fun clear() {
         dueAtMillis = null
-        return true
     }
 }
