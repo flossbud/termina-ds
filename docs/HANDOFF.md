@@ -4,7 +4,10 @@ You are picking up an in-progress project. **Phase 0 (fork + build + rebrand),
 Phase 1 (second-screen foundation), and Phase 2 (read-only game-state bridge)
 are complete and hardware-verified. Phase 3 (live HUD) is complete and
 hardware-verified (`docs/verification/2026-07-25-phase-3-thor.md`), including
-five hardware-driven amendments.**
+five hardware-driven amendments. Phase 4a status: command mailbox + pause
+implemented and reviewed per-task, install candidate on device; hardware
+verification of the pause round-trip pending; Plan B (full pause-menu styling +
+Options) next.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -33,7 +36,9 @@ magic, masks, items, C-button assignments), `PlayState` (current scene/room),
 `Player` (position). Reading them is a struct field access over the JNI bridge —
 no memory scanning, no fragile offsets. **Every planned bottom-screen feature
 (HUD, map, walkthrough sync) is downstream of reading these structs.** This is
-why the whole thing is feasible.
+why the whole thing is feasible. **The snapshot bridge is read-only; the command
+mailbox is the sanctioned write path (absolute commands, drained on the game
+thread).**
 
 ## 3. Architecture and the load-bearing invariants
 
@@ -72,10 +77,12 @@ Invariants you must not break:
 | `OTRExporter/`, `ZAPDTR/` | Vendored asset-build tools (were submodules) |
 | `docs/superpowers/specs/2026-07-23-termina-ds-phase-2-state-bridge-design.md` | Phase 2 spec (state bridge) |
 | `docs/superpowers/plans/2026-07-23-termina-ds-phase-2.md` | Phase 2 implementation plan (done) |
-| `mm/2s2h/TerminaDS/GameSnapshot.h` | **Layout contract.** The index enum IS the payload; Kotlin mirrors it by hand |
-| `mm/2s2h/TerminaDS/SnapshotPublisher.cpp` | Game-thread sampler + seqlock. **The only file that dereferences game pointers** |
-| `mm/2s2h/TerminaDS/NativeBridge.cpp` | JNI seam, native side (uptime + `nativeReadSnapshot`) |
+| `mm/2s2h/TerminaDS/GameSnapshot.h` | **Layout contract.** The index enum IS the payload; Kotlin mirrors it by hand. Current schema is v2 (28 slots), bumped atomically on both sides in Phase 4a Tasks 1–2 |
+| `mm/2s2h/TerminaDS/SnapshotPublisher.cpp` | Game-thread snapshot sampler + seqlock; with `CommandMailbox.cpp`, one of only two files that touch game state |
+| `mm/2s2h/TerminaDS/CommandMailbox.{h,cpp}` | Sanctioned game-state write path: a fixed SPSC ring of absolute commands, drained on the game thread; with `SnapshotPublisher.cpp`, the only two files that touch game state |
+| `mm/2s2h/TerminaDS/NativeBridge.cpp` | JNI seam, native side (uptime + snapshot read + command submit) |
 | `Android/app/src/main/java/com/terminads/mm/NativeBridge.kt` | JNI seam, Kotlin side — the ONLY thing that calls native |
+| `Android/app/src/main/java/com/terminads/mm/CommandBridge.kt` | The only Kotlin writer; submits absolute commands as the command ring's main-thread single producer |
 | `Android/app/src/main/java/com/terminads/mm/GameSnapshot.kt` | Kotlin mirror of the layout + pure decoder (unit-tested) |
 | `Android/app/src/main/java/com/terminads/mm/GameSnapshotPoller.kt` | 10 Hz main-thread poll, staleness, `BridgeState` classification |
 | `Android/app/src/main/java/com/terminads/mm/secondscreen/` | All second-screen code (manager, presentation, policy, host, lifecycle shim) |
@@ -84,6 +91,8 @@ Invariants you must not break:
 | `Android/.../secondscreen/SceneNames.kt` | GENERATED sceneId -> name table (tools/generate-scene-names.py) |
 | `Android/.../secondscreen/HudModel.kt` | Pure snapshot -> HUD model, route(), diagnostic strings |
 | `Android/.../secondscreen/GameplayScreen.kt` | The §4 gameplay HUD (vitals, map, nav) |
+| `Android/.../secondscreen/PauseRequestTracker.kt` | Observe-don't-assume acknowledgement and timeout tracking for pause/resume commands |
+| `Android/.../secondscreen/PauseMenuScreen.kt` | Plan A pause-root skeleton: live RESUME plus inert Inventory, Map, Song of Time, and Options rows |
 | `Android/app/src/main/java/com/terminads/mm/MainActivity.java` | Inherited game activity; second screen wired into onCreate/onStart/onResume/onStop/onDestroy |
 | `tools/build-apk.sh`, `docker/Dockerfile.android` | The reproducible build |
 | `tools/assemble-apk.sh` | UI-only APK assembly -- NEVER after native changes (stale glob) |
@@ -127,6 +136,11 @@ and bridge-error screens driven by the live snapshot model.
 how the JNI rename and each new native symbol were confirmed — a green build is
 not proof the symbol shipped.
 
+**Pause/frame-step quirk:** Termina DS implements its pause by enabling the
+engine's frame-advance gate. While paused this way, holding Z+R single-steps
+frames (the engine's development affordance at `mm/src/code/z_pause.c:44`).
+This is accepted, discoverable, and harmless; it is not a failed pause.
+
 > ⚠️ **`llvm-nm` is NOT on the build host.** It ships inside the NDK in the
 > `termina-ds-build:latest` image — run the check there, or use host `nm -D` on
 > the extracted `.so`. Run bare on the host with stderr suppressed, `llvm-nm`
@@ -134,10 +148,10 @@ not proof the symbol shipped.
 > `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
 > here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
 
-**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 73 fast JVM
-tests (display policy, lifecycle owner, snapshot decoder/poller, design scaling,
-scene names, HUD model/routing, structural guards). No NDK, no device, about a
-minute. Extra arguments still reach Gradle, so
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 95 fast JVM
+tests (display policy, lifecycle owner, snapshot decoder/poller, command bridge,
+pause routing/tracking, design scaling, scene names, HUD model, structural
+guards). No NDK, no device, about a minute. Extra arguments still reach Gradle, so
 `./tools/run-unit-tests.sh --tests '*PollerTest*'` works.
 
 > ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testReleaseUnitTest UP-TO-DATE`
@@ -172,6 +186,22 @@ coexists with.
 
 From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
 
+**Phase 4a status:** command mailbox + pause implemented and reviewed per-task,
+install candidate on device; hardware verification of the pause round-trip
+pending; Plan B (full pause-menu styling + Options) next.
+
+The pending Thor checklist is:
+
+1. Check pause round-trip latency and confirm the top screen freezes.
+2. Confirm PAUSE is disabled while kaleido or BenMenu owns the screen.
+3. Resume and confirm normal game updates return.
+4. Background while paused: the second screen releases, the game stays frozen,
+   and the pause menu is restored on return.
+5. Confirm the idle plate appears on the title/intro now that `saveLoaded` gates
+   the HUD.
+6. Sanity-check the accepted Z+R frame-step quirk while paused.
+7. Run TalkBack over the new pause control and pause-menu rows.
+
 - **Phase 3 — Live HUD:** bottom-screen vitals bar, map region with area label,
   and inert nav.
   **Complete and hardware-verified** (`docs/verification/2026-07-25-phase-3-thor.md`).
@@ -193,9 +223,12 @@ From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
   Extending the payload later costs: one enum entry in `GameSnapshot.h`, one
   field in the publisher, one in the decoder, one test, and a
   `TDS_SNAP_SCHEMA_VERSION` bump **on both sides**.
-- **Phase 4 — Settings reskin** for the handheld.
-- **Phase 5 — Command bridge** (bottom screen → game, frame-safe): warps, item
-  assignment, pause. High risk — this MUTATES game state; needs frame-safety.
+- **Phase 4 — Settings reskin** for the handheld. Phase 4a Plan A delivered the
+  frame-safe command mailbox and pause/resume skeleton; Plan B is the full
+  pause-menu styling and Options work above.
+- **Phase 5 — Command bridge expansion** (bottom screen → game, frame-safe):
+  warps and item assignment. High risk — this MUTATES game state; preserve the
+  mailbox's game-thread drain and absolute-command rules.
 - **Phase 6 — Map subsystem** (area + world map; Song of Soaring warp select).
   High risk, mostly a *content* problem — MM's N64 maps are crude; MM3D-quality
   maps must be extracted-and-cleaned or authored, plus a scene-ID→asset registry
@@ -225,8 +258,8 @@ templates).
   show() catch; the `.cxx`-every-build cost (§5).
 - **Untested verification tail:** top-screen framerate measurement with the
   second screen active; TalkBack reading the bottom screen (the Phase 3 HUD now
-  provides explicit semantics for vitals and the stalled-data chip); USB-C
-  external-display-out takeover behavior.
+  provides explicit semantics for vitals and the stalled-data chip); the Phase
+  4a Thor checklist in §7; USB-C external-display-out takeover behavior.
 - **No `LICENSE` file yet** for Termina DS itself. The upstream base is CC0-1.0.
   The user's choice; ask before adding one.
 
