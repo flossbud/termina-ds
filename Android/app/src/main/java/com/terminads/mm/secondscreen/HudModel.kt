@@ -125,19 +125,30 @@ sealed interface ScreenKind {
 }
 
 /**
+ * The engine's "Cutscene Scene" (scene_table.h ordinal 0x08): the intro
+ * sequence plays here with a live PlayState before any save is loaded, so
+ * hasPlayState alone would render meaningless vitals over it. Schema v2's
+ * saveLoaded flag replaces this scene-id special case in Phase 4.
+ */
+private const val CUTSCENE_SCENE_ID = 8
+
+private fun inPlayableWorld(s: GameSnapshot): Boolean =
+    s.hasPlayState && s.sceneId != CUTSCENE_SCENE_ID
+
+/**
  * Routing per spec §4. The diagnostic strings are copied verbatim from the
  * Phase 2 debug readout so docs/HANDOFF.md's fault vocabulary still matches
  * what the screen shows; RouteTest pins them.
  */
 fun route(state: BridgeState): ScreenKind = when (state) {
     is BridgeState.Live ->
-        if (state.snapshot.hasPlayState) {
+        if (inPlayableWorld(state.snapshot)) {
             ScreenKind.Gameplay(deriveHudModel(state.snapshot), stalledSeconds = null)
         } else {
             ScreenKind.Idle(waitingForGame = false)
         }
     is BridgeState.Stalled ->
-        if (state.snapshot.hasPlayState) {
+        if (inPlayableWorld(state.snapshot)) {
             ScreenKind.Gameplay(deriveHudModel(state.snapshot), state.millisSinceChange / 1000)
         } else {
             ScreenKind.Idle(waitingForGame = false)

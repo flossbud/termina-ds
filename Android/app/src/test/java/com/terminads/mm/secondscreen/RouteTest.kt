@@ -8,15 +8,29 @@ import org.junit.Test
 
 class RouteTest {
 
-    private fun snapshot(hasPlayState: Boolean) = GameSnapshot(
+    private fun snapshot(hasPlayState: Boolean, sceneId: Int = 0x2D) = GameSnapshot(
         frameCounter = 7, health = 48, healthCapacity = 48, magic = 0,
         magicCapacity = 0, magicLevel = 0, rupees = 0, playerForm = 4,
         equippedMask = 0, day = 1, timeOfDay = 0x4000, isNight = false,
         doubleDefense = false, buttonItems = listOf(255, 255, 255, 255),
         buttonAmmo = listOf(0, 0, 0, 0), hasPlayState = hasPlayState,
-        hasPlayer = hasPlayState, sceneId = 0x2D, roomNum = 0,
+        hasPlayer = hasPlayState, sceneId = sceneId, roomNum = 0,
         playerX = 0f, playerY = 0f, playerZ = 0f, playerYaw = 0,
     )
+
+    @Test
+    fun preSaveCutsceneSceneIdlesDespiteLiveWorld() {
+        // The intro plays in scene 0x08 ("Cutscene Scene") with a live
+        // PlayState before any save exists -- never a HUD there.
+        assertEquals(
+            ScreenKind.Idle(waitingForGame = false),
+            route(BridgeState.Live(snapshot(hasPlayState = true, sceneId = 8))),
+        )
+        assertEquals(
+            ScreenKind.Idle(waitingForGame = false),
+            route(BridgeState.Stalled(snapshot(hasPlayState = true, sceneId = 8), 2400)),
+        )
+    }
 
     @Test
     fun liveWithWorldShowsGameplay() {
