@@ -279,19 +279,3 @@ private fun Hairline() {
             .background(TerminaColors.HairlineFaint),
     )
 }
-
-/** Replaced by the real control library in Task 8. */
-@Composable
-private fun OptionRowList(
-    rows: List<OptionRow>,
-    selectedKey: OptionKey?,
-    onRowSelect: (OptionKey) -> Unit,
-    onRowChange: (OptionKey, Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier.fillMaxWidth()) {
-        for (row in rows) {
-            Text(row.label, style = TerminaType.OptionLabel.toStyle(TerminaColors.Ink2))
-        }
-    }
-}
