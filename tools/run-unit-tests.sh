@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Run the Termina DS JVM unit tests inside the Docker toolchain image.
 #
-# These are plain JUnit tests -- no NDK, no device, no APK assembly -- so this
-# takes about a minute rather than the 8-19 minutes a full ./tools/build-apk.sh
-# costs. Use it for every Kotlin change; save the full build for native changes.
+# These are plain JUnit tests, but Gradle also invokes the incremental debug
+# native build. With an unchanged CMake source list this takes about 40 seconds,
+# rather than the 8-19 minutes a full ./tools/build-apk.sh costs. No device or
+# APK assembly is involved. Use it for every Kotlin change; save the full release
+# build for native release verification.
 #
 # Gradle prints "BUILD SUCCESSFUL" with "testDebugUnitTest UP-TO-DATE" while
 # running zero tests, which has already produced a false pass in this project
@@ -30,8 +32,48 @@ docker run --rm \
     -v "termina-ds-android-home:/root/.android" \
     -w /workspace/Android \
     "${IMAGE}" \
-    sh -c "rm -rf ${RESULTS_REL} && exec ./gradlew --no-daemon --rerun-tasks :app:testDebugUnitTest \"\$@\"" \
-    sh "$@" || gradle_status=$?
+    bash -euo pipefail -c '
+        native_cxx_dir="app/.cxx"
+        native_stamp_file="${native_cxx_dir}/termina-native-source-list.sha256"
+
+        # mm/CMakeLists.txt uses GLOB_RECURSE without CONFIGURE_DEPENDS. Hash
+        # only the sorted matching path list: additions/removals require a
+        # re-glob, while edits to an existing file are normal Ninja inputs.
+        shopt -s globstar nullglob dotglob
+        native_sources=(
+            ../mm/2s2h/**/*.c
+            ../mm/2s2h/**/*.cpp
+            ../mm/2s2h/**/*.h
+            ../mm/2s2h/**/*.hpp
+        )
+        native_source_stamp="$(
+            {
+                if [ "${#native_sources[@]}" -gt 0 ]; then
+                    printf "%s\0" "${native_sources[@]}"
+                fi
+            } \
+                | LC_ALL=C sort -z \
+                | sha256sum \
+                | awk "{ print \$1 }"
+        )"
+        previous_native_source_stamp=""
+
+        if [ -f "${native_stamp_file}" ]; then
+            IFS= read -r previous_native_source_stamp < "${native_stamp_file}" || true
+        fi
+        if [ -d "${native_cxx_dir}" ] \
+            && [ "${previous_native_source_stamp}" != "${native_source_stamp}" ]; then
+            echo "native source list changed -- clearing .cxx to force a CMake re-glob"
+            rm -rf "${native_cxx_dir}"
+        fi
+
+        mkdir -p "${native_cxx_dir}"
+        printf "%s\n" "${native_source_stamp}" > "${native_stamp_file}"
+
+        rm -rf "$1"
+        shift
+        exec ./gradlew --no-daemon --rerun-tasks :app:testDebugUnitTest "$@"
+    ' bash "${RESULTS_REL}" "$@" || gradle_status=$?
 
 shopt -s nullglob
 xml_files=("${RESULTS_DIR}"/*.xml)

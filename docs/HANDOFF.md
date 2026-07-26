@@ -131,10 +131,11 @@ and bridge-error screens driven by the live snapshot model.
 (`adb pair` / `adb connect`); the pairing may need re-establishing each session
 (the user reads the code off the device). Last known address: `10.0.0.30`.
 
-**Verify natives landed:** `llvm-nm -D` on the packaged `arm64-v8a` library
-(`lib/arm64-v8a/lib2ship.so`), grepping for `Java_com_terminads_mm_*`. This is
-how the JNI rename and each new native symbol were confirmed — a green build is
-not proof the symbol shipped.
+**Verify natives landed:** run `tools/verify-apk.sh` inside the build container.
+It uses `llvm-nm -D` on the packaged `arm64-v8a` library
+(`lib/arm64-v8a/lib2ship.so`) and checks every JNI and Termina DS native export.
+This is how the JNI rename and each new native symbol were confirmed — a green
+build is not proof the symbol shipped.
 
 **Pause/frame-step quirk:** Termina DS implements its pause by enabling the
 engine's frame-advance gate. While paused this way, holding Z+R single-steps
@@ -148,10 +149,12 @@ This is accepted, discoverable, and harmless; it is not a failed pause.
 > `GLOB_RECURSE` failure this check exists to catch. **Never suppress stderr
 > here.** The working invocation is in the Phase 2 plan, Task 6 Step 2.
 
-**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 104 fast JVM
-tests (display policy, lifecycle owner, snapshot decoder/poller, command bridge,
-pause routing/tracking, design scaling, scene names, HUD model, structural
-guards). No NDK, no device, about a minute. Extra arguments still reach Gradle, so
+**Unit tests:** `./tools/run-unit-tests.sh` (added in Phase 2) — 183 JVM tests
+in 21 suites (display policy, lifecycle owner, snapshot decoder/poller, command
+bridge, pause routing/tracking, design scaling, scene names, HUD model,
+structural guards). Gradle also invokes the incremental debug native build; with
+an unchanged native source list the full run is about 40 seconds. No device or
+APK assembly is involved. Extra arguments still reach Gradle, so
 `./tools/run-unit-tests.sh --tests '*PollerTest*'` works.
 
 > ⚠️ Gradle prints `BUILD SUCCESSFUL` with `testDebugUnitTest UP-TO-DATE`
@@ -300,9 +303,9 @@ device; game data in `/sdcard/TerminaDS` survives.
   photo found in seconds a layout bug that two code reviews missed
   (Phase 3's nav underline).
 - A green build is not proof a native symbol shipped: verify with llvm-nm
-  inside the Docker image (see `.superpowers/codex-sol/verify-apk.sh` for
-  the exact three-symbol + mm.o2r gate).
-- `./tools/run-unit-tests.sh` is self-verifying from JUnit XML (104 tests
+  inside the Docker image (see `tools/verify-apk.sh` for the exact six-symbol +
+  mm.o2r gate).
+- `./tools/run-unit-tests.sh` is self-verifying from JUnit XML (183 tests
   as of Phase 4a). Never trust raw Gradle console text: it prints BUILD
   SUCCESSFUL with zero tests run when tasks are UP-TO-DATE.
 
