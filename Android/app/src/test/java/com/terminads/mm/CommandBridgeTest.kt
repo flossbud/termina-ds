@@ -64,6 +64,7 @@ class CommandBridgeTest {
         assertEquals(4, CommandBridge.OP_SET_INTERNAL_RES)
         assertEquals(5, CommandBridge.OP_SET_MSAA)
         assertEquals(6, CommandBridge.OP_SET_TEXTURE_FILTER)
+        assertEquals(7, CommandBridge.OP_SET_DISPLAY_HZ)
     }
 
     @Test
@@ -87,5 +88,16 @@ class CommandBridgeTest {
     fun semanticSettersSurfaceANonOkStatus() {
         val bridge = CommandBridge { _, _, _, _ -> 1 }
         assertEquals(SubmitStatus.FULL, bridge.setMsaa(4))
+    }
+
+    @Test
+    fun displayRefreshSubmitsTheAbsoluteHz() {
+        val rec = Recorder()
+
+        assertEquals(SubmitStatus.OK, CommandBridge(rec::submit).setDisplayRefreshHz(120))
+        assertEquals(CommandBridge.OP_SET_DISPLAY_HZ, rec.lastOp)
+        assertEquals(120, rec.lastA)
+        assertEquals(0, rec.lastB)
+        assertEquals(null, rec.lastName)
     }
 }

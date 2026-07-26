@@ -40,6 +40,9 @@ class CommandBridge(private val submit: (Int, Int, Int, String?) -> Int) {
     fun setTextureFilter(mode: Int): SubmitStatus =
         decode(submit(OP_SET_TEXTURE_FILTER, mode, 0, null))
 
+    fun setDisplayRefreshHz(hz: Int): SubmitStatus =
+        decode(submit(OP_SET_DISPLAY_HZ, hz, 0, null))
+
     private fun decode(status: Int): SubmitStatus = when (status) {
         0 -> SubmitStatus.OK
         1 -> SubmitStatus.FULL
@@ -56,5 +59,6 @@ class CommandBridge(private val submit: (Int, Int, Int, String?) -> Int) {
         const val OP_SET_INTERNAL_RES = 4
         const val OP_SET_MSAA = 5
         const val OP_SET_TEXTURE_FILTER = 6
+        const val OP_SET_DISPLAY_HZ = 7
     }
 }

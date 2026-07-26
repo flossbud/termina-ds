@@ -1,4 +1,5 @@
 #include "CommandMailbox.h"
+#include "DisplayRefresh.h"
 
 #include <atomic>
 #include <cstring>
@@ -73,6 +74,9 @@ void Apply(const TdsCommand& cmd) {
             window->SetTextureFilter((Fast::FilteringMode)cmd.a);
             break;
         }
+        case TDS_CMD_SET_DISPLAY_HZ:
+            TerminaDS_SetDisplayRefreshHz(cmd.a);
+            break;
         default:
             // Validated at submit; an unknown op here is a torn build --
             // drop it rather than guess.
@@ -83,7 +87,7 @@ void Apply(const TdsCommand& cmd) {
 } // namespace
 
 extern "C" int32_t TerminaDS_SubmitCommand(int32_t op, int32_t a, int32_t b, const char* name) {
-    if (op < TDS_CMD_PAUSE_SET || op > TDS_CMD_SET_TEXTURE_FILTER) {
+    if (op < TDS_CMD_PAUSE_SET || op > TDS_CMD_SET_DISPLAY_HZ) {
         return TDS_SUBMIT_INVALID;
     }
     const bool needsName = (op == TDS_CMD_CVAR_SET_INT);
@@ -96,7 +100,8 @@ extern "C" int32_t TerminaDS_SubmitCommand(int32_t op, int32_t a, int32_t b, con
     // silently taking a nonsense multiplier.
     if ((op == TDS_CMD_SET_INTERNAL_RES && (a < 50 || a > 200)) ||
         (op == TDS_CMD_SET_MSAA && (a < 1 || a > 8)) ||
-        (op == TDS_CMD_SET_TEXTURE_FILTER && (a < 0 || a > 2))) {
+        (op == TDS_CMD_SET_TEXTURE_FILTER && (a < 0 || a > 2)) ||
+        (op == TDS_CMD_SET_DISPLAY_HZ && (a < 1 || a > 1000))) {
         return TDS_SUBMIT_INVALID;
     }
 

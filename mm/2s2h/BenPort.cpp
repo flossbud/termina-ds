@@ -63,6 +63,7 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/BenGui/Notification.h"
 #include "2s2h/ShipUtils.h"
 #include "2s2h/ShipInit.hpp"
+#include "2s2h/TerminaDS/DisplayRefresh.h"
 #include "2s2h/PresetManager/PresetManager.h"
 
 #ifdef __ANDROID__
@@ -328,12 +329,20 @@ OTRGlobals::~OTRGlobals() {
 }
 
 uint32_t OTRGlobals::GetInterpolationFPS() {
+    // Termina DS: prefer Android's rate because SDL's cached display mode goes
+    // stale when the device switches rate without reconfiguring the surface
+    // (gfx_sdl2.cpp:268-274). Fall back to the engine query until Android has
+    // reported.
+    const int32_t androidRefreshHz = TerminaDS_GetDisplayRefreshHz();
+    const uint32_t hz = androidRefreshHz > 0
+        ? (uint32_t)androidRefreshHz
+        : Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
+
     if (CVarGetInteger("gMatchRefreshRate", 0)) {
-        return Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
+        return hz;
     } else if (CVarGetInteger(CVAR_VSYNC_ENABLED, 1) ||
                !Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
-        return std::min<uint32_t>(Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate(),
-                                  CVarGetInteger("gInterpolationFPS", 20));
+        return std::min<uint32_t>(hz, CVarGetInteger("gInterpolationFPS", 20));
     }
     return CVarGetInteger("gInterpolationFPS", 20);
 }

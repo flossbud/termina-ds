@@ -8,6 +8,8 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Display
+import com.terminads.mm.CommandBridge
+import com.terminads.mm.NativeBridge
 
 /**
  * Owns second-screen discovery and Presentation lifecycle.
@@ -29,6 +31,13 @@ class SecondScreenManager(private val activity: Activity) {
     private val displayManager =
         activity.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private val handler = Handler(Looper.getMainLooper())
+    private val commandBridge = CommandBridge(NativeBridge::submitCommand)
+    private val mainDisplayRefreshReporter = MainDisplayRefreshReporter { hz ->
+        // refresh() runs synchronously from Activity lifecycle callbacks or
+        // DisplayListener callbacks delivered through the main-looper Handler.
+        // CommandBridge is therefore always called by its one Android producer.
+        commandBridge.setDisplayRefreshHz(hz)
+    }
 
     private var presentation: SecondScreenPresentation? = null
     private var shownInfo: DisplayInfo? = null
@@ -68,6 +77,7 @@ class SecondScreenManager(private val activity: Activity) {
 
         val displays = displayManager.displays
         val infos = displays.map { it.toDisplayInfo() }
+        mainDisplayRefreshReporter.refresh(infos)
         val chosen = DisplaySelectionPolicy.select(infos, readOverride())
 
         if (chosen == null) {

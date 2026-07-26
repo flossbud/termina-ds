@@ -32,16 +32,18 @@ enum TdsCommandOp {
      * The three settings whose CVar write alone changes nothing. BenMenu
      * applies them through .Callback() (BenMenu.cpp:596-599, :621-623) and the
      * interpreter reads the CVars only at Init (interpreter.cpp:4187-4189,
-     * Fast3dWindow.cpp:101-102). Each opcode below performs the CVar write AND
-     * the engine apply inside one drained command, so a dropped command can
-     * never leave a persisted value the screen does not show.
+     * Fast3dWindow.cpp:101-102). Each of those three opcodes performs the CVar
+     * write AND the engine apply inside one drained command, so a dropped
+     * command can never leave a persisted value the screen does not show.
      */
     /* a: 50..200, the internal resolution as a percent. */
     TDS_CMD_SET_INTERNAL_RES = 4,
     /* a: 1..8, the MSAA sample count. */
     TDS_CMD_SET_MSAA = 5,
     /* a: 0..2, FILTER_THREE_POINT / FILTER_LINEAR / FILTER_NONE. */
-    TDS_CMD_SET_TEXTURE_FILTER = 6
+    TDS_CMD_SET_TEXTURE_FILTER = 6,
+    /* a: 1..1000, the Android main display's active refresh rate in Hz. */
+    TDS_CMD_SET_DISPLAY_HZ = 7
 };
 
 enum TdsSubmitStatus {

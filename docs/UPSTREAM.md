@@ -45,6 +45,7 @@ resolving mechanically.
 | `Android/app/build.gradle` | compileSdk 34, Kotlin/Compose plugins, deps, test options | Compose toolchain (Task 7) |
 | `Android/gradle.properties` | `org.gradle.jvmargs` 1536m → 4096m | Compose toolchain (Task 7) |
 | `mm/2s2h/BenGui/BenGui.hpp`, `mm/2s2h/BenGui/BenGui.cpp` | added `BenGui::IsBenMenuVisible()` accessor | TerminaDS snapshot's `MENU_OPEN` flag (Phase 4a) |
+| `mm/2s2h/BenPort.cpp` | `GetInterpolationFPS()` prefers the Android-supplied display rate, with the existing window query as fallback | SDL's cached display mode stays stale when Android changes refresh rate without reconfiguring the surface |
 | `engine/src/ship/window/gui/Gui.cpp` | Phase 4 Plan B | One call to `TerminaDS_LoadVeilFont()` after the FontAwesome registration, so the pause veil's Cinzel is in the font atlas. The atlas is built once during `Gui::Init`, so a later `AddFont` would not be rasterised. |
 
 ## Files we have added (never conflict)

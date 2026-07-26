@@ -12,6 +12,7 @@
  * Registration uses RegisterShipInitFunc, so no inherited file is edited.
  */
 #include "CommandMailbox.h"
+#include "DisplayRefresh.h"
 #include "GameSnapshot.h"
 
 #include <atomic>
@@ -179,8 +180,10 @@ void Publish() {
     v[TDS_SNAP_IDX_CVAR_DRAW_DISTANCE] =
         CVarGetInteger("gEnhancements.Graphics.IncreaseActorDrawDistance", 1);
     v[TDS_SNAP_IDX_CVAR_3D_ITEM_DROPS] = CVarGetInteger("gEnhancements.Graphics.3DItemDrops", 0);
-    v[TDS_SNAP_IDX_DISPLAY_REFRESH_HZ] =
-        (int32_t)Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
+    const int32_t displayRefreshHz = TerminaDS_GetDisplayRefreshHz();
+    v[TDS_SNAP_IDX_DISPLAY_REFRESH_HZ] = displayRefreshHz > 0
+        ? displayRefreshHz
+        : (int32_t)Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
 
     v[TDS_SNAP_IDX_FLAGS] = flags;
 
