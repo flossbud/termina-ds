@@ -49,6 +49,8 @@ class OptionControlsTest {
         s: GameSettings = settings(),
         selectedKey: OptionKey? = null,
     ) {
+        lastChange = null
+        lastSelect = null
         composeTestRule.setContent {
             DesignRoot {
                 OptionRowList(
@@ -77,10 +79,11 @@ class OptionControlsTest {
     }
 
     @Test
-    fun tappingASegmentEmitsItsEngineValueNotItsIndex() {
+    fun tappingASegmentSelectsItsRowAndEmitsItsEngineValue() {
         show()
         // MSAA segments are OFF/2x/4x/8x -> engine values 1/2/4/8.
         composeTestRule.onNodeWithText("4×").performClick()
+        assertEquals(OptionKey.MSAA, lastSelect)
         assertEquals(OptionKey.MSAA to 4, lastChange)
     }
 
@@ -101,12 +104,15 @@ class OptionControlsTest {
     }
 
     @Test
-    fun chevronsStepTheSliderByItsStep() {
-        show(selectedKey = OptionKey.INTERNAL_RES)
+    fun pressingAChevronSelectsItsRowAndStepsTheSliderByItsStep() {
+        show()
         composeTestRule.onNodeWithContentDescription("Increase internal resolution").performClick()
+        assertEquals(OptionKey.INTERNAL_RES, lastSelect)
         assertEquals(OptionKey.INTERNAL_RES to 105, lastChange)
 
+        lastSelect = null
         composeTestRule.onNodeWithContentDescription("Decrease internal resolution").performClick()
+        assertEquals(OptionKey.INTERNAL_RES, lastSelect)
         assertEquals(OptionKey.INTERNAL_RES to 95, lastChange)
     }
 
@@ -174,6 +180,7 @@ class OptionControlsTest {
             down(center)
             moveTo(percentOffset(0.8f, 0.5f))
         }
+        assertEquals(OptionKey.INTERNAL_RES, lastSelect)
         readout.assertTextEquals("170%")
 
         val (key, value) = requireNotNull(lastChange)

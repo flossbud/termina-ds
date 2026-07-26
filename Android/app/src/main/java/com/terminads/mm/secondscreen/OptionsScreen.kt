@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import com.terminads.mm.GameSettings
 
@@ -78,13 +79,18 @@ private fun OptionsHeader(model: HudModel, onBack: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(du(20f)),
     ) {
-        Text(
-            "‹",
-            style = TerminaType.SubscreenTitle.toStyle(TerminaColors.InkMuted),
-            modifier = Modifier
+        Box(
+            Modifier
+                .size(width = du(46f), height = du(52f))
                 .clickable(onClick = onBack)
                 .semantics { contentDescription = "Back to the pause menu" },
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "‹",
+                style = TerminaType.SubscreenTitle.toStyle(TerminaColors.InkMuted),
+            )
+        }
         Text("OPTIONS", style = TerminaType.SubscreenTitle.toStyle(TerminaColors.Ink3))
         Box(Modifier.weight(1f))
         PausedChip()
@@ -178,6 +184,7 @@ private fun CategoryChips(
                 activeUnderline = TerminaColors.Gold,
                 inactiveInk = TerminaColors.TextDim,
                 onTap = { onSelect(category) },
+                modifier = Modifier.height(du(42f)),
             )
         }
     }
@@ -202,12 +209,15 @@ private fun UnderlinedLabel(
     activeInk: Color = TerminaColors.Ink,
     activeUnderline: Color = TerminaColors.AccentBright,
     inactiveInk: Color = TerminaColors.TextDimmer,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        Modifier
+        modifier
             .clickable(onClick = onTap)
+            .semantics { selected = active }
             .width(IntrinsicSize.Max),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(text, style = spec.toStyle(if (active) activeInk else inactiveInk))
         Box(
@@ -253,11 +263,16 @@ private fun OptionsFooter(onResume: () -> Unit) {
             style = TerminaType.FooterHint.toStyle(TerminaColors.TextHint),
         )
         Box(Modifier.weight(1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .height(du(52f))
+                .clickable(onClick = onResume),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
             Text(
                 "RESUME PLAY",
                 style = TerminaType.PauseAction.toStyle(TerminaColors.InkMuted),
-                modifier = Modifier.clickable(onClick = onResume),
             )
             Box(
                 Modifier

@@ -47,15 +47,21 @@ class SecondScreenHostTest {
             settings = DEFAULT_GAME_SETTINGS,
         ),
     )
+    private val unpausedState = BridgeState.Live(
+        pausedState.snapshot.copy(isPaused = false),
+    )
 
-    private fun showHost(commandBridge: CommandBridge) {
+    private fun showHost(
+        commandBridge: CommandBridge,
+        pollBridge: () -> BridgeState = { pausedState },
+    ) {
         composeTestRule.setContent {
             SecondScreenHost(
                 displayInfo = DisplayInfo(
                     displayId = 1, name = "test", widthPx = 1920, heightPx = 1080,
                     refreshRate = 60f, isDefault = false,
                 ),
-                pollBridge = { pausedState },
+                pollBridge = pollBridge,
                 commandBridge = commandBridge,
                 pauseTracker = PauseRequestTracker(nowMillis = { 0L }),
             )
@@ -84,6 +90,27 @@ class SecondScreenHostTest {
             listOf(CommandCall(CommandBridge.OP_SET_MSAA, 4, 0, null)),
             calls,
         )
+    }
+
+    @Test
+    fun observedUnpauseResetsOptionsNavigationBeforeTheNextPause() {
+        var polledState: BridgeState = pausedState
+        showHost(
+            commandBridge = CommandBridge { _, _, _, _ -> 0 },
+            pollBridge = { polledState },
+        )
+        composeTestRule.onNodeWithContentDescription("Options").performClick()
+        composeTestRule.onNodeWithText("SETTINGS").assertIsDisplayed()
+
+        polledState = unpausedState
+        composeTestRule.mainClock.advanceTimeBy(100L)
+        composeTestRule.waitForIdle()
+
+        polledState = pausedState
+        composeTestRule.mainClock.advanceTimeBy(100L)
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithContentDescription("Options").assertIsDisplayed()
     }
 
     @Test

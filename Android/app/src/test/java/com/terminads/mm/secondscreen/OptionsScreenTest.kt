@@ -1,9 +1,12 @@
 package com.terminads.mm.secondscreen
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import com.terminads.mm.GameSettings
 import org.junit.Assert.assertEquals
@@ -73,6 +76,16 @@ class OptionsScreenTest {
     }
 
     @Test
+    fun activeTabAndCategoryExposeSelectedSemantics() {
+        show()
+
+        composeTestRule.onNodeWithText("SETTINGS").assertIsSelected()
+        composeTestRule.onNodeWithText("ENHANCEMENTS").assertIsNotSelected()
+        composeTestRule.onNodeWithText("GRAPHICS").assertIsSelected()
+        composeTestRule.onNodeWithText("AUDIO").assertIsNotSelected()
+    }
+
+    @Test
     fun settingsTabShowsItsFourCategoryChips() {
         show(tab = OptionsTab.SETTINGS)
         for (label in listOf("GRAPHICS", "AUDIO", "CONTROLS", "SYSTEM")) {
@@ -116,6 +129,33 @@ class OptionsScreenTest {
 
         composeTestRule.onNodeWithText("RESUME PLAY").performClick()
         assert(resumed)
+    }
+
+    @Test
+    fun categoryAndChromeActionsUseTheDesignedTouchBounds() {
+        show()
+        val rootBounds = composeTestRule.onRoot().fetchSemanticsNode().boundsInRoot
+        val scale = minOf(
+            rootBounds.width / DESIGN_WIDTH_PX,
+            rootBounds.height / DESIGN_HEIGHT_PX,
+        )
+        val backBounds = composeTestRule
+            .onNodeWithContentDescription("Back to the pause menu")
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val categoryBounds = composeTestRule
+            .onNodeWithText("GRAPHICS")
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val resumeBounds = composeTestRule
+            .onNodeWithText("RESUME PLAY")
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertEquals(46f * scale, backBounds.width, 1f)
+        assertEquals(52f * scale, backBounds.height, 1f)
+        assertEquals(42f * scale, categoryBounds.height, 1f)
+        assertEquals(52f * scale, resumeBounds.height, 1f)
     }
 
     @Test

@@ -155,7 +155,7 @@ private fun OptionRowView(
                     modifier = Modifier.padding(start = du(22f), top = du(6f)),
                 )
             }
-            ControlView(row, onChange)
+            ControlView(row, onSelect, onChange)
         }
     }
 }
@@ -168,10 +168,14 @@ private fun selectionWash(): Brush = Brush.horizontalGradient(
 )
 
 @Composable
-private fun ControlView(row: OptionRow, onChange: (Int) -> Unit) {
+private fun ControlView(
+    row: OptionRow,
+    onSelect: () -> Unit,
+    onChange: (Int) -> Unit,
+) {
     when (val control = row.control) {
-        is OptionControl.Slider -> SliderControl(row, control, onChange)
-        is OptionControl.Segmented -> SegmentedControl(row, control, onChange)
+        is OptionControl.Slider -> SliderControl(row, control, onSelect, onChange)
+        is OptionControl.Segmented -> SegmentedControl(row, control, onSelect, onChange)
         is OptionControl.Checkbox -> CheckboxControl(control, row.enabled)
     }
 }
@@ -192,6 +196,7 @@ private fun ControlView(row: OptionRow, onChange: (Int) -> Unit) {
 private fun SliderControl(
     row: OptionRow,
     control: OptionControl.Slider,
+    onSelect: () -> Unit,
     onChange: (Int) -> Unit,
 ) {
     val spokenLabel = row.label.lowercase()
@@ -224,6 +229,7 @@ private fun SliderControl(
             modifier = Modifier
                 .size(width = du(50f), height = du(54f))
                 .clickable(enabled = row.enabled) {
+                    onSelect()
                     onChange(
                         quantize(shown - control.step, control.min, control.max, control.step),
                     )
@@ -243,6 +249,7 @@ private fun SliderControl(
                     if (row.enabled) {
                         Modifier.pointerInput(control.min, control.max, control.step) {
                             detectHorizontalDragGestures(
+                                onDragStart = { onSelect() },
                                 onDragEnd = { dragValue = null },
                                 onDragCancel = { dragValue = null },
                             ) { change, _ -> emitFromOffset(change.position.x) }
@@ -295,6 +302,7 @@ private fun SliderControl(
             modifier = Modifier
                 .size(width = du(50f), height = du(54f))
                 .clickable(enabled = row.enabled) {
+                    onSelect()
                     onChange(
                         quantize(shown + control.step, control.min, control.max, control.step),
                     )
@@ -319,6 +327,7 @@ private fun SliderControl(
 private fun SegmentedControl(
     row: OptionRow,
     control: OptionControl.Segmented,
+    onSelect: () -> Unit,
     onChange: (Int) -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(du(6f))) {
@@ -326,7 +335,10 @@ private fun SegmentedControl(
             val active = index == control.selectedIndex
             Column(
                 Modifier
-                    .clickable(enabled = row.enabled) { onChange(control.values[index]) }
+                    .clickable(enabled = row.enabled) {
+                        onSelect()
+                        onChange(control.values[index])
+                    }
                     .padding(horizontal = du(10f)),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

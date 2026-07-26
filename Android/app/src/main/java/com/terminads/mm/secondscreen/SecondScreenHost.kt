@@ -43,6 +43,7 @@ fun SecondScreenHost(
     var pauseRequestState by remember { mutableStateOf(PauseRequestState.IDLE) }
     var failedTarget by remember { mutableStateOf<Boolean?>(null) }
     var nav by remember { mutableStateOf(PauseNavState()) }
+    var previousPaused by remember { mutableStateOf<Boolean?>(null) }
     val saveDebouncer = remember { CVarSaveDebouncer() }
 
     // Main-thread coroutine scoped to this composition: starts when the
@@ -71,9 +72,13 @@ fun SecondScreenHost(
                     SubmitStatus.INVALID, SubmitStatus.UNKNOWN -> saveDebouncer.clear()
                 }
             }
-            state.pausedOrNull()?.let {
-                pauseRequestState = pauseTracker.observe(it)
-                failedTarget = failedTargetAfterObservation(failedTarget, it)
+            state.pausedOrNull()?.let { paused ->
+                if (previousPaused == true && !paused) {
+                    nav = PauseNavState()
+                }
+                previousPaused = paused
+                pauseRequestState = pauseTracker.observe(paused)
+                failedTarget = failedTargetAfterObservation(failedTarget, paused)
             }
             delay(pollIntervalMillis)
         }
