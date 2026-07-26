@@ -47,8 +47,10 @@ infrastructure, and the release keystore. The design source of truth is
 `docs/design/second-screen-handoff/README.md`. Follow the established
 workflow: brainstorm the remaining open decisions with me, write the spec
 amendment/plan with pinned file:line ground truth, and propose execution
-options before implementing. TalkBack leads Plan B's hardware
-verification — it has been deferred three phases.
+options before implementing. Screen-reader (TalkBack) verification is OUT
+OF SCOPE by owner decision 2026-07-26 — the Thor ships without one
+installed, so it was never runnable; see
+`docs/verification/2026-07-26-phase-4-plan-b-thor.md` §5.1.
 
 **Operating constraints (standing):**
 - Builds take ~15-20 min full pipeline on this host (Docker; `.cxx` clear
