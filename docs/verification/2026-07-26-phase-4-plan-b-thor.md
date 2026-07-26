@@ -1,16 +1,17 @@
 # Phase 4 Plan B Hardware Verification — AYN Thor
 
 **Date:** 2026-07-26
-**Device:** AYN Thor (`kalama`), Android 13, wireless adb (`10.0.0.30:33635`)
+**Device:** AYN Thor (`kalama`), Android 13, wireless adb
 **Build:** `a879df0c3`, `com.terminads.mm`, **release-signed**
 (SHA-256 `94dd1374593fcf1a9ce36d5c0a0038836aaf22a7110784482309f6d503c5dcd4`)
 **Spec:** `docs/superpowers/specs/2026-07-25-termina-ds-phase-4-plan-b-design.md`
-**Branch:** `78b0e0d8d..a879df0c3` (14 commits)
+**Branch:** `78b0e0d8d..a879df0c3` (14 commits of app code; later commits are docs and tooling only)
 
-> **This document records a PARTIAL verification.** The Options subscreen and the
-> command path are confirmed working on hardware. The veil's motion and the
-> pause-lifecycle fix are **not yet verified** and are listed as open in §5. Do
-> not treat this phase as fully hardware-verified until those close.
+> **Phase 4 Plan B is hardware-verified.** All checks in §3 passed on the AYN
+> Thor, including the four that were outstanding at first writing (veil motion,
+> veil input pass-through, pause-lifecycle reset, and the dynamic
+> refresh-rate fix). Remaining items in §5.2 are carried from earlier phases, not
+> blockers for this one.
 >
 > **The TalkBack requirement is dropped** (owner decision, 2026-07-26). See §5.1
 > for what that means and what remains verified without it.
@@ -54,9 +55,18 @@
 | 7 | Three control types work | ✅ segmented (Clock Type, Draw Distance), checkbox (3D Item Drops), MSAA |
 | 8 | FPS row greys out under Match Refresh Rate | ✅ user confirmed greyed **and inert** |
 | 9 | In-place update on the same release key | ✅ no uninstall needed for the second install |
+| 10 | **Veil renders on the top screen** with its ornament clock, wordmark entrance, shimmer, glow, growing rule, and breathing hint diamond | ✅ owner-confirmed |
+| 11 | **Veil never intercepts input** — taps on the top screen while paused do nothing | ✅ owner-confirmed |
+| 12 | **Pause lifecycle resets to root** — `Options → RESUME PLAY → pause again` lands on the root menu, including when unpausing via the game's own START | ✅ owner-confirmed |
+| 13 | **Dynamic refresh-rate fix** — switching the Thor between 120 Hz and 60 Hz mid-game with Match Refresh Rate on keeps the game at normal speed, with no sleep/wake | ✅ owner-confirmed |
+| 14 | No crashes or app errors across the full session | ✅ `FATAL EXCEPTION` count 0 |
 
-The user's overall assessment after exercising the Options subscreen: *"it seems
-to work well."*
+Owner's assessment across two sessions: *"a lot of it works well"*, then
+*"looks like it works well"* after the four remaining checks.
+
+**Check 13 is the regression test for §4.** It is the scenario that produced the
+original slow motion, and it now behaves correctly without the sleep/wake that
+previously masked it.
 
 ## 4. Root cause found and fixed during verification
 
@@ -155,17 +165,15 @@ Anyone reviving this should start by installing a screen reader on the device,
 then answer the `Presentation` reachability question before anything else — if
 the answer is no, the rest is moot and the fix is architectural, not cosmetic.
 
-### 5.2 Still to verify on hardware
+### 5.2 Carried forward — not blockers for this phase
 
-| # | Check | Why it matters |
+| # | Item | Note |
 |---|---|---|
-| 1 | **Veil motion on the top screen** | Ornament clock, hand oscillation, wordmark entrance, shimmer, glow, rule growth, staggered rise, breathing diamond. **Zero automated coverage** — code review was the only gate |
-| 2 | **Veil never intercepts input** | It draws to the foreground draw list with no window |
-| 3 | **Pause lifecycle** — `Options → RESUME PLAY → pause again` lands on root, including via the game's own START | The bug fixed in `495fd8d57`; START is the path a callback-level fix would have missed |
-| 4 | **Refresh-rate fix end to end** — change the Thor 60↔120 mid-game and confirm the chip follows and the game holds full speed, with no sleep/wake | The fix built this session; §4's root cause |
-| 5 | Internal Resolution and Texture Filter rows | No written value in the config; appear untouched |
-| 6 | Top-screen framerate with the second screen active | Carried from Phase 3. `GetCurrentRefreshRate()` is sampled every frame by deliberate choice |
-| 7 | The >10-hearts visual | Carried from Phase 3 |
+| 1 | Internal Resolution and Texture Filter rows | No written value in the config, so they appear untouched. Both use the semantic opcodes, which are exercised by the MSAA row that was confirmed working |
+| 2 | Top-screen framerate measurement with the second screen active | Carried from Phase 3. `GetCurrentRefreshRate()` is sampled every frame by deliberate choice — see §7 |
+| 3 | The >10-hearts visual | Carried from Phase 3 |
+| 4 | USB-C external-display-out takeover behavior | Carried from earlier phases |
+| 5 | The `MAX n HZ` chip tracking a live refresh-rate change | The game's *speed* was confirmed correct during the switch (check 13), which is the half that matters; the chip's own update was not watched closely |
 
 ## 6. Review-loop notes
 

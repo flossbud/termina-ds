@@ -8,9 +8,8 @@ five hardware-driven amendments. Phase 4a is complete and
 hardware-verified (`docs/verification/2026-07-25-phase-4a-thor.md`; camera
 draw-side settle accepted, PAUSED veil moved to Plan B). **Phase 4 Plan B
 (pause-menu styling, Options, ImGui veil, Compose test infra, release keystore)
-is complete and reviewed, and PARTIALLY hardware-verified** — four checks remain
-open, listed in §5.2 of
-`docs/verification/2026-07-26-phase-4-plan-b-thor.md`. Phase 5 is next; its
+is complete, reviewed, and hardware-verified**
+(`docs/verification/2026-07-26-phase-4-plan-b-thor.md`). Phase 5 is next; its
 scope is being discussed with the owner.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
@@ -198,8 +197,8 @@ From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
 SPSC command mailbox (absolute commands, drained on the game thread);
 pause rides the engine frame-advance gate. Accepted behaviors: the camera
 settles on the draw side after pausing; Z+R single-steps while frozen.
-**Phase 4 Plan B — pause menu, Options, veil:** complete; partially
-hardware-verified (`docs/verification/2026-07-26-phase-4-plan-b-thor.md`).
+**Phase 4 Plan B — pause menu, Options, veil:** complete and hardware-verified
+(`docs/verification/2026-07-26-phase-4-plan-b-thor.md`).
 Delivered schema v3, three semantic mailbox opcodes, the full §5 pause root
 menu, the §10 Options subscreen on real BenMenu CVars, the engine-side ImGui
 PAUSED veil, Compose UI test infrastructure (Robolectric), release keystore
@@ -363,10 +362,10 @@ the engine-side ImGui PAUSED veil; Compose UI test infrastructure; release
 keystore plumbing; and a dynamic display-refresh-rate fix found during
 verification.
 
-**Still open — four hardware checks** (§5.2 of the verification doc): the veil's
-motion, whether the veil intercepts input, the pause-lifecycle reset
-(`Options → RESUME PLAY → pause again` must land on root, including via the
-game's own START), and the refresh-rate fix end to end.
+All hardware checks passed, including the veil's motion and input
+pass-through, the pause-lifecycle reset (via both RESUME PLAY and the game's
+own START), and the dynamic refresh-rate fix. Items carried forward from
+earlier phases are in §5.2 of the verification doc.
 
 ### Things worth knowing before the next phase
 
