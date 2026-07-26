@@ -330,8 +330,12 @@ rows render and emit the expected command on interaction.
 **Native-side sanity.** The publisher's existing static_assert-guarded layout
 extended to v3.
 
-**Hardware — TalkBack leads.** Deferred three phases; it goes first this time.
-Then: each of the ten rows visibly applying on the top screen; both grey-out
+**Hardware.** (TalkBack verification was DROPPED by owner decision on
+2026-07-26 — the Thor ships without a screen reader installed, so the check was
+never runnable as written. Accessibility correctness remains asserted in CI; see
+`docs/verification/2026-07-26-phase-4-plan-b-thor.md` §5.1.)
+
+Each of the ten rows visibly applying on the top screen; both grey-out
 relationships; persistence across restart (`CVAR_SAVE`); the veil's appearance,
 entrance animation, and legibility; pause/resume round-trip unchanged; the
 carried Phase 3 items (>10-hearts visual, framerate spot-check).

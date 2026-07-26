@@ -8,9 +8,12 @@
 **Branch:** `78b0e0d8d..a879df0c3` (14 commits)
 
 > **This document records a PARTIAL verification.** The Options subscreen and the
-> command path are confirmed working on hardware. TalkBack, the veil's motion,
-> and the pause-lifecycle fix are **not yet verified** and are listed as open in
-> §5. Do not treat this phase as fully hardware-verified until those close.
+> command path are confirmed working on hardware. The veil's motion and the
+> pause-lifecycle fix are **not yet verified** and are listed as open in §5. Do
+> not treat this phase as fully hardware-verified until those close.
+>
+> **The TalkBack requirement is dropped** (owner decision, 2026-07-26). See §5.1
+> for what that means and what remains verified without it.
 
 ## 1. What Plan B delivers
 
@@ -97,23 +100,72 @@ the target changes (`:958`, `:988`). Its **input** was wrong.
 change at any moment. It is now treated as a supported runtime condition rather
 than a startup constant.
 
-## 5. NOT YET VERIFIED — open
+## 5. Open items
 
-These are the phase's highest-value remaining checks. **TalkBack was the stated
-lead priority for this phase and has now been deferred a fourth time.**
+### 5.1 TalkBack requirement — DROPPED
+
+**Owner decision, 2026-07-26.** The spec (§7) and every prior phase's checklist
+made screen-reader verification the lead hardware priority. It is dropped.
+
+The reason it never happened is worth recording accurately, because the earlier
+framing was wrong: this was described across three phases as a deferred user
+task, but **TalkBack is not installed on the Thor.** The device is a gaming
+handheld and ships without Google's accessibility suite:
+
+```
+$ adb shell pm list packages | grep -iE 'talkback|accessibility|marvin'
+(none)
+$ adb shell dumpsys accessibility | grep 'Enabled services'
+Enabled services:{{com.odin.gameassistant/...ForegroundAppMonitorV4Service}}
+```
+
+So the check was never runnable as written. It required installing a screen
+reader first, which no plan ever stated. The deferral was an authoring failure,
+not an owner one.
+
+**What remains verified without it.** Accessibility *correctness* is asserted in
+CI and does not depend on a device:
+
+- Every row's semantics string is pinned exactly — e.g. `"Internal resolution,
+  100 percent, slider"`, `"Inventory, available in a future update"`,
+  `"Current FPS, unavailable, locked by match refresh rate"`.
+- `OptionsModelTest.semanticsAreAFunctionOfSettingsAlone` proves those strings
+  are a pure function of settings rather than of time, so nothing time-varying
+  can leak into a description.
+- Robolectric tests confirm they render as real `contentDescription`s, that
+  disabled rows carry `disabled()`, and that the active tab and category expose
+  `selected`.
+- A structural guard test prevents `contentDescription` regressions.
+
+**What is now unknown and accepted as such:**
+
+- Whether a screen reader can reach a `Presentation` on a secondary display at
+  all. This was the genuinely open question — the combination of `Presentation`,
+  a secondary display, and `FLAG_NOT_FOCUSABLE` is unusual, and no automated
+  test can answer it. `uiautomator dump` also returns a null root node for this
+  window, so even non-TalkBack tooling cannot introspect it.
+- Traversal order.
+- Whether a slider re-announces its whole label while being dragged. This was
+  the one adjudicated open question — row semantics embed values in
+  `contentDescription` per spec `:163`, and a reviewer argued for splitting into
+  `stateDescription`. **That question is now closed as won't-fix**; the split
+  remains the designed remedy if screen-reader support is ever revisited.
+
+Anyone reviving this should start by installing a screen reader on the device,
+then answer the `Presentation` reachability question before anything else — if
+the answer is no, the rest is moot and the fix is architectural, not cosmetic.
+
+### 5.2 Still to verify on hardware
 
 | # | Check | Why it matters |
 |---|---|---|
-| 1 | **TalkBack across gameplay, pause, and Options** | Deferred since Phase 2. Accessibility is a first-class requirement of this design |
-| 2 | **Slider drag chatter under TalkBack** | Open adjudicated question: row semantics embed values in `contentDescription` per spec `:163`. A reviewer argued for splitting into `stateDescription`. Deferred to be settled by ear. If the label re-announces on every tick, the fix is designed and ready |
-| 3 | **Active tab/category announced as selected** | The `selected` semantics added in `495fd8d57` |
-| 4 | **Veil motion on the top screen** | Ornament clock, hand oscillation, wordmark entrance, shimmer, glow, rule growth, staggered rise, breathing diamond. **Zero automated coverage** — code review was the only gate |
-| 5 | **Veil never intercepts input** | It draws to the foreground draw list with no window |
-| 6 | **Pause lifecycle** — `Options → RESUME PLAY → pause again` lands on root, including via the game's own START | The bug fixed in `495fd8d57`; START is the path a callback-level fix would have missed |
-| 7 | **Refresh-rate fix end to end** — change the Thor 60↔120 mid-game and confirm the chip follows and the game holds full speed, with no sleep/wake | The fix built this session; §4's root cause |
-| 8 | Internal Resolution and Texture Filter rows | No written value in the config; appear untouched |
-| 9 | Top-screen framerate with the second screen active | Carried from Phase 3. `GetCurrentRefreshRate()` is sampled every frame by deliberate choice |
-| 10 | The >10-hearts visual | Carried from Phase 3 |
+| 1 | **Veil motion on the top screen** | Ornament clock, hand oscillation, wordmark entrance, shimmer, glow, rule growth, staggered rise, breathing diamond. **Zero automated coverage** — code review was the only gate |
+| 2 | **Veil never intercepts input** | It draws to the foreground draw list with no window |
+| 3 | **Pause lifecycle** — `Options → RESUME PLAY → pause again` lands on root, including via the game's own START | The bug fixed in `495fd8d57`; START is the path a callback-level fix would have missed |
+| 4 | **Refresh-rate fix end to end** — change the Thor 60↔120 mid-game and confirm the chip follows and the game holds full speed, with no sleep/wake | The fix built this session; §4's root cause |
+| 5 | Internal Resolution and Texture Filter rows | No written value in the config; appear untouched |
+| 6 | Top-screen framerate with the second screen active | Carried from Phase 3. `GetCurrentRefreshRate()` is sampled every frame by deliberate choice |
+| 7 | The >10-hearts visual | Carried from Phase 3 |
 
 ## 6. Review-loop notes
 

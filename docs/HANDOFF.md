@@ -174,7 +174,7 @@ coexists with.
 ## 6. Working style that has worked here
 
 - The user is hands-on and has the Thor. Any bottom-screen visual, framerate
-  feel, touch-doesn't-steal-focus check, or TalkBack test needs them looking at
+  feel, or touch-doesn't-steal-focus check needs them looking at
   the physical device. Ask; don't guess.
 - Verify claims on real hardware, not just a green build. `llvm-nm` for symbols,
   logcat for lifecycle, the user's eyes for rendering.
@@ -227,9 +227,20 @@ templates).
   test; `(void)env/(void)thiz` boilerplate; a dead reset in the `SecondScreenManager`
   show() catch; the `.cxx`-every-build cost (§5).
 - **Untested verification tail:** top-screen framerate measurement with the
-  second screen active; TalkBack reading the bottom screen (the Phase 3 HUD now
-  provides explicit semantics for vitals and the stalled-data chip); the Phase
+  second screen active; the Phase
   4a Thor checklist in §7; USB-C external-display-out takeover behavior.
+- **Screen-reader verification is out of scope (owner decision, 2026-07-26).**
+  Earlier phases listed "TalkBack leads hardware verification" as a standing
+  item. It was never runnable: the Thor ships without a screen reader installed
+  (`pm list packages` finds none; `dumpsys accessibility` shows only the vendor's
+  game-assistant service), and `uiautomator dump` returns a null root node for
+  the second-screen `Presentation`. Accessibility *correctness* is still asserted
+  in CI — exact semantics strings, a determinism test, disabled-row semantics,
+  `selected` on active tabs, and a structural guard. What is unknown and accepted
+  as such is whether a screen reader can reach a `Presentation` on a secondary
+  display at all. Anyone reviving this should answer that question first; if the
+  answer is no, the remedy is architectural. See
+  `docs/verification/2026-07-26-phase-4-plan-b-thor.md` §5.1.
 - **No `LICENSE` file yet** for Termina DS itself. The upstream base is CC0-1.0.
   The user's choice; ask before adding one.
 
