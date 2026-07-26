@@ -62,11 +62,20 @@ android {
     def releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
     def releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
     def hasReleaseSigning = releaseKeystorePath && releaseKeystorePassword && releaseKeyAlias && releaseKeyPassword
+    def releaseKeystoreFile = releaseKeystorePath ? file(releaseKeystorePath) : null
+    if (releaseKeystorePath && (!releaseKeystoreFile.isFile() || !releaseKeystoreFile.canRead())) {
+        throw new GradleException(
+            "ANDROID_KEYSTORE_PATH is set to '${releaseKeystorePath}', but no readable keystore file is there. " +
+            "Inside the build container the keystore must be mounted at /keystore; check " +
+            "ANDROID_KEYSTORE_DIR and the read-only mount in tools/build-apk.sh or " +
+            "tools/assemble-apk.sh. Refusing to fall back to debug signing silently -- " +
+            "a debug-signed 'release' APK cannot update a release-signed install.")
+    }
 
     signingConfigs {
         release {
             if (hasReleaseSigning) {
-                storeFile file(releaseKeystorePath)
+                storeFile releaseKeystoreFile
                 storePassword releaseKeystorePassword
                 keyAlias releaseKeyAlias
                 keyPassword releaseKeyPassword

@@ -262,13 +262,23 @@ Developer options → Wireless debugging → "Pair device with pairing code"
 and sends you the pairing IP:port + 6-digit code for `adb pair`, then the
 main-screen port for `adb connect`).
 
-**Signing.** The app is debug-signed by the keystore inside this VM's
-`termina-ds-android-home` Docker volume. If that volume is ever lost, the
-Thor will refuse updates (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) and the fix
-is uninstall/reinstall — game data survives in `/sdcard/2S2H` shared
-storage (the app's data root is `/sdcard/TerminaDS`; a legacy-import flow
-migrates). A real release keystore via `tools/make-keystore.sh` is planned
-Plan B work.
+**Signing.** A normal build uses the persistent release keystore at
+`~/.termina-ds/release-keystore.jks`, reads the password from
+`~/.termina-ds/pass`, and defaults the alias to `termina-ds`. Both files stay
+outside the repository and Docker volumes. The build scripts mount the
+keystore directory read-only at `/keystore` and rewrite the host path for
+Gradle. Set `ANDROID_KEYSTORE_DIR` to override the mounted directory when using
+the default filename; an explicit `ANDROID_KEYSTORE_PATH` is resolved (including
+symlinks) and instead mounts the target's parent directory so the path and mount
+cannot disagree. Explicit
+`ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and
+`ANDROID_KEY_PASSWORD` values take precedence over the file-based defaults. If
+the password file is absent and the signing variables are unset, local builds
+retain the debug-signing fallback. The mode-`600` password file protects the
+password from other unprivileged host users, not from root or docker-group
+members; those principals can already read the source file directly. Switching
+from the debug key to the release key forces one uninstall/reinstall on the
+device; game data in `/sdcard/TerminaDS` survives.
 
 **Verification discipline.**
 - Both Thor displays are FLAG_SECURE: you cannot screenshot them. Logcat
