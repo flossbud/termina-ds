@@ -6,8 +6,12 @@ are complete and hardware-verified. Phase 3 (live HUD) is complete and
 hardware-verified (`docs/verification/2026-07-25-phase-3-thor.md`), including
 five hardware-driven amendments. Phase 4a is complete and
 hardware-verified (`docs/verification/2026-07-25-phase-4a-thor.md`; camera
-draw-side settle accepted, PAUSED veil moved to Plan B). Plan B (full
-pause-menu styling + Options + ImGui veil) next.**
+draw-side settle accepted, PAUSED veil moved to Plan B). **Phase 4 Plan B
+(pause-menu styling, Options, ImGui veil, Compose test infra, release keystore)
+is complete and reviewed, and PARTIALLY hardware-verified** — four checks remain
+open, listed in §5.2 of
+`docs/verification/2026-07-26-phase-4-plan-b-thor.md`. Phase 5 is next; its
+scope is being discussed with the owner.**
 This doc is what you need to be productive without re-discovering it all. Read it
 fully before touching anything.
 
@@ -77,7 +81,7 @@ Invariants you must not break:
 | `OTRExporter/`, `ZAPDTR/` | Vendored asset-build tools (were submodules) |
 | `docs/superpowers/specs/2026-07-23-termina-ds-phase-2-state-bridge-design.md` | Phase 2 spec (state bridge) |
 | `docs/superpowers/plans/2026-07-23-termina-ds-phase-2.md` | Phase 2 implementation plan (done) |
-| `mm/2s2h/TerminaDS/GameSnapshot.h` | **Layout contract.** The index enum IS the payload; Kotlin mirrors it by hand. Current schema is v2 (28 slots), bumped atomically on both sides in Phase 4a Tasks 1–2 |
+| `mm/2s2h/TerminaDS/GameSnapshot.h` | **Layout contract.** The index enum IS the payload; Kotlin mirrors it by hand. Current schema is v3 (39 slots) — v3 added the ten graphics settings plus the live display refresh rate. Bump both sides atomically in ONE commit; split schema history was classified a defect in Plan A's final review |
 | `mm/2s2h/TerminaDS/SnapshotPublisher.cpp` | Game-thread snapshot sampler + seqlock; with `CommandMailbox.cpp`, one of only two files that touch game state |
 | `mm/2s2h/TerminaDS/CommandMailbox.{h,cpp}` | Sanctioned game-state write path: a fixed SPSC ring of absolute commands, drained on the game thread; with `SnapshotPublisher.cpp`, the only two files that touch game state |
 | `mm/2s2h/TerminaDS/NativeBridge.cpp` | JNI seam, native side (uptime + snapshot read + command submit) |
@@ -194,9 +198,16 @@ From the spec (§6 there). Phases 0-3 are complete and hardware-verified.
 SPSC command mailbox (absolute commands, drained on the game thread);
 pause rides the engine frame-advance gate. Accepted behaviors: the camera
 settles on the draw side after pausing; Z+R single-steps while frozen.
-**Plan B next:** full §5 pause-menu styling, §10 Options on real BenMenu
-CVars, the engine-side ImGui PAUSED veil, Compose UI test infra, release
-keystore.
+**Phase 4 Plan B — pause menu, Options, veil:** complete; partially
+hardware-verified (`docs/verification/2026-07-26-phase-4-plan-b-thor.md`).
+Delivered schema v3, three semantic mailbox opcodes, the full §5 pause root
+menu, the §10 Options subscreen on real BenMenu CVars, the engine-side ImGui
+PAUSED veil, Compose UI test infrastructure (Robolectric), release keystore
+plumbing, and a dynamic display-refresh-rate fix. **Four hardware checks remain
+open** — see §5.2 of that verification doc.
+
+**Phase 5 is next** (scope under discussion with the owner; the roadmap entry
+below predates that conversation).
 
 
 - **Phase 5 — Command bridge expansion** (bottom screen → game, frame-safe):
@@ -297,7 +308,7 @@ device; game data in `/sdcard/TerminaDS` survives.
 **Verification discipline.**
 - Both Thor displays are FLAG_SECURE: you cannot screenshot them. Logcat
   proves launch and the publisher line proves the bridge
-  (`Snapshot: publisher registered, first publish (schema 2, 28 slots)`);
+  (`Snapshot: publisher registered, first publish (schema 3, 39 slots)`);
   only the user can judge rendering. **When a visual report and your
   mental model disagree, ask for a phone photo of the panel first** — a
   photo found in seconds a layout bug that two code reviews missed
@@ -340,25 +351,43 @@ compliant work as violations).
 - The pre-save intro/title publish garbage save slots by design; routing
   gates on the schema-v2 `saveLoaded` flag.
 
-## 11. Next up: Phase 4 Plan B
+## 11. Where Phase 4 Plan B landed
 
-Scope (user-approved 2026-07-25): the full §5 pause-root-menu styling and
-§10 Options subscreen from the design handoff
-(`docs/design/second-screen-handoff/README.md`), both Graphics categories
-bound to real CVars; the engine-side ImGui PAUSED veil (darkened frame +
-wordmark + subtitle while `pauseState` is set); Compose UI test
-infrastructure (Robolectric smoke tests — the class of tooling that would
-have caught the Phase 3 nav bug at build time); and the release keystore.
+Complete, reviewed, and partially hardware-verified. Full record:
+`docs/verification/2026-07-26-phase-4-plan-b-thor.md`.
 
-Research the plan must pin before writing (spec §2 lists them):
-- The 10-row CVar table (names, ranges, defaults, live-vs-restart) read
-  from `mm/2s2h/BenGui/BenMenu.cpp`'s Settings→Graphics and
-  Enhancements→Graphics sections (known so far: `gInterpolationFPS` :635,
-  `gMatchRefreshRate` :654, and the disable-when pattern at :2201 that
-  mirrors the design's FPS lock).
-- The ImGui overlay seam: how 2S2H registers always-on-top draw windows
-  (`mm/2s2h/BenGui/BenGui.cpp` setup around :99) and its custom-font
-  loading, for the veil.
-- The Options screens write CVars through the existing command mailbox
-  (`CVAR_SET_INT` + debounced `CVAR_SAVE`) — no new native machinery
-  expected beyond the veil's draw hook reading `pauseState`.
+**Delivered:** schema v3 (39 slots); three semantic mailbox opcodes for the
+settings whose CVar write alone applies nothing; the full §5 pause root menu;
+the §10 Options subscreen with both Graphics categories on real BenMenu CVars;
+the engine-side ImGui PAUSED veil; Compose UI test infrastructure; release
+keystore plumbing; and a dynamic display-refresh-rate fix found during
+verification.
+
+**Still open — four hardware checks** (§5.2 of the verification doc): the veil's
+motion, whether the veil intercepts input, the pause-lifecycle reset
+(`Options → RESUME PLAY → pause again` must land on root, including via the
+game's own START), and the refresh-rate fix end to end.
+
+### Things worth knowing before the next phase
+
+- **The display refresh rate changes at runtime.** SDL caches the display mode
+  and refreshes it only when the surface is reconfigured, so the Thor's 60/120
+  switching left the engine pacing against a stale rate — that was the
+  slow-motion bug, and why sleep/wake appeared to fix it. Android is now the
+  source of truth: `MainDisplayRefreshReporter` pushes the **main** display's
+  rate through `TDS_CMD_SET_DISPLAY_HZ`, and both the publisher and
+  `OTRGlobals::GetInterpolationFPS` prefer it. Treat a changing refresh rate as
+  a supported condition, never a startup constant.
+- **`CVAR_SAVE` is the only command with no observable effect in the snapshot.**
+  Every other command is fire-and-observe; a dropped one self-corrects on the
+  next poll. Persistence has no such signal, so its submit status is the only
+  evidence it happened — which is why the debouncer separates "is due" from
+  "consume" and retries on `FULL`.
+- **A new native `.cpp` must trigger a CMake re-glob.** `tools/run-unit-tests.sh`
+  now stamps the globbed source list and clears `.cxx` when it changes;
+  `tools/build-apk.sh` clears unconditionally. Without that, a new file compiles
+  green and ships without its code.
+- **`tools/verify-apk.sh` gates six symbols**, including the three that export no
+  JNI. A green build proves nothing about whether a native feature shipped.
+- Screen-reader verification is out of scope — see §8.
+
